@@ -10,33 +10,154 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppRegisterRouteImport } from './routes/app.register'
+import { Route as AppPublishedRouteImport } from './routes/app.published'
+import { Route as AppPublishRouteImport } from './routes/app.publish'
+import { Route as AppProposalsRouteImport } from './routes/app.proposals'
+import { Route as AppProposalDetailRouteImport } from './routes/app.proposal-detail'
+import { Route as AppHistoryRouteImport } from './routes/app.history'
+import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AppCodeRouteImport } from './routes/app.code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRegisterRoute = AppRegisterRouteImport.update({
+  id: '/app/register',
+  path: '/app/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppPublishedRoute = AppPublishedRouteImport.update({
+  id: '/app/published',
+  path: '/app/published',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppPublishRoute = AppPublishRouteImport.update({
+  id: '/app/publish',
+  path: '/app/publish',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppProposalsRoute = AppProposalsRouteImport.update({
+  id: '/app/proposals',
+  path: '/app/proposals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppProposalDetailRoute = AppProposalDetailRouteImport.update({
+  id: '/app/proposal-detail',
+  path: '/app/proposal-detail',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/app/history',
+  path: '/app/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/app/dashboard',
+  path: '/app/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppCodeRoute = AppCodeRouteImport.update({
+  id: '/app/code',
+  path: '/app/code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app/code': typeof AppCodeRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/proposal-detail': typeof AppProposalDetailRoute
+  '/app/proposals': typeof AppProposalsRoute
+  '/app/publish': typeof AppPublishRoute
+  '/app/published': typeof AppPublishedRoute
+  '/app/register': typeof AppRegisterRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/code': typeof AppCodeRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/proposal-detail': typeof AppProposalDetailRoute
+  '/app/proposals': typeof AppProposalsRoute
+  '/app/publish': typeof AppPublishRoute
+  '/app/published': typeof AppPublishedRoute
+  '/app/register': typeof AppRegisterRoute
+  '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app/code': typeof AppCodeRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/proposal-detail': typeof AppProposalDetailRoute
+  '/app/proposals': typeof AppProposalsRoute
+  '/app/publish': typeof AppPublishRoute
+  '/app/published': typeof AppPublishedRoute
+  '/app/register': typeof AppRegisterRoute
+  '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app/code'
+    | '/app/dashboard'
+    | '/app/history'
+    | '/app/proposal-detail'
+    | '/app/proposals'
+    | '/app/publish'
+    | '/app/published'
+    | '/app/register'
+    | '/app/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/app/code'
+    | '/app/dashboard'
+    | '/app/history'
+    | '/app/proposal-detail'
+    | '/app/proposals'
+    | '/app/publish'
+    | '/app/published'
+    | '/app/register'
+    | '/app'
+  id:
+    | '__root__'
+    | '/'
+    | '/app/code'
+    | '/app/dashboard'
+    | '/app/history'
+    | '/app/proposal-detail'
+    | '/app/proposals'
+    | '/app/publish'
+    | '/app/published'
+    | '/app/register'
+    | '/app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppCodeRoute: typeof AppCodeRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppHistoryRoute: typeof AppHistoryRoute
+  AppProposalDetailRoute: typeof AppProposalDetailRoute
+  AppProposalsRoute: typeof AppProposalsRoute
+  AppPublishRoute: typeof AppPublishRoute
+  AppPublishedRoute: typeof AppPublishedRoute
+  AppRegisterRoute: typeof AppRegisterRoute
+  AppIndexRoute: typeof AppIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,12 +169,94 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/register': {
+      id: '/app/register'
+      path: '/app/register'
+      fullPath: '/app/register'
+      preLoaderRoute: typeof AppRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/published': {
+      id: '/app/published'
+      path: '/app/published'
+      fullPath: '/app/published'
+      preLoaderRoute: typeof AppPublishedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/publish': {
+      id: '/app/publish'
+      path: '/app/publish'
+      fullPath: '/app/publish'
+      preLoaderRoute: typeof AppPublishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/proposals': {
+      id: '/app/proposals'
+      path: '/app/proposals'
+      fullPath: '/app/proposals'
+      preLoaderRoute: typeof AppProposalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/proposal-detail': {
+      id: '/app/proposal-detail'
+      path: '/app/proposal-detail'
+      fullPath: '/app/proposal-detail'
+      preLoaderRoute: typeof AppProposalDetailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/history': {
+      id: '/app/history'
+      path: '/app/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/app/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/code': {
+      id: '/app/code'
+      path: '/app/code'
+      fullPath: '/app/code'
+      preLoaderRoute: typeof AppCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppCodeRoute: AppCodeRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppHistoryRoute: AppHistoryRoute,
+  AppProposalDetailRoute: AppProposalDetailRoute,
+  AppProposalsRoute: AppProposalsRoute,
+  AppPublishRoute: AppPublishRoute,
+  AppPublishedRoute: AppPublishedRoute,
+  AppRegisterRoute: AppRegisterRoute,
+  AppIndexRoute: AppIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
