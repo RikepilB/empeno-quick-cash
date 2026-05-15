@@ -10,7 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as NegocioIndexRouteImport } from './routes/negocio.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as NegocioSolicitudesRouteImport } from './routes/negocio.solicitudes'
+import { Route as NegocioSolicitudRouteImport } from './routes/negocio.solicitud'
+import { Route as NegocioPropuestasRouteImport } from './routes/negocio.propuestas'
+import { Route as NegocioPropuestaRouteImport } from './routes/negocio.propuesta'
+import { Route as NegocioPlanRouteImport } from './routes/negocio.plan'
+import { Route as NegocioPerfilRouteImport } from './routes/negocio.perfil'
+import { Route as NegocioHistorialRouteImport } from './routes/negocio.historial'
+import { Route as NegocioDashboardRouteImport } from './routes/negocio.dashboard'
 import { Route as AppRegisterRouteImport } from './routes/app.register'
 import { Route as AppPublishedRouteImport } from './routes/app.published'
 import { Route as AppPublishRouteImport } from './routes/app.publish'
@@ -25,9 +34,54 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NegocioIndexRoute = NegocioIndexRouteImport.update({
+  id: '/negocio/',
+  path: '/negocio/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/app/',
   path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioSolicitudesRoute = NegocioSolicitudesRouteImport.update({
+  id: '/negocio/solicitudes',
+  path: '/negocio/solicitudes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioSolicitudRoute = NegocioSolicitudRouteImport.update({
+  id: '/negocio/solicitud',
+  path: '/negocio/solicitud',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioPropuestasRoute = NegocioPropuestasRouteImport.update({
+  id: '/negocio/propuestas',
+  path: '/negocio/propuestas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioPropuestaRoute = NegocioPropuestaRouteImport.update({
+  id: '/negocio/propuesta',
+  path: '/negocio/propuesta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioPlanRoute = NegocioPlanRouteImport.update({
+  id: '/negocio/plan',
+  path: '/negocio/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioPerfilRoute = NegocioPerfilRouteImport.update({
+  id: '/negocio/perfil',
+  path: '/negocio/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioHistorialRoute = NegocioHistorialRouteImport.update({
+  id: '/negocio/historial',
+  path: '/negocio/historial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioDashboardRoute = NegocioDashboardRouteImport.update({
+  id: '/negocio/dashboard',
+  path: '/negocio/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRegisterRoute = AppRegisterRouteImport.update({
@@ -81,7 +135,16 @@ export interface FileRoutesByFullPath {
   '/app/publish': typeof AppPublishRoute
   '/app/published': typeof AppPublishedRoute
   '/app/register': typeof AppRegisterRoute
+  '/negocio/dashboard': typeof NegocioDashboardRoute
+  '/negocio/historial': typeof NegocioHistorialRoute
+  '/negocio/perfil': typeof NegocioPerfilRoute
+  '/negocio/plan': typeof NegocioPlanRoute
+  '/negocio/propuesta': typeof NegocioPropuestaRoute
+  '/negocio/propuestas': typeof NegocioPropuestasRoute
+  '/negocio/solicitud': typeof NegocioSolicitudRoute
+  '/negocio/solicitudes': typeof NegocioSolicitudesRoute
   '/app/': typeof AppIndexRoute
+  '/negocio/': typeof NegocioIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -93,7 +156,16 @@ export interface FileRoutesByTo {
   '/app/publish': typeof AppPublishRoute
   '/app/published': typeof AppPublishedRoute
   '/app/register': typeof AppRegisterRoute
+  '/negocio/dashboard': typeof NegocioDashboardRoute
+  '/negocio/historial': typeof NegocioHistorialRoute
+  '/negocio/perfil': typeof NegocioPerfilRoute
+  '/negocio/plan': typeof NegocioPlanRoute
+  '/negocio/propuesta': typeof NegocioPropuestaRoute
+  '/negocio/propuestas': typeof NegocioPropuestasRoute
+  '/negocio/solicitud': typeof NegocioSolicitudRoute
+  '/negocio/solicitudes': typeof NegocioSolicitudesRoute
   '/app': typeof AppIndexRoute
+  '/negocio': typeof NegocioIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -106,7 +178,16 @@ export interface FileRoutesById {
   '/app/publish': typeof AppPublishRoute
   '/app/published': typeof AppPublishedRoute
   '/app/register': typeof AppRegisterRoute
+  '/negocio/dashboard': typeof NegocioDashboardRoute
+  '/negocio/historial': typeof NegocioHistorialRoute
+  '/negocio/perfil': typeof NegocioPerfilRoute
+  '/negocio/plan': typeof NegocioPlanRoute
+  '/negocio/propuesta': typeof NegocioPropuestaRoute
+  '/negocio/propuestas': typeof NegocioPropuestasRoute
+  '/negocio/solicitud': typeof NegocioSolicitudRoute
+  '/negocio/solicitudes': typeof NegocioSolicitudesRoute
   '/app/': typeof AppIndexRoute
+  '/negocio/': typeof NegocioIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -120,7 +201,16 @@ export interface FileRouteTypes {
     | '/app/publish'
     | '/app/published'
     | '/app/register'
+    | '/negocio/dashboard'
+    | '/negocio/historial'
+    | '/negocio/perfil'
+    | '/negocio/plan'
+    | '/negocio/propuesta'
+    | '/negocio/propuestas'
+    | '/negocio/solicitud'
+    | '/negocio/solicitudes'
     | '/app/'
+    | '/negocio/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -132,7 +222,16 @@ export interface FileRouteTypes {
     | '/app/publish'
     | '/app/published'
     | '/app/register'
+    | '/negocio/dashboard'
+    | '/negocio/historial'
+    | '/negocio/perfil'
+    | '/negocio/plan'
+    | '/negocio/propuesta'
+    | '/negocio/propuestas'
+    | '/negocio/solicitud'
+    | '/negocio/solicitudes'
     | '/app'
+    | '/negocio'
   id:
     | '__root__'
     | '/'
@@ -144,7 +243,16 @@ export interface FileRouteTypes {
     | '/app/publish'
     | '/app/published'
     | '/app/register'
+    | '/negocio/dashboard'
+    | '/negocio/historial'
+    | '/negocio/perfil'
+    | '/negocio/plan'
+    | '/negocio/propuesta'
+    | '/negocio/propuestas'
+    | '/negocio/solicitud'
+    | '/negocio/solicitudes'
     | '/app/'
+    | '/negocio/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -157,7 +265,16 @@ export interface RootRouteChildren {
   AppPublishRoute: typeof AppPublishRoute
   AppPublishedRoute: typeof AppPublishedRoute
   AppRegisterRoute: typeof AppRegisterRoute
+  NegocioDashboardRoute: typeof NegocioDashboardRoute
+  NegocioHistorialRoute: typeof NegocioHistorialRoute
+  NegocioPerfilRoute: typeof NegocioPerfilRoute
+  NegocioPlanRoute: typeof NegocioPlanRoute
+  NegocioPropuestaRoute: typeof NegocioPropuestaRoute
+  NegocioPropuestasRoute: typeof NegocioPropuestasRoute
+  NegocioSolicitudRoute: typeof NegocioSolicitudRoute
+  NegocioSolicitudesRoute: typeof NegocioSolicitudesRoute
   AppIndexRoute: typeof AppIndexRoute
+  NegocioIndexRoute: typeof NegocioIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -169,11 +286,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/negocio/': {
+      id: '/negocio/'
+      path: '/negocio'
+      fullPath: '/negocio/'
+      preLoaderRoute: typeof NegocioIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/': {
       id: '/app/'
       path: '/app'
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/solicitudes': {
+      id: '/negocio/solicitudes'
+      path: '/negocio/solicitudes'
+      fullPath: '/negocio/solicitudes'
+      preLoaderRoute: typeof NegocioSolicitudesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/solicitud': {
+      id: '/negocio/solicitud'
+      path: '/negocio/solicitud'
+      fullPath: '/negocio/solicitud'
+      preLoaderRoute: typeof NegocioSolicitudRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/propuestas': {
+      id: '/negocio/propuestas'
+      path: '/negocio/propuestas'
+      fullPath: '/negocio/propuestas'
+      preLoaderRoute: typeof NegocioPropuestasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/propuesta': {
+      id: '/negocio/propuesta'
+      path: '/negocio/propuesta'
+      fullPath: '/negocio/propuesta'
+      preLoaderRoute: typeof NegocioPropuestaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/plan': {
+      id: '/negocio/plan'
+      path: '/negocio/plan'
+      fullPath: '/negocio/plan'
+      preLoaderRoute: typeof NegocioPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/perfil': {
+      id: '/negocio/perfil'
+      path: '/negocio/perfil'
+      fullPath: '/negocio/perfil'
+      preLoaderRoute: typeof NegocioPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/historial': {
+      id: '/negocio/historial'
+      path: '/negocio/historial'
+      fullPath: '/negocio/historial'
+      preLoaderRoute: typeof NegocioHistorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/dashboard': {
+      id: '/negocio/dashboard'
+      path: '/negocio/dashboard'
+      fullPath: '/negocio/dashboard'
+      preLoaderRoute: typeof NegocioDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/register': {
@@ -245,7 +425,16 @@ const rootRouteChildren: RootRouteChildren = {
   AppPublishRoute: AppPublishRoute,
   AppPublishedRoute: AppPublishedRoute,
   AppRegisterRoute: AppRegisterRoute,
+  NegocioDashboardRoute: NegocioDashboardRoute,
+  NegocioHistorialRoute: NegocioHistorialRoute,
+  NegocioPerfilRoute: NegocioPerfilRoute,
+  NegocioPlanRoute: NegocioPlanRoute,
+  NegocioPropuestaRoute: NegocioPropuestaRoute,
+  NegocioPropuestasRoute: NegocioPropuestasRoute,
+  NegocioSolicitudRoute: NegocioSolicitudRoute,
+  NegocioSolicitudesRoute: NegocioSolicitudesRoute,
   AppIndexRoute: AppIndexRoute,
+  NegocioIndexRoute: NegocioIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
