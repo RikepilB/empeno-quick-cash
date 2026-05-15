@@ -10,33 +10,271 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as NegocioIndexRouteImport } from './routes/negocio.index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as NegocioSolicitudesRouteImport } from './routes/negocio.solicitudes'
+import { Route as NegocioSolicitudRouteImport } from './routes/negocio.solicitud'
+import { Route as NegocioPropuestasRouteImport } from './routes/negocio.propuestas'
+import { Route as NegocioPropuestaRouteImport } from './routes/negocio.propuesta'
+import { Route as NegocioPlanRouteImport } from './routes/negocio.plan'
+import { Route as NegocioPerfilRouteImport } from './routes/negocio.perfil'
+import { Route as NegocioHistorialRouteImport } from './routes/negocio.historial'
+import { Route as NegocioDashboardRouteImport } from './routes/negocio.dashboard'
+import { Route as AppRegisterRouteImport } from './routes/app.register'
+import { Route as AppPublishedRouteImport } from './routes/app.published'
+import { Route as AppPublishRouteImport } from './routes/app.publish'
+import { Route as AppProposalsRouteImport } from './routes/app.proposals'
+import { Route as AppProposalDetailRouteImport } from './routes/app.proposal-detail'
+import { Route as AppHistoryRouteImport } from './routes/app.history'
+import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AppCodeRouteImport } from './routes/app.code'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NegocioIndexRoute = NegocioIndexRouteImport.update({
+  id: '/negocio/',
+  path: '/negocio/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/app/',
+  path: '/app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioSolicitudesRoute = NegocioSolicitudesRouteImport.update({
+  id: '/negocio/solicitudes',
+  path: '/negocio/solicitudes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioSolicitudRoute = NegocioSolicitudRouteImport.update({
+  id: '/negocio/solicitud',
+  path: '/negocio/solicitud',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioPropuestasRoute = NegocioPropuestasRouteImport.update({
+  id: '/negocio/propuestas',
+  path: '/negocio/propuestas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioPropuestaRoute = NegocioPropuestaRouteImport.update({
+  id: '/negocio/propuesta',
+  path: '/negocio/propuesta',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioPlanRoute = NegocioPlanRouteImport.update({
+  id: '/negocio/plan',
+  path: '/negocio/plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioPerfilRoute = NegocioPerfilRouteImport.update({
+  id: '/negocio/perfil',
+  path: '/negocio/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioHistorialRoute = NegocioHistorialRouteImport.update({
+  id: '/negocio/historial',
+  path: '/negocio/historial',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NegocioDashboardRoute = NegocioDashboardRouteImport.update({
+  id: '/negocio/dashboard',
+  path: '/negocio/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRegisterRoute = AppRegisterRouteImport.update({
+  id: '/app/register',
+  path: '/app/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppPublishedRoute = AppPublishedRouteImport.update({
+  id: '/app/published',
+  path: '/app/published',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppPublishRoute = AppPublishRouteImport.update({
+  id: '/app/publish',
+  path: '/app/publish',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppProposalsRoute = AppProposalsRouteImport.update({
+  id: '/app/proposals',
+  path: '/app/proposals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppProposalDetailRoute = AppProposalDetailRouteImport.update({
+  id: '/app/proposal-detail',
+  path: '/app/proposal-detail',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/app/history',
+  path: '/app/history',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/app/dashboard',
+  path: '/app/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppCodeRoute = AppCodeRouteImport.update({
+  id: '/app/code',
+  path: '/app/code',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app/code': typeof AppCodeRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/proposal-detail': typeof AppProposalDetailRoute
+  '/app/proposals': typeof AppProposalsRoute
+  '/app/publish': typeof AppPublishRoute
+  '/app/published': typeof AppPublishedRoute
+  '/app/register': typeof AppRegisterRoute
+  '/negocio/dashboard': typeof NegocioDashboardRoute
+  '/negocio/historial': typeof NegocioHistorialRoute
+  '/negocio/perfil': typeof NegocioPerfilRoute
+  '/negocio/plan': typeof NegocioPlanRoute
+  '/negocio/propuesta': typeof NegocioPropuestaRoute
+  '/negocio/propuestas': typeof NegocioPropuestasRoute
+  '/negocio/solicitud': typeof NegocioSolicitudRoute
+  '/negocio/solicitudes': typeof NegocioSolicitudesRoute
+  '/app/': typeof AppIndexRoute
+  '/negocio/': typeof NegocioIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/app/code': typeof AppCodeRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/proposal-detail': typeof AppProposalDetailRoute
+  '/app/proposals': typeof AppProposalsRoute
+  '/app/publish': typeof AppPublishRoute
+  '/app/published': typeof AppPublishedRoute
+  '/app/register': typeof AppRegisterRoute
+  '/negocio/dashboard': typeof NegocioDashboardRoute
+  '/negocio/historial': typeof NegocioHistorialRoute
+  '/negocio/perfil': typeof NegocioPerfilRoute
+  '/negocio/plan': typeof NegocioPlanRoute
+  '/negocio/propuesta': typeof NegocioPropuestaRoute
+  '/negocio/propuestas': typeof NegocioPropuestasRoute
+  '/negocio/solicitud': typeof NegocioSolicitudRoute
+  '/negocio/solicitudes': typeof NegocioSolicitudesRoute
+  '/app': typeof AppIndexRoute
+  '/negocio': typeof NegocioIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app/code': typeof AppCodeRoute
+  '/app/dashboard': typeof AppDashboardRoute
+  '/app/history': typeof AppHistoryRoute
+  '/app/proposal-detail': typeof AppProposalDetailRoute
+  '/app/proposals': typeof AppProposalsRoute
+  '/app/publish': typeof AppPublishRoute
+  '/app/published': typeof AppPublishedRoute
+  '/app/register': typeof AppRegisterRoute
+  '/negocio/dashboard': typeof NegocioDashboardRoute
+  '/negocio/historial': typeof NegocioHistorialRoute
+  '/negocio/perfil': typeof NegocioPerfilRoute
+  '/negocio/plan': typeof NegocioPlanRoute
+  '/negocio/propuesta': typeof NegocioPropuestaRoute
+  '/negocio/propuestas': typeof NegocioPropuestasRoute
+  '/negocio/solicitud': typeof NegocioSolicitudRoute
+  '/negocio/solicitudes': typeof NegocioSolicitudesRoute
+  '/app/': typeof AppIndexRoute
+  '/negocio/': typeof NegocioIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app/code'
+    | '/app/dashboard'
+    | '/app/history'
+    | '/app/proposal-detail'
+    | '/app/proposals'
+    | '/app/publish'
+    | '/app/published'
+    | '/app/register'
+    | '/negocio/dashboard'
+    | '/negocio/historial'
+    | '/negocio/perfil'
+    | '/negocio/plan'
+    | '/negocio/propuesta'
+    | '/negocio/propuestas'
+    | '/negocio/solicitud'
+    | '/negocio/solicitudes'
+    | '/app/'
+    | '/negocio/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/app/code'
+    | '/app/dashboard'
+    | '/app/history'
+    | '/app/proposal-detail'
+    | '/app/proposals'
+    | '/app/publish'
+    | '/app/published'
+    | '/app/register'
+    | '/negocio/dashboard'
+    | '/negocio/historial'
+    | '/negocio/perfil'
+    | '/negocio/plan'
+    | '/negocio/propuesta'
+    | '/negocio/propuestas'
+    | '/negocio/solicitud'
+    | '/negocio/solicitudes'
+    | '/app'
+    | '/negocio'
+  id:
+    | '__root__'
+    | '/'
+    | '/app/code'
+    | '/app/dashboard'
+    | '/app/history'
+    | '/app/proposal-detail'
+    | '/app/proposals'
+    | '/app/publish'
+    | '/app/published'
+    | '/app/register'
+    | '/negocio/dashboard'
+    | '/negocio/historial'
+    | '/negocio/perfil'
+    | '/negocio/plan'
+    | '/negocio/propuesta'
+    | '/negocio/propuestas'
+    | '/negocio/solicitud'
+    | '/negocio/solicitudes'
+    | '/app/'
+    | '/negocio/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppCodeRoute: typeof AppCodeRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppHistoryRoute: typeof AppHistoryRoute
+  AppProposalDetailRoute: typeof AppProposalDetailRoute
+  AppProposalsRoute: typeof AppProposalsRoute
+  AppPublishRoute: typeof AppPublishRoute
+  AppPublishedRoute: typeof AppPublishedRoute
+  AppRegisterRoute: typeof AppRegisterRoute
+  NegocioDashboardRoute: typeof NegocioDashboardRoute
+  NegocioHistorialRoute: typeof NegocioHistorialRoute
+  NegocioPerfilRoute: typeof NegocioPerfilRoute
+  NegocioPlanRoute: typeof NegocioPlanRoute
+  NegocioPropuestaRoute: typeof NegocioPropuestaRoute
+  NegocioPropuestasRoute: typeof NegocioPropuestasRoute
+  NegocioSolicitudRoute: typeof NegocioSolicitudRoute
+  NegocioSolicitudesRoute: typeof NegocioSolicitudesRoute
+  AppIndexRoute: typeof AppIndexRoute
+  NegocioIndexRoute: typeof NegocioIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,22 +286,156 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/negocio/': {
+      id: '/negocio/'
+      path: '/negocio'
+      fullPath: '/negocio/'
+      preLoaderRoute: typeof NegocioIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/': {
+      id: '/app/'
+      path: '/app'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/solicitudes': {
+      id: '/negocio/solicitudes'
+      path: '/negocio/solicitudes'
+      fullPath: '/negocio/solicitudes'
+      preLoaderRoute: typeof NegocioSolicitudesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/solicitud': {
+      id: '/negocio/solicitud'
+      path: '/negocio/solicitud'
+      fullPath: '/negocio/solicitud'
+      preLoaderRoute: typeof NegocioSolicitudRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/propuestas': {
+      id: '/negocio/propuestas'
+      path: '/negocio/propuestas'
+      fullPath: '/negocio/propuestas'
+      preLoaderRoute: typeof NegocioPropuestasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/propuesta': {
+      id: '/negocio/propuesta'
+      path: '/negocio/propuesta'
+      fullPath: '/negocio/propuesta'
+      preLoaderRoute: typeof NegocioPropuestaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/plan': {
+      id: '/negocio/plan'
+      path: '/negocio/plan'
+      fullPath: '/negocio/plan'
+      preLoaderRoute: typeof NegocioPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/perfil': {
+      id: '/negocio/perfil'
+      path: '/negocio/perfil'
+      fullPath: '/negocio/perfil'
+      preLoaderRoute: typeof NegocioPerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/historial': {
+      id: '/negocio/historial'
+      path: '/negocio/historial'
+      fullPath: '/negocio/historial'
+      preLoaderRoute: typeof NegocioHistorialRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/negocio/dashboard': {
+      id: '/negocio/dashboard'
+      path: '/negocio/dashboard'
+      fullPath: '/negocio/dashboard'
+      preLoaderRoute: typeof NegocioDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/register': {
+      id: '/app/register'
+      path: '/app/register'
+      fullPath: '/app/register'
+      preLoaderRoute: typeof AppRegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/published': {
+      id: '/app/published'
+      path: '/app/published'
+      fullPath: '/app/published'
+      preLoaderRoute: typeof AppPublishedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/publish': {
+      id: '/app/publish'
+      path: '/app/publish'
+      fullPath: '/app/publish'
+      preLoaderRoute: typeof AppPublishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/proposals': {
+      id: '/app/proposals'
+      path: '/app/proposals'
+      fullPath: '/app/proposals'
+      preLoaderRoute: typeof AppProposalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/proposal-detail': {
+      id: '/app/proposal-detail'
+      path: '/app/proposal-detail'
+      fullPath: '/app/proposal-detail'
+      preLoaderRoute: typeof AppProposalDetailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/history': {
+      id: '/app/history'
+      path: '/app/history'
+      fullPath: '/app/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/app/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/code': {
+      id: '/app/code'
+      path: '/app/code'
+      fullPath: '/app/code'
+      preLoaderRoute: typeof AppCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppCodeRoute: AppCodeRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppHistoryRoute: AppHistoryRoute,
+  AppProposalDetailRoute: AppProposalDetailRoute,
+  AppProposalsRoute: AppProposalsRoute,
+  AppPublishRoute: AppPublishRoute,
+  AppPublishedRoute: AppPublishedRoute,
+  AppRegisterRoute: AppRegisterRoute,
+  NegocioDashboardRoute: NegocioDashboardRoute,
+  NegocioHistorialRoute: NegocioHistorialRoute,
+  NegocioPerfilRoute: NegocioPerfilRoute,
+  NegocioPlanRoute: NegocioPlanRoute,
+  NegocioPropuestaRoute: NegocioPropuestaRoute,
+  NegocioPropuestasRoute: NegocioPropuestasRoute,
+  NegocioSolicitudRoute: NegocioSolicitudRoute,
+  NegocioSolicitudesRoute: NegocioSolicitudesRoute,
+  AppIndexRoute: AppIndexRoute,
+  NegocioIndexRoute: NegocioIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
