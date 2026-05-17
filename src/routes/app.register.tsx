@@ -1,61 +1,87 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { PhoneFrame } from "@/components/PhoneFrame";
-import { Check, Upload, Smartphone } from "lucide-react";
+import { Smartphone, Loader2 } from "lucide-react";
+import { useState, type FormEvent } from "react";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 export const Route = createFileRoute("/app/register")({ component: Register });
 
 function Register() {
+  const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const form = new FormData(e.currentTarget);
+      const full_name = String(form.get("full_name") ?? "").trim();
+      const email = String(form.get("email") ?? "").trim();
+      const password = String(form.get("password") ?? "");
+      const phone = String(form.get("phone") ?? "").trim();
+
+      const supabase = getSupabaseBrowser();
+      const { error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        phone: phone || undefined,
+        options: { data: { role: "client", full_name } },
+      });
+      if (signUpError) throw signUpError;
+
+      // If email confirmation is disabled in Supabase dashboard, a session is created immediately
+      // and beforeLoad on /app/dashboard will pass. Otherwise the user will see the login page.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (sessionData.session) {
+        await navigate({ to: "/app/dashboard" });
+      } else {
+        await navigate({ to: "/app/login", search: { confirm: 1 } });
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al registrar");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
-    <PhoneFrame title="Crear cuenta" back="/app">
-      <div className="space-y-5 p-6">
+    <PhoneFrame title="Crear cuenta" back="/app/login">
+      <form onSubmit={onSubmit} className="space-y-5 p-6">
         <div>
           <label className="label-field">Nombre completo</label>
-          <input className="input-field" defaultValue="María Fernández Castro" />
+          <input name="full_name" required className="input-field" placeholder="María Fernández Castro" />
         </div>
         <div>
           <label className="label-field">Correo electrónico</label>
-          <input className="input-field" defaultValue="maria.f@correo.com" />
+          <input name="email" type="email" required className="input-field" placeholder="maria@correo.com" />
         </div>
         <div>
           <label className="label-field">Contraseña</label>
-          <input type="password" className="input-field" defaultValue="••••••••••" />
+          <input name="password" type="password" required minLength={6} className="input-field" placeholder="Mínimo 6 caracteres" />
         </div>
-
         <div>
-          <label className="label-field">Celular</label>
-          <div className="flex gap-2">
-            <input className="input-field flex-1" defaultValue="+51 987 654 321" />
-            <button className="rounded-xl border border-primary bg-primary/10 px-3 text-xs font-semibold text-primary">Enviar</button>
-          </div>
-          <div className="mt-2 flex items-center gap-2 rounded-lg bg-status-accepted/15 px-3 py-2 text-xs text-status-accepted">
-            <Check className="h-3.5 w-3.5" /> Código enviado · ingresa los 6 dígitos
-          </div>
-          <div className="mt-2 flex gap-2">
-            {[4, 7, 2, 1, 9, 5].map((d, i) => (
-              <input key={i} className="input-field h-12 w-full text-center font-display text-xl" defaultValue={d} />
-            ))}
-          </div>
+          <label className="label-field">Celular (opcional)</label>
+          <input name="phone" className="input-field" placeholder="+51 987 654 321" />
         </div>
 
-        <div>
-          <label className="label-field">Verificación de identidad (DNI)</label>
-          <div className="rounded-xl border-2 border-dashed border-border bg-surface p-5 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/15 text-primary">
-              <Upload className="h-5 w-5" />
-            </div>
-            <div className="mt-2 text-sm font-semibold">Toma una foto de tu DNI</div>
-            <div className="text-xs text-muted-foreground">Frontal · Reverso</div>
-            <div className="mt-3 flex justify-center gap-2">
-              <span className="badge-dot badge-accepted"><Check className="h-3 w-3" /> Frontal</span>
-              <span className="badge-dot badge-accepted"><Check className="h-3 w-3" /> Reverso</span>
-            </div>
+        {error && (
+          <div className="rounded-lg bg-status-reported/15 px-3 py-2 text-xs text-status-reported">
+            {error}
           </div>
-        </div>
+        )}
 
-        <Link to="/app/dashboard" className="btn-primary w-full">
-          <Smartphone className="h-4 w-4" /> Completar registro
-        </Link>
-      </div>
+        <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Smartphone className="h-4 w-4" />}
+          {submitting ? "Creando cuenta..." : "Crear cuenta"}
+        </button>
+
+        <p className="text-center text-xs text-muted-foreground">
+          ¿Ya tienes cuenta?{" "}
+          <Link to="/app/login" className="text-primary hover:underline">Inicia sesión</Link>
+        </p>
+      </form>
     </PhoneFrame>
   );
 }
