@@ -20,6 +20,9 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# AI assistant instructions (private to local clone — contains contact info)
+CLAUDE.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
