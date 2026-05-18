@@ -16,6 +16,11 @@ dist-ssr
 .nitro
 *.local
 
+# Env files (broader catch — covers .env.production.local, .env.staging, etc.)
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
@@ -27,8 +32,17 @@ dist-ssr
 supabase/.temp/
 supabase/.branches/
 
-# AI assistant instructions (private to local clone — contains contact info)
+# AI assistant instructions and local state (private to local clone)
 CLAUDE.md
+SESSION-STATE.md
+handoff.md
+.claude/
+
+# Session working memos (per-session logs, never committed)
+backlog.md
+session.md
+session-*.md
+SESSION_*.md
 
 # Editor directories and files
 .vscode/*

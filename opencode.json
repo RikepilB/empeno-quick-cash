@@ -1,0 +1,42 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "anthropic/claude-sonnet-4",
+  "small_model": "anthropic/claude-haiku-3",
+
+  "instructions": ["CLAUDE.md", "backlog.md"],
+
+  "agent": {
+    "reviewer": {
+      "description": "Code reviewer for empeno-quick-cash. Analyzes TypeScript/React code, checks for bugs, security issues, and performance problems.",
+      "mode": "subagent",
+      "model": "openai/gpt-4o",
+      "permission": { "edit": "ask", "bash": "ask" }
+    }
+  },
+
+  "mcp": {
+    "code-review": {
+      "type": "local",
+      "command": ["bun", "run", ".opencode/mcp/code-review-server.ts"],
+      "enabled": true,
+      "env": {}
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": true,
+      "env": {}
+    }
+  },
+
+  "plugin": [],
+
+  "permission": {
+    "edit": "allow",
+    "bash": { "git *": "allow", "bun *": "allow", "npx *": "allow", "node *": "allow", "rm *": "ask", "*": "ask" },
+    "external_directory": { "*": "allow" }
+  },
+
+  "formatter": true,
+  "lsp": true
+}

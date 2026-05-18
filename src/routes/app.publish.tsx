@@ -1,35 +1,127 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { PhoneFrame } from "@/components/PhoneFrame";
-import { Camera, Plus, Smartphone, Laptop, Gem, Watch, Car, Box } from "lucide-react";
-import { useState } from "react";
+import { Camera, Plus, Loader2, X } from "lucide-react";
+import { useRef, useState, type FormEvent } from "react";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
+import { createSolicitud } from "@/server-fns/solicitudes";
+import { CATEGORIES, type CategoryKey } from "@/lib/categories";
 
 export const Route = createFileRoute("/app/publish")({ component: Publish });
 
-const cats = [
-  { k: "celular", l: "Celular", icon: Smartphone },
-  { k: "laptop", l: "Laptop", icon: Laptop },
-  { k: "joya", l: "Joya", icon: Gem },
-  { k: "reloj", l: "Reloj", icon: Watch },
-  { k: "vehiculo", l: "Vehículo", icon: Car },
-  { k: "otro", l: "Otro", icon: Box },
-];
+const CONDITIONS = ["Nuevo", "Bueno", "Regular", "Detalles"] as const;
+const PLAZOS = [15, 30, 45, 60] as const;
+const MIN_PHOTOS = 2;
+const MAX_PHOTOS = 8;
+const BUCKET = "solicitud-photos";
+
+type LocalPhoto = { file: File; previewUrl: string; storagePath?: string };
 
 function Publish() {
-  const [cat, setCat] = useState("celular");
+  const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [category, setCategory] = useState<CategoryKey>("celular");
+  const [condition, setCondition] = useState<(typeof CONDITIONS)[number]>("Bueno");
+  const [plazo, setPlazo] = useState<(typeof PLAZOS)[number]>(30);
+  const [photos, setPhotos] = useState<LocalPhoto[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  function handleFiles(filesList: FileList | null) {
+    if (!filesList || filesList.length === 0) return;
+    const remaining = MAX_PHOTOS - photos.length;
+    const incoming = Array.from(filesList).slice(0, remaining);
+    setPhotos((prev) => [
+      ...prev,
+      ...incoming.map((f) => ({ file: f, previewUrl: URL.createObjectURL(f) })),
+    ]);
+  }
+
+  function removePhoto(idx: number) {
+    setPhotos((prev) => {
+      URL.revokeObjectURL(prev[idx]!.previewUrl);
+      return prev.filter((_, i) => i !== idx);
+    });
+  }
+
+  async function uploadAllPhotos(userId: string): Promise<string[]> {
+    if (photos.length === 0) return [];
+    const supabase = getSupabaseBrowser();
+    const paths: string[] = [];
+    for (let i = 0; i < photos.length; i++) {
+      const photo = photos[i]!;
+      const ext = photo.file.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `${userId}/${crypto.randomUUID()}-${i}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from(BUCKET)
+        .upload(path, photo.file, { contentType: photo.file.type || "image/jpeg" });
+      if (upErr) throw new Error(`Error subiendo foto ${i + 1}: ${upErr.message}`);
+      paths.push(path);
+    }
+    return paths;
+  }
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    if (photos.length < MIN_PHOTOS) {
+      setError(`Sube al menos ${MIN_PHOTOS} fotos.`);
+      return;
+    }
+    setSubmitting(true);
+    try {
+      const form = new FormData(e.currentTarget);
+      const supabase = getSupabaseBrowser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("Inicia sesión nuevamente.");
+
+      const photoPaths = await uploadAllPhotos(user.id);
+
+      const amountStr = String(form.get("expected_amount_pen") ?? "").replace(/[^\d]/g, "");
+      const yearStr = String(form.get("year") ?? "").trim();
+      const result = await createSolicitud({
+        data: {
+          category,
+          brand: String(form.get("brand") ?? "").trim() || null,
+          model: String(form.get("model") ?? "").trim() || null,
+          year: yearStr ? Number(yearStr) : null,
+          storage: String(form.get("storage") ?? "").trim() || null,
+          condition,
+          description: String(form.get("description") ?? "").trim() || null,
+          expected_amount_pen: amountStr ? Number(amountStr) : null,
+          expected_term_days: plazo,
+          district: String(form.get("district") ?? "").trim() || null,
+          photo_paths: photoPaths,
+        },
+      });
+      await navigate({ to: "/app/published", search: { id: result.id } });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al publicar");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <PhoneFrame title="Publicar artículo" back="/app/dashboard">
-      <div className="space-y-5 p-6 pb-10">
+      <form onSubmit={onSubmit} className="space-y-5 p-6 pb-10">
         <div>
           <label className="label-field">Categoría</label>
           <div className="grid grid-cols-3 gap-2">
-            {cats.map((c) => {
+            {CATEGORIES.map((c) => {
               const Icon = c.icon;
-              const active = cat === c.k;
+              const active = category === c.key;
               return (
-                <button key={c.k} onClick={() => setCat(c.k)} className={`flex flex-col items-center gap-1 rounded-xl border p-3 text-xs transition ${active ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface text-muted-foreground"}`}>
+                <button
+                  type="button"
+                  key={c.key}
+                  onClick={() => setCategory(c.key)}
+                  className={`flex flex-col items-center gap-1 rounded-xl border p-3 text-xs transition ${active ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface text-muted-foreground"}`}
+                >
                   <Icon className="h-5 w-5" />
-                  {c.l}
+                  {c.label}
                 </button>
               );
             })}
@@ -39,27 +131,32 @@ function Publish() {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label-field">Marca</label>
-            <input className="input-field" defaultValue="Apple" />
+            <input name="brand" className="input-field" placeholder="Apple" />
           </div>
           <div>
             <label className="label-field">Modelo</label>
-            <input className="input-field" defaultValue="iPhone 14 Pro" />
+            <input name="model" className="input-field" placeholder="iPhone 14 Pro" />
           </div>
           <div>
             <label className="label-field">Año</label>
-            <input className="input-field" defaultValue="2023" />
+            <input name="year" type="number" inputMode="numeric" className="input-field" placeholder="2023" />
           </div>
           <div>
             <label className="label-field">Almacenamiento</label>
-            <input className="input-field" defaultValue="256 GB" />
+            <input name="storage" className="input-field" placeholder="256 GB" />
           </div>
         </div>
 
         <div>
           <label className="label-field">Estado del artículo</label>
           <div className="grid grid-cols-4 gap-2">
-            {["Nuevo", "Bueno", "Regular", "Detalles"].map((e, i) => (
-              <button key={e} className={`rounded-lg border px-2 py-2 text-xs ${i === 1 ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface text-muted-foreground"}`}>
+            {CONDITIONS.map((e) => (
+              <button
+                type="button"
+                key={e}
+                onClick={() => setCondition(e)}
+                className={`rounded-lg border px-2 py-2 text-xs ${condition === e ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface text-muted-foreground"}`}
+              >
                 {e}
               </button>
             ))}
@@ -67,21 +164,49 @@ function Publish() {
         </div>
 
         <div>
-          <label className="label-field">Imperfecciones (opcional)</label>
-          <textarea className="input-field min-h-[70px]" defaultValue="Ligero rayón en el marco superior. Pantalla y batería en perfecto estado." />
+          <label className="label-field">Descripción / imperfecciones</label>
+          <textarea
+            name="description"
+            className="input-field min-h-[70px]"
+            placeholder="Cuéntale al casa de empeño el estado real del artículo."
+          />
         </div>
 
         <div>
-          <label className="label-field">Fotografías (mín. 2 · máx. 8)</label>
+          <label className="label-field">Fotografías (mín. {MIN_PHOTOS} · máx. {MAX_PHOTOS})</label>
           <div className="grid grid-cols-4 gap-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="aspect-square rounded-lg bg-gradient-to-br from-surface-2 to-surface text-center text-3xl leading-[5rem]">📱</div>
+            {photos.map((p, idx) => (
+              <div key={idx} className="relative aspect-square overflow-hidden rounded-lg bg-surface-2">
+                <img src={p.previewUrl} alt="" className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removePhoto(idx)}
+                  className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white"
+                  aria-label="Quitar foto"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
             ))}
-            <button className="flex aspect-square flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary">
-              <Camera className="h-5 w-5" />
-              <span className="mt-1 text-[10px]">Agregar</span>
-            </button>
+            {photos.length < MAX_PHOTOS && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex aspect-square flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"
+              >
+                <Camera className="h-5 w-5" />
+                <span className="mt-1 text-[10px]">Agregar</span>
+              </button>
+            )}
           </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => handleFiles(e.target.files)}
+          />
         </div>
 
         <details className="group rounded-xl border border-border bg-surface">
@@ -92,29 +217,41 @@ function Publish() {
           <div className="space-y-4 border-t border-border p-4">
             <div>
               <label className="label-field">Monto esperado (S/)</label>
-              <input className="input-field" placeholder="2,500" />
+              <input name="expected_amount_pen" inputMode="numeric" className="input-field" placeholder="2,500" />
             </div>
             <div>
               <label className="label-field">Plazo deseado</label>
               <div className="grid grid-cols-4 gap-2">
-                {[15, 30, 45, 60].map((d) => (
-                  <button key={d} className={`rounded-lg border py-2 text-xs ${d === 30 ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"}`}>
+                {PLAZOS.map((d) => (
+                  <button
+                    type="button"
+                    key={d}
+                    onClick={() => setPlazo(d)}
+                    className={`rounded-lg border py-2 text-xs ${plazo === d ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"}`}
+                  >
                     {d} días
                   </button>
                 ))}
               </div>
             </div>
             <div>
-              <label className="label-field">Documentos de respaldo</label>
-              <button className="flex w-full items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-background py-3 text-xs text-muted-foreground hover:border-primary hover:text-primary">
-                <Plus className="h-4 w-4" /> Boleta / Certificado
-              </button>
+              <label className="label-field">Distrito</label>
+              <input name="district" className="input-field" placeholder="Miraflores" />
             </div>
           </div>
         </details>
 
-        <Link to="/app/published" className="btn-primary w-full">Publicar y esperar propuestas</Link>
-      </div>
+        {error && (
+          <div className="rounded-lg bg-status-reported/15 px-3 py-2 text-xs text-status-reported">
+            {error}
+          </div>
+        )}
+
+        <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
+          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {submitting ? "Publicando..." : "Publicar y esperar propuestas"}
+        </button>
+      </form>
     </PhoneFrame>
   );
 }
