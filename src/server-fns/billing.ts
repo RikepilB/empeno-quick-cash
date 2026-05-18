@@ -115,7 +115,10 @@ export const startCheckout = createServerFn({ method: "POST" })
         .single<{ id: string; name: string; price_pen: number }>();
       if (planErr || !plan) throw new Error("Plan no encontrado.");
 
-      const live = isCulqiLive() && !!data.token_id;
+      const live = isCulqiLive();
+      if (live && !data.token_id) {
+        throw new Error("token_id requerido (Culqi en modo live).");
+      }
       const mode: "live" | "demo" = live ? "live" : "demo";
       let charge: { id: string; status: "paid" | "failed" | "demo" } = {
         id: `demo_charge_${Date.now()}`,

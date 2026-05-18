@@ -6,6 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getBusinessContext } from "@/server-fns/business";
 import { listPlans, listMyInvoices, startCheckout, getBillingMode } from "@/server-fns/billing";
 import { formatPEN } from "@/lib/categories";
+import { openCheckout, getCulqiPublicKey } from "@/lib/culqi-checkout";
 
 export const Route = createFileRoute("/negocio/perfil")({ component: Perfil });
 
@@ -20,7 +21,8 @@ function Perfil() {
   const [msg, setMsg] = useState<string | null>(null);
 
   const checkout = useMutation({
-    mutationFn: (planId: string) => startCheckout({ data: { plan_id: planId } }),
+    mutationFn: (args: { plan_id: string; token_id?: string }) =>
+      startCheckout({ data: args }),
     onSuccess: async (res) => {
       setMsg(
         res.mode === "demo"
@@ -41,6 +43,30 @@ function Perfil() {
   const business = context.data?.business;
   const currentPlanId = sub?.plan.id ?? null;
   const isDemo = billingMode.data?.mode === "demo";
+  const missingPublicKey = !isDemo && !getCulqiPublicKey();
+
+  async function handlePlanClick(plan: { id: string; price_pen: number }) {
+    setMsg(null);
+    setPendingPlan(plan.id);
+    try {
+      if (isDemo) {
+        checkout.mutate({ plan_id: plan.id });
+        return;
+      }
+      const tok = await openCheckout({
+        amount_pen: plan.price_pen,
+        plan_id: plan.id,
+      });
+      if (!tok) {
+        setPendingPlan(null);
+        return;
+      }
+      checkout.mutate({ plan_id: plan.id, token_id: tok.token_id });
+    } catch (err) {
+      setMsg(err instanceof Error ? err.message : "Error al abrir Culqi");
+      setPendingPlan(null);
+    }
+  }
 
   return (
     <BusinessLayout title="Negocio" subtitle="Datos del negocio, plan y facturación">
@@ -62,6 +88,19 @@ function Perfil() {
             <div className="text-muted-foreground">
               Aún no se ha configurado <code>CULQI_SECRET_KEY</code>. Los cambios de plan se aplican al instante sin
               cobrar. Cuando agregues la clave, las suscripciones pasarán por Culqi automáticamente.
+            </div>
+          </div>
+        </div>
+      )}
+
+      {missingPublicKey && (
+        <div className="mb-4 flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
+          <ShieldCheck className="h-4 w-4 shrink-0 text-destructive" />
+          <div>
+            <div className="font-semibold text-destructive">Falta clave pública de Culqi</div>
+            <div className="text-muted-foreground">
+              El servidor está en modo live pero <code>VITE_CULQI_PUBLIC_KEY</code> no está
+              configurada en el cliente. No se puede cobrar hasta que se agregue.
             </div>
           </div>
         </div>
@@ -171,11 +210,9 @@ function Perfil() {
                       ))}
                     </ul>
                     <button
-                      disabled={isCurrent || submitting}
+                      disabled={isCurrent || submitting || missingPublicKey}
                       onClick={() => {
-                        setMsg(null);
-                        setPendingPlan(p.id);
-                        checkout.mutate(p.id);
+                        handlePlanClick({ id: p.id, price_pen: p.price_pen });
                       }}
                       className={`mt-5 rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-60 ${
                         isCurrent
@@ -192,7 +229,7 @@ function Perfil() {
                       ) : isDemo ? (
                         "Cambiar (demo)"
                       ) : (
-                        "Cambiar plan"
+                        "Pagar y cambiar"
                       )}
                     </button>
                   </div>
