@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BusinessLayout } from "@/components/BusinessLayout";
+import { BusinessLayout } from "@/ui/BusinessLayout";
 import { TrendingUp, Send, CheckCircle2, Inbox, AlertTriangle, ArrowRight, Loader2 } from "lucide-react";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { listActiveSolicitudes } from "@/server-fns/solicitudes";
-import { listMyPropuestas } from "@/server-fns/propuestas";
-import { getBusinessContext } from "@/server-fns/business";
+import { listActiveSolicitudes } from "@/services/solicitudes";
+import { listMyPropuestas } from "@/services/propuestas";
+import { getBusinessContext } from "@/services/business";
 import { categoryMeta, buildTitle, formatPEN, relativeTime } from "@/lib/categories";
 
 export const Route = createFileRoute("/negocio/dashboard")({ component: BizDashboard });

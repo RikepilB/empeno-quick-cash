@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { getSupabaseServer } from "@/lib/supabase/server";
-import { chargeOnce, isCulqiLive } from "@/lib/culqi";
+import { getSupabaseServer } from "@/lib/db/server";
+import { chargeOnce, isCulqiLive } from "@/lib/payments/client";
 
 // ============================================================================
 // Types
