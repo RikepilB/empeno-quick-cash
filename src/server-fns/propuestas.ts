@@ -136,14 +136,22 @@ export const createPropuesta = createServerFn({ method: "POST" })
 
     if (error || !row) throw new Error(error?.message ?? "Error al enviar propuesta");
 
-    // Increment quota counter via SECURITY DEFINER RPC (subscriptions writes are
-    // server-only by policy; the rpc enforces the quota atomically).
-    const { error: incErr } = await supabase.rpc("increment_propuestas_used");
-    if (incErr) {
-      // Log but do not roll back: propuesta is already inserted and the limit
-      // check above is the source of truth. Stale counter will catch up on
-      // next monthly rollover.
-      console.warn("increment_propuestas_used failed:", incErr.message);
+    // Quota gate via SECURITY DEFINER RPC. Atomically increments the counter
+    // and returns allowed=false when the plan limit would be exceeded. Race
+    // outcome under concurrency: the second request reads allowed=false here
+    // and we delete its insert so the counter pegs at the cap.
+    const { data: incRows, error: incErr } = await supabase
+      .rpc("increment_propuestas_used")
+      .returns<{ used: number; allowed: boolean }[]>();
+    const incRow = Array.isArray(incRows) ? incRows[0] : (incRows as { used: number; allowed: boolean } | null);
+    const denied = !!incErr || !incRow || incRow.allowed === false;
+
+    if (denied) {
+      const { error: delErr } = await supabase.from("propuestas").delete().eq("id", row.id);
+      if (delErr) {
+        console.warn("rollback propuesta failed after quota deny:", delErr.message);
+      }
+      throw new Error("Has alcanzado el límite de propuestas de tu plan.");
     }
 
     return { id: row.id };
