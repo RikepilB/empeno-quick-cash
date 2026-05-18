@@ -1,0 +1,12 @@
+# Enforce LF line endings on all text files to keep prettier/eslint
+# deterministic across Windows/Linux/macOS checkouts.
+* text=auto eol=lf
+
+# Binary files should not be touched
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
