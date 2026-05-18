@@ -20,6 +20,13 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Playwright MCP local artifacts (console logs + page snapshots)
+.playwright-mcp/
+
+# Supabase CLI local cache (regenerated on `supabase link`)
+supabase/.temp/
+supabase/.branches/
+
 # AI assistant instructions (private to local clone — contains contact info)
 CLAUDE.md
 

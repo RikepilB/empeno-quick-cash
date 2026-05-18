@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
   LayoutDashboard,
@@ -9,7 +9,9 @@ import {
   Bell,
   CreditCard,
   Search,
+  LogOut,
 } from "lucide-react";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 const nav = [
   { to: "/negocio/dashboard", label: "Panel", icon: LayoutDashboard },
@@ -21,6 +23,13 @@ const nav = [
 
 export function BusinessLayout({ children, title, subtitle, actions }: { children: ReactNode; title: string; subtitle?: string; actions?: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const router = useRouter();
+
+  async function handleLogout() {
+    await getSupabaseBrowser().auth.signOut();
+    await router.invalidate();
+    await router.navigate({ to: "/negocio/login" });
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -86,13 +95,14 @@ export function BusinessLayout({ children, title, subtitle, actions }: { childre
               <Bell className="h-4 w-4" />
               <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
             </button>
-            <div className="hidden items-center gap-3 rounded-xl border border-border bg-surface px-3 py-1.5 md:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20 font-display font-bold text-primary">JM</div>
-              <div className="text-xs leading-tight">
-                <div className="font-semibold">Joyería Miraflores</div>
-                <div className="text-muted-foreground">Admin</div>
-              </div>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="hidden items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-xs text-muted-foreground hover:text-foreground md:flex"
+              title="Cerrar sesión"
+            >
+              <LogOut className="h-4 w-4" />
+              Salir
+            </button>
             {actions}
           </header>
 
