@@ -1,10 +1,28 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { PhoneFrame } from "@/components/PhoneFrame";
-import { CheckCircle2, Bell, Eye } from "lucide-react";
+import { CheckCircle2, Bell, Eye, Loader2 } from "lucide-react";
+import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
+import { getSolicitud } from "@/server-fns/solicitudes";
+import { categoryMeta, buildTitle, formatPEN } from "@/lib/categories";
 
-export const Route = createFileRoute("/app/published")({ component: Published });
+const searchSchema = z.object({ id: z.string().uuid().optional() });
+
+export const Route = createFileRoute("/app/published")({
+  component: Published,
+  validateSearch: searchSchema,
+});
 
 function Published() {
+  const search = useSearch({ from: "/app/published" });
+  const id = search.id;
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["solicitud", id],
+    queryFn: () => (id ? getSolicitud({ data: { id } }) : Promise.resolve(null)),
+    enabled: !!id,
+  });
+
   return (
     <PhoneFrame title="Publicación activa" back="/app/dashboard">
       <div className="p-6">
@@ -21,20 +39,49 @@ function Published() {
             <Eye className="h-3.5 w-3.5" /> Vista previa pública
           </div>
           <div className="rounded-2xl border border-border bg-surface p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-surface-2 text-3xl">📱</div>
-              <div className="min-w-0 flex-1">
-                <div className="font-display text-lg font-bold leading-tight">iPhone 14 Pro 256GB</div>
-                <div className="text-xs text-muted-foreground">Apple · 2023 · Estado: Bueno</div>
-                <div className="mt-1 text-xs text-muted-foreground">Distrito: Surquillo · Plazo: 30 días</div>
+            {isLoading || !data ? (
+              <div className="flex items-center justify-center py-8 text-xs text-muted-foreground">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
               </div>
-            </div>
-            <div className="mt-3 flex gap-1.5">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 flex-1 rounded-lg bg-surface-2 text-center leading-[3rem]">📱</div>
-              ))}
-            </div>
-            <p className="mt-3 text-xs text-muted-foreground">"Ligero rayón en el marco superior. Pantalla y batería en perfecto estado."</p>
+            ) : (
+              <>
+                <div className="flex items-start gap-3">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-surface-2 text-3xl">
+                    {categoryMeta(data.category).emoji}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-display text-lg font-bold leading-tight">{buildTitle(data)}</div>
+                    <div className="text-xs text-muted-foreground">
+                      {[data.brand, data.year, `Estado: ${data.condition ?? "—"}`].filter(Boolean).join(" · ")}
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Distrito: {data.district ?? "—"} · Plazo: {data.expected_term_days ?? "—"} días
+                    </div>
+                  </div>
+                </div>
+                {data.photos.length > 0 && (
+                  <div className="mt-3 flex gap-1.5">
+                    {data.photos.slice(0, 4).map((p) => (
+                      <img
+                        key={p.id}
+                        src={p.public_url}
+                        alt=""
+                        className="h-12 flex-1 rounded-lg bg-surface-2 object-cover"
+                      />
+                    ))}
+                  </div>
+                )}
+                {data.description && (
+                  <p className="mt-3 text-xs text-muted-foreground">{data.description}</p>
+                )}
+                {data.expected_amount_pen && (
+                  <div className="mt-3 flex items-center justify-between rounded-lg bg-background px-3 py-2 text-xs">
+                    <span className="text-muted-foreground">Monto referencia</span>
+                    <span className="font-display font-bold">{formatPEN(data.expected_amount_pen)}</span>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
 
@@ -47,7 +94,7 @@ function Published() {
           </div>
           <div className="mt-4 font-display text-xl font-bold uppercase">Esperando propuestas</div>
           <p className="mt-1 max-w-xs text-xs text-muted-foreground">
-            Te avisaremos por notificación apenas recibas la primera oferta. Generalmente en menos de 30 minutos.
+            Las casas de empeño afiliadas pueden ver tu solicitud y enviar ofertas. Revisa tu panel para verlas.
           </p>
           <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Bell className="h-3 w-3" /> Notificaciones activadas
@@ -55,7 +102,11 @@ function Published() {
         </div>
 
         <div className="mt-8 space-y-2">
-          <Link to="/app/proposals" className="btn-primary w-full">Ver propuestas (demo)</Link>
+          {id && (
+            <Link to="/app/proposals" search={{ id }} className="btn-primary w-full">
+              Ver propuestas
+            </Link>
+          )}
           <Link to="/app/dashboard" className="btn-ghost w-full">Volver al inicio</Link>
         </div>
       </div>

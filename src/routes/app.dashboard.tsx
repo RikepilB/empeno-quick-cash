@@ -1,23 +1,45 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PhoneFrame } from "@/components/PhoneFrame";
-import { Plus, Clock, Sparkles, History as HistoryIcon, Bell } from "lucide-react";
+import { Plus, Clock, Sparkles, History as HistoryIcon, Bell, Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { listMySolicitudes, type SolicitudListItem } from "@/server-fns/solicitudes";
+import { listMyClientOperations } from "@/server-fns/operations";
+import { getCurrentUser } from "@/server-fns/auth";
+import { categoryMeta, buildTitle } from "@/lib/categories";
 
 export const Route = createFileRoute("/app/dashboard")({ component: Dashboard });
 
-const activos = [
-  { id: 1, art: "iPhone 14 Pro 256GB", emoji: "📱", estado: "Con propuestas", count: 3, badge: "badge-accepted" },
-  { id: 2, art: "Reloj Tissot PRX", emoji: "⌚", estado: "Esperando propuestas", count: 0, badge: "badge-pending" },
-  { id: 3, art: "Anillo de oro 18k", emoji: "💍", estado: "Aceptado", count: 1, badge: "badge-new" },
-];
+function statusBadge(s: SolicitudListItem): { label: string; badge: string } {
+  if (s.status === "accepted") return { label: "Aceptado", badge: "badge-new" };
+  if (s.status === "closed") return { label: "Cerrado", badge: "badge-inactive" };
+  if (s.status === "expired") return { label: "Expirado", badge: "badge-inactive" };
+  if (s.propuestas_count > 0) return { label: "Con propuestas", badge: "badge-accepted" };
+  return { label: "Esperando propuestas", badge: "badge-pending" };
+}
 
 function Dashboard() {
+  const user = useQuery({ queryKey: ["currentUser"], queryFn: () => getCurrentUser() });
+  const solicitudes = useQuery({
+    queryKey: ["mySolicitudes"],
+    queryFn: () => listMySolicitudes(),
+  });
+  const operations = useQuery({
+    queryKey: ["myClientOperations"],
+    queryFn: () => listMyClientOperations(),
+  });
+
+  const items = solicitudes.data ?? [];
+  const activeCount = items.filter((s) => s.status === "active" || s.status === "accepted").length;
+  const totalOps = operations.data?.length ?? 0;
+  const firstName = user.data?.profile.full_name?.split(" ")[0] ?? "";
+
   return (
     <PhoneFrame hideHeader>
       <div className="bg-background">
         <div className="flex items-center justify-between p-6 pb-4">
           <div>
             <div className="text-xs text-muted-foreground">¡Hola,</div>
-            <div className="font-display text-2xl font-bold uppercase">María! 👋</div>
+            <div className="font-display text-2xl font-bold uppercase">{firstName || "Cliente"}! 👋</div>
           </div>
           <button className="relative rounded-xl border border-border bg-surface p-2.5">
             <Bell className="h-5 w-5" />
@@ -42,18 +64,48 @@ function Dashboard() {
           </div>
 
           <div className="mt-3 space-y-2.5">
-            {activos.map((p) => (
-              <Link key={p.id} to={p.estado === "Con propuestas" ? "/app/proposals" : p.estado === "Aceptado" ? "/app/code" : "/app/published"} className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 transition hover:border-primary/40">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-2 text-2xl">{p.emoji}</div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-semibold">{p.art}</div>
-                  <div className="mt-0.5 flex items-center gap-2">
-                    <span className={`badge-dot ${p.badge}`}>{p.estado}</span>
-                    {p.count > 0 && <span className="text-[11px] text-muted-foreground">· {p.count} {p.count === 1 ? "propuesta" : "propuestas"}</span>}
-                  </div>
-                </div>
-              </Link>
-            ))}
+            {solicitudes.isLoading ? (
+              <div className="flex items-center justify-center py-6 text-xs text-muted-foreground">
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
+              </div>
+            ) : items.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-border bg-surface p-6 text-center text-xs text-muted-foreground">
+                Aún no has publicado ningún artículo. Toca "Empeñar un artículo" para empezar.
+              </div>
+            ) : (
+              items.map((s) => {
+                const { label, badge } = statusBadge(s);
+                const target =
+                  s.status === "accepted"
+                    ? { to: "/app/code" as const, search: { propuesta_id: undefined as string | undefined } }
+                    : s.propuestas_count > 0
+                      ? { to: "/app/proposals" as const, search: { id: s.id } }
+                      : { to: "/app/published" as const, search: { id: s.id } };
+                return (
+                  <Link
+                    key={s.id}
+                    to={target.to}
+                    search={target.search as any}
+                    className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 transition hover:border-primary/40"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-2 text-2xl">
+                      {categoryMeta(s.category).emoji}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold">{buildTitle(s)}</div>
+                      <div className="mt-0.5 flex items-center gap-2">
+                        <span className={`badge-dot ${badge}`}>{label}</span>
+                        {s.propuestas_count > 0 && (
+                          <span className="text-[11px] text-muted-foreground">
+                            · {s.propuestas_count} {s.propuestas_count === 1 ? "propuesta" : "propuestas"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })
+            )}
           </div>
 
           <div className="mt-6 rounded-xl border border-border bg-surface p-4">
@@ -66,12 +118,12 @@ function Dashboard() {
           <div className="mt-6 grid grid-cols-2 gap-3 pb-8">
             <div className="rounded-xl border border-border bg-surface p-4">
               <Clock className="h-4 w-4 text-primary" />
-              <div className="mt-2 font-display text-xl font-bold">2</div>
+              <div className="mt-2 font-display text-xl font-bold">{activeCount}</div>
               <div className="text-[11px] text-muted-foreground">Empeños activos</div>
             </div>
             <div className="rounded-xl border border-border bg-surface p-4">
               <HistoryIcon className="h-4 w-4 text-primary" />
-              <div className="mt-2 font-display text-xl font-bold">12</div>
+              <div className="mt-2 font-display text-xl font-bold">{totalOps}</div>
               <div className="text-[11px] text-muted-foreground">Operaciones totales</div>
             </div>
           </div>
