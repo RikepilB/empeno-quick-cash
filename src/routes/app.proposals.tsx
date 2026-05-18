@@ -1,11 +1,11 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/ui/PhoneFrame";
 import { ArrowUpDown, MapPin, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getSolicitud } from "@/server-fns/solicitudes";
-import { listPropuestasForSolicitud, type PropuestaForClient } from "@/server-fns/propuestas";
+import { getSolicitud } from "@/services/solicitudes";
+import { listPropuestasForSolicitud, type PropuestaForClient } from "@/services/propuestas";
 import { categoryMeta, buildTitle, formatPEN } from "@/lib/categories";
 
 const searchSchema = z.object({ id: z.string().uuid().optional() });

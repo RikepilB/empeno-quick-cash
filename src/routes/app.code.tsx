@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/ui/PhoneFrame";
 import { Share2, MapPin, Clock, CheckCircle2, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
-import { getOperationByPropuesta } from "@/server-fns/operations";
+import { getOperationByPropuesta } from "@/services/operations";
 import { buildTitle, categoryMeta, formatPEN } from "@/lib/categories";
 
 const searchSchema = z.object({
