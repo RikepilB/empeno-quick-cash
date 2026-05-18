@@ -35,6 +35,7 @@ supabase/.branches/
 # AI assistant instructions and local state (private to local clone)
 CLAUDE.md
 SESSION-STATE.md
+handoff.md
 .claude/
 
 # Editor directories and files
