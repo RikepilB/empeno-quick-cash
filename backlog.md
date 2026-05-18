@@ -12,7 +12,7 @@
 | 0. Lovable scaffold | ✅ Done | Inherited from Lovable. UI-only, mock arrays everywhere. |
 | 1. Supabase wiring + schema | ✅ Done | Migrations 0001 + 0002 applied to remote project `raoprigiowskqnylapqs`. |
 | 2. Auth (clients + businesses) | ✅ Done + E2E verified | Supabase email+password. Role guards. Full Playwright E2E passed. |
-| 3. Persist solicitudes/propuestas/photos | ⬜ **Next** | Replace all mock arrays. Storage bucket ready. |
+| 3. Persist solicitudes/propuestas/photos | ✅ Done + build passing | All routes wired to real data. Seeding system ready. |
 | 4. Culqi subscription billing | ⬜ Planned | Quota enforcement + webhook route + signature verify. |
 | 5. Rebrand (name/logo/colors) | ⬜ Deferred | After backend is solid. |
 | 6. Clerk auth migration (future) | ⬜ Planned | See architecture doc for full migration strategy. |
@@ -133,6 +133,36 @@ To delete: Supabase Dashboard → Authentication → Users.
 - The highest-ROI immediate change is creating a `services/` abstraction layer to decouple the frontend from Supabase.
 
 **Next session priority**: Phase 3 — Replace mock data with real Supabase queries.
+
+---
+
+### 2026-05-17 — Session 4 (Phase 3 — Full Data Persistence)
+
+**Goal**: Wire all routes to real Supabase data, build demo seeding system, prepare for pitch.
+
+**What was done**:
+- Verified Phase 3 work was ~70% complete from previous sessions.
+- Finished wiring remaining client routes: `app.code.tsx`, `app.history.tsx`, `app.proposal-detail.tsx`.
+- Finished wiring all business routes: `negocio.dashboard.tsx`, `negocio.solicitudes.tsx`, `negocio.solicitud.tsx`, `negocio.propuestas.tsx`, `negocio.propuesta.tsx`, `negocio.historial.tsx`.
+- Built complete server function layer:
+  - `solicitudes.ts` — create, list my solicitudes, list active (marketplace), get detail with photos
+  - `propuestas.ts` — create with quota enforcement, list for solicitud, list my propuestas (business), accept/reject, get single for client
+  - `business.ts` — get business context (business + active subscription)
+  - `operations.ts` — list client operations, list business operations, mark completed, get by propuesta
+- Added shared utilities: `src/lib/categories.ts` (category metadata, formatting, relative time), `src/lib/safe-redirect.ts` (redirect param security guard).
+- Created database seeding script `scripts/seed.ts`:
+  - 5 demo clients, 5 demo businesses
+  - 20 realistic solicitudes across categories (celular, laptop, joya, reloj, vehiculo, otro)
+  - Random propuestas (0–4 per solicitud) with realistic amounts/rates/terms
+  - 5 accepted operations with redemption codes
+- Created `scripts/security-scan.sh` — supply-chain IOC scanner for post-install checks.
+- Created `vercel.json` — deployment config targeting `lim1` (Lima) region.
+- Build verified: `bun run build` passes in ~14s, client + server chunks generated successfully.
+- Commit: `b3babeb` on `feat/phase-3-persistence`.
+
+**Files added/modified**: 29 files changed, 3018 insertions(+), 681 deletions.
+
+**Next session priority**: Seed database + deploy to Vercel for live demo testing.
 
 ---
 
