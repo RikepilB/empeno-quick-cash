@@ -1,6 +1,7 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, LogOut } from "lucide-react";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
 
 interface PhoneFrameProps {
   children: ReactNode;
@@ -10,6 +11,14 @@ interface PhoneFrameProps {
 }
 
 export function PhoneFrame({ children, title, back, hideHeader }: PhoneFrameProps) {
+  const router = useRouter();
+
+  async function handleLogout() {
+    await getSupabaseBrowser().auth.signOut();
+    await router.invalidate();
+    await router.navigate({ to: "/app/login" });
+  }
+
   return (
     <div className="min-h-screen w-full bg-background py-6 md:py-12">
       <div className="mx-auto w-full max-w-[420px] px-4">
@@ -34,10 +43,18 @@ export function PhoneFrame({ children, title, back, hideHeader }: PhoneFrameProp
           <div className="min-h-[680px] bg-background">{children}</div>
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+        <div className="mt-6 flex items-center justify-center gap-3 text-xs text-muted-foreground">
           <span>Vista cliente · mobile</span>
           <span>·</span>
           <Link to="/negocio" className="text-primary hover:underline">Ver panel del negocio</Link>
+          <span>·</span>
+          <button
+            onClick={handleLogout}
+            className="inline-flex items-center gap-1 text-muted-foreground hover:text-foreground"
+            title="Cerrar sesión"
+          >
+            <LogOut className="h-3 w-3" /> Salir
+          </button>
         </div>
       </div>
     </div>
