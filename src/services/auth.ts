@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSupabaseServer } from "@/lib/db/server";
+import { log } from "@/lib/logger";
 
 export type AuthRole = "client" | "business";
 

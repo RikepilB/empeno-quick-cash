@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSupabaseServer } from "@/lib/db/server";
+import { sanitizeError, log } from "@/lib/logger";
+import { rateLimitByUser } from "@/lib/rate-limit";
 
 // ============================================================================
 // Types
@@ -69,7 +71,7 @@ async function getOwnerBusiness(
     .select("id, name")
     .eq("owner_id", userId)
     .single<{ id: string; name: string }>();
-  if (error || !data) throw new Error("No tienes un negocio registrado.");
+  if (error || !data) throw sanitizeError(error, "No tienes un negocio registrado.");
   return data;
 }
 
@@ -94,6 +96,9 @@ export const createPropuesta = createServerFn({ method: "POST" })
     } = await supabase.auth.getUser();
     if (!user) throw new Error("No autenticado");
 
+    const rl = await rateLimitByUser("propuesta:create", user.id, 30, 3600);
+    if (!rl.allowed) throw new Error("Demasiadas propuestas. Intenta en una hora.");
+
     const business = await getOwnerBusiness(supabase, user.id);
 
     // Fetch active or trialing subscription + plan
@@ -110,7 +115,7 @@ export const createPropuesta = createServerFn({ method: "POST" })
         plans: { monthly_propuestas: number | null } | null;
       }>();
 
-    if (subErr) throw new Error(subErr.message);
+    if (subErr) throw sanitizeError(subErr, "Error al verificar tu suscripción.");
     if (!sub) throw new Error("Tu negocio no tiene una suscripción activa.");
 
     const limit = sub.plans?.monthly_propuestas ?? null;
@@ -134,7 +139,7 @@ export const createPropuesta = createServerFn({ method: "POST" })
       .select("id")
       .single<{ id: string }>();
 
-    if (error || !row) throw new Error(error?.message ?? "Error al enviar propuesta");
+    if (error || !row) throw sanitizeError(error, "Error al enviar la propuesta.");
 
     // Quota gate via SECURITY DEFINER RPC. Atomically increments the counter
     // and returns allowed=false when the plan limit would be exceeded. Race
@@ -143,7 +148,9 @@ export const createPropuesta = createServerFn({ method: "POST" })
     const { data: incRows, error: incErr } = await supabase
       .rpc("increment_propuestas_used")
       .returns<{ used: number; allowed: boolean }[]>();
-    const incRow = Array.isArray(incRows) ? incRows[0] : (incRows as { used: number; allowed: boolean } | null);
+    const incRow = Array.isArray(incRows)
+      ? incRows[0]
+      : (incRows as { used: number; allowed: boolean } | null);
     const denied = !!incErr || !incRow || incRow.allowed === false;
 
     if (denied) {
@@ -175,7 +182,7 @@ export const listPropuestasForSolicitud = createServerFn({ method: "GET" })
       .eq("solicitud_id", data.solicitud_id)
       .order("monto_pen", { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar las propuestas.");
 
     return (rows ?? []).map((r: any) => ({
       id: r.id,
@@ -211,7 +218,7 @@ export const getPropuestaForClient = createServerFn({ method: "GET" })
       )
       .eq("id", data.propuesta_id)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar las propuestas.");
     if (!row) return null;
     const r = row as any;
     return {
@@ -254,7 +261,7 @@ export const listMyPropuestas = createServerFn({ method: "GET" }).handler(
       .eq("business_id", business.id)
       .order("created_at", { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar las propuestas.");
 
     return (rows ?? []).map((r: any) => {
       const sol = Array.isArray(r.solicitudes) ? r.solicitudes[0] : r.solicitudes;
@@ -303,6 +310,14 @@ export const acceptPropuesta = createServerFn({ method: "POST" })
       propuesta_id: string;
     }> => {
       const supabase = getSupabaseServer();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("No autenticado");
+
+      const rl = await rateLimitByUser("propuesta:accept", user.id, 10, 3600);
+      if (!rl.allowed) throw new Error("Demasiados intentos. Intenta en una hora.");
+
       const redemptionCode = generateRedemptionCode();
 
       const { data: op, error } = await supabase.rpc("accept_propuesta", {
@@ -310,8 +325,8 @@ export const acceptPropuesta = createServerFn({ method: "POST" })
         p_redemption_code: redemptionCode,
       });
 
-      if (error) throw new Error(error.message);
-      if (!op) throw new Error("Error al aceptar la propuesta");
+      if (error) throw sanitizeError(error, "Error al aceptar la propuesta.");
+      if (!op) throw new Error("Error al aceptar la propuesta.");
 
       const row = op as {
         id: string;
@@ -340,6 +355,6 @@ export const rejectPropuesta = createServerFn({ method: "POST" })
       .from("propuestas")
       .update({ status: "rejected" })
       .eq("id", data.propuesta_id);
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al rechazar la propuesta.");
     return { ok: true };
   });

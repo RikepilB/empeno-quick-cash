@@ -1,6 +1,9 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSupabaseServer } from "@/lib/db/server";
+import { buildSignedPhotoUrl } from "@/lib/photos";
+import { sanitizeError, log } from "@/lib/logger";
+import { rateLimitByUser } from "@/lib/rate-limit";
 
 // ============================================================================
 // Shared types
@@ -28,7 +31,7 @@ export type SolicitudPhoto = {
   id: string;
   storage_path: string;
   position: number;
-  public_url: string;
+  signed_url: string;
 };
 
 export type SolicitudDetail = SolicitudListItem & {
@@ -36,17 +39,7 @@ export type SolicitudDetail = SolicitudListItem & {
   photos: SolicitudPhoto[];
 };
 
-// Solicitud row + business name, for business marketplace view
 export type SolicitudForBusiness = SolicitudListItem;
-
-// ============================================================================
-// Helpers
-// ============================================================================
-const STORAGE_BUCKET = "solicitud-photos";
-
-function buildPublicPhotoUrl(supabaseUrl: string, storagePath: string): string {
-  return `${supabaseUrl}/storage/v1/object/public/${STORAGE_BUCKET}/${storagePath}`;
-}
 
 // ============================================================================
 // createSolicitud — client posts a new pawn request
@@ -74,6 +67,9 @@ export const createSolicitud = createServerFn({ method: "POST" })
     } = await supabase.auth.getUser();
     if (!user) throw new Error("No autenticado");
 
+    const rl = await rateLimitByUser("solicitud:create", user.id, 10, 3600);
+    if (!rl.allowed) throw new Error("Demasiadas solicitudes. Intenta en una hora.");
+
     const { data: row, error } = await supabase
       .from("solicitudes")
       .insert({
@@ -92,7 +88,7 @@ export const createSolicitud = createServerFn({ method: "POST" })
       .select("id")
       .single<{ id: string }>();
 
-    if (error || !row) throw new Error(error?.message ?? "Error al crear solicitud");
+    if (error || !row) throw sanitizeError(error, "Error al crear la solicitud.");
 
     if (data.photo_paths.length > 0) {
       const photoRows = data.photo_paths.map((storage_path, position) => ({
@@ -101,9 +97,10 @@ export const createSolicitud = createServerFn({ method: "POST" })
         position,
       }));
       const { error: photoErr } = await supabase.from("solicitud_photos").insert(photoRows);
-      if (photoErr) throw new Error(photoErr.message);
+      if (photoErr) throw sanitizeError(photoErr, "Error al guardar las fotos.");
     }
 
+    log.info("solicitud_created", { id: row.id, user_id: user.id });
     return { id: row.id };
   });
 
@@ -126,7 +123,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       .eq("client_id", user.id)
       .order("created_at", { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar tus solicitudes.");
 
     return (data ?? []).map((row: any) => ({
       id: row.id,
@@ -148,7 +145,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
 );
 
 // ============================================================================
-// listActiveSolicitudes — business marketplace view (requires active sub via RLS)
+// listActiveSolicitudes — business marketplace view
 // ============================================================================
 const listActiveSchema = z
   .object({
@@ -177,12 +174,14 @@ export const listActiveSolicitudes = createServerFn({ method: "GET" })
 
     if (filters?.category) query = query.eq("category", filters.category);
     if (filters?.district) query = query.eq("district", filters.district);
-    if (filters?.min_amount !== undefined) query = query.gte("expected_amount_pen", filters.min_amount);
-    if (filters?.max_amount !== undefined) query = query.lte("expected_amount_pen", filters.max_amount);
+    if (filters?.min_amount !== undefined)
+      query = query.gte("expected_amount_pen", filters.min_amount);
+    if (filters?.max_amount !== undefined)
+      query = query.lte("expected_amount_pen", filters.max_amount);
     if (filters?.plazo !== undefined) query = query.eq("expected_term_days", filters.plazo);
 
     const { data, error } = await query;
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar solicitudes.");
 
     return (data ?? []).map((row: any) => ({
       id: row.id,
@@ -203,7 +202,7 @@ export const listActiveSolicitudes = createServerFn({ method: "GET" })
   });
 
 // ============================================================================
-// getSolicitud — full detail with photos. Used by both client and business.
+// getSolicitud — full detail with photos. Single nested select (no N+1).
 // ============================================================================
 const getSolicitudSchema = z.object({ id: z.string().uuid() });
 
@@ -211,40 +210,45 @@ export const getSolicitud = createServerFn({ method: "GET" })
   .inputValidator(getSolicitudSchema)
   .handler(async ({ data }): Promise<SolicitudDetail | null> => {
     const supabase = getSupabaseServer();
-    const supabaseUrl = process.env.SUPABASE_URL ?? import.meta.env.VITE_SUPABASE_URL;
 
     const { data: row, error } = await supabase
       .from("solicitudes")
       .select(
-        "id, client_id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, created_at",
+        "id, client_id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, created_at, solicitud_photos(id, storage_path, position), propuestas(count)",
       )
       .eq("id", data.id)
       .maybeSingle();
 
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar la solicitud.");
     if (!row) return null;
 
-    const { data: photos, error: photosErr } = await supabase
-      .from("solicitud_photos")
-      .select("id, storage_path, position")
-      .eq("solicitud_id", data.id)
-      .order("position", { ascending: true });
-
-    if (photosErr) throw new Error(photosErr.message);
-
-    const { count: propuestaCount } = await supabase
-      .from("propuestas")
-      .select("id", { count: "exact", head: true })
-      .eq("solicitud_id", data.id);
-
-    return {
-      ...row,
-      photos: (photos ?? []).map((p) => ({
+    const r = row as any;
+    const photosRaw = Array.isArray(r.solicitud_photos) ? r.solicitud_photos : [];
+    const photos: SolicitudPhoto[] = await Promise.all(
+      photosRaw.map(async (p: any) => ({
         id: p.id,
         storage_path: p.storage_path,
         position: p.position,
-        public_url: buildPublicPhotoUrl(supabaseUrl, p.storage_path),
+        signed_url: await buildSignedPhotoUrl(p.storage_path),
       })),
-      propuestas_count: propuestaCount ?? 0,
-    } as SolicitudDetail;
+    );
+
+    return {
+      id: r.id,
+      client_id: r.client_id,
+      category: r.category,
+      brand: r.brand,
+      model: r.model,
+      year: r.year,
+      storage: r.storage,
+      condition: r.condition,
+      description: r.description,
+      expected_amount_pen: r.expected_amount_pen,
+      expected_term_days: r.expected_term_days,
+      district: r.district,
+      status: r.status,
+      created_at: r.created_at,
+      photos,
+      propuestas_count: r.propuestas?.[0]?.count ?? 0,
+    };
   });
