@@ -136,11 +136,15 @@ export const createPropuesta = createServerFn({ method: "POST" })
 
     if (error || !row) throw new Error(error?.message ?? "Error al enviar propuesta");
 
-    // Increment quota counter (best-effort; we already passed the limit check)
-    await supabase
-      .from("subscriptions")
-      .update({ propuestas_used_this_period: sub.propuestas_used_this_period + 1 })
-      .eq("id", sub.id);
+    // Increment quota counter via SECURITY DEFINER RPC (subscriptions writes are
+    // server-only by policy; the rpc enforces the quota atomically).
+    const { error: incErr } = await supabase.rpc("increment_propuestas_used");
+    if (incErr) {
+      // Log but do not roll back: propuesta is already inserted and the limit
+      // check above is the source of truth. Stale counter will catch up on
+      // next monthly rollover.
+      console.warn("increment_propuestas_used failed:", incErr.message);
+    }
 
     return { id: row.id };
   });
