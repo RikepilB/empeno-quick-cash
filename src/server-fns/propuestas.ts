@@ -244,30 +244,34 @@ export const listMyPropuestas = createServerFn({ method: "GET" }).handler(
 
     if (error) throw new Error(error.message);
 
-    return (rows ?? []).map((r: any) => ({
-      id: r.id,
-      solicitud_id: r.solicitud_id,
-      solicitud_summary: {
-        category: r.solicitudes?.category ?? "",
-        brand: r.solicitudes?.brand ?? null,
-        model: r.solicitudes?.model ?? null,
-        district: r.solicitudes?.district ?? null,
-      },
-      monto_pen: r.monto_pen,
-      tasa_mensual: Number(r.tasa_mensual),
-      plazo_dias: r.plazo_dias,
-      status: r.status,
-      created_at: r.created_at,
-      operation: r.operations?.[0]
-        ? {
-            id: r.operations[0].id,
-            redemption_code: r.operations[0].redemption_code,
-            status: r.operations[0].status,
-            accepted_at: r.operations[0].accepted_at,
-            completed_at: r.operations[0].completed_at,
-          }
-        : null,
-    }));
+    return (rows ?? []).map((r: any) => {
+      const sol = Array.isArray(r.solicitudes) ? r.solicitudes[0] : r.solicitudes;
+      const opRaw = Array.isArray(r.operations) ? r.operations[0] : r.operations;
+      return {
+        id: r.id,
+        solicitud_id: r.solicitud_id,
+        solicitud_summary: {
+          category: sol?.category ?? "",
+          brand: sol?.brand ?? null,
+          model: sol?.model ?? null,
+          district: sol?.district ?? null,
+        },
+        monto_pen: r.monto_pen,
+        tasa_mensual: Number(r.tasa_mensual),
+        plazo_dias: r.plazo_dias,
+        status: r.status,
+        created_at: r.created_at,
+        operation: opRaw
+          ? {
+              id: opRaw.id,
+              redemption_code: opRaw.redemption_code,
+              status: opRaw.status,
+              accepted_at: opRaw.accepted_at,
+              completed_at: opRaw.completed_at,
+            }
+          : null,
+      };
+    });
   },
 );
 
