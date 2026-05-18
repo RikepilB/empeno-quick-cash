@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSupabaseServer } from "@/lib/db/server";
+import { sanitizeError } from "@/lib/logger";
 import { chargeOnce, isCulqiLive } from "@/lib/payments/client";
 
 // ============================================================================
@@ -29,23 +30,21 @@ export type Invoice = {
 // ============================================================================
 // listPlans — public catalog
 // ============================================================================
-export const listPlans = createServerFn({ method: "GET" }).handler(
-  async (): Promise<Plan[]> => {
-    const supabase = getSupabaseServer();
-    const { data, error } = await supabase
-      .from("plans")
-      .select("id, name, price_pen, monthly_propuestas, features")
-      .order("price_pen", { ascending: true });
-    if (error) throw new Error(error.message);
-    return (data ?? []).map((p: any) => ({
-      id: p.id,
-      name: p.name,
-      price_pen: p.price_pen,
-      monthly_propuestas: p.monthly_propuestas,
-      features: Array.isArray(p.features) ? p.features : [],
-    }));
-  },
-);
+export const listPlans = createServerFn({ method: "GET" }).handler(async (): Promise<Plan[]> => {
+  const supabase = getSupabaseServer();
+  const { data, error } = await supabase
+    .from("plans")
+    .select("id, name, price_pen, monthly_propuestas, features")
+    .order("price_pen", { ascending: true });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((p: any) => ({
+    id: p.id,
+    name: p.name,
+    price_pen: p.price_pen,
+    monthly_propuestas: p.monthly_propuestas,
+    features: Array.isArray(p.features) ? p.features : [],
+  }));
+});
 
 // ============================================================================
 // listMyInvoices — current biz invoice history
@@ -72,7 +71,7 @@ export const listMyInvoices = createServerFn({ method: "GET" }).handler(
       )
       .eq("business_id", biz.id)
       .order("created_at", { ascending: false });
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar los planes.");
     return (data ?? []) as Invoice[];
   },
 );
@@ -113,7 +112,7 @@ export const startCheckout = createServerFn({ method: "POST" })
         .select("id, name, price_pen")
         .eq("id", data.plan_id)
         .single<{ id: string; name: string; price_pen: number }>();
-      if (planErr || !plan) throw new Error("Plan no encontrado.");
+      if (planErr || !plan) throw sanitizeError(planErr, "Plan no encontrado.");
 
       const live = isCulqiLive();
       if (live && !data.token_id) {
@@ -144,7 +143,7 @@ export const startCheckout = createServerFn({ method: "POST" })
         p_culqi_subscription_id: null,
         p_period_end: periodEnd,
       });
-      if (subErr) throw new Error(subErr.message);
+      if (subErr) throw sanitizeError(subErr, "Error al actualizar el plan.");
       const sub = subRow as { id: string };
 
       // Record the invoice
@@ -158,7 +157,7 @@ export const startCheckout = createServerFn({ method: "POST" })
         p_period_start: new Date().toISOString(),
         p_period_end: periodEnd,
       });
-      if (invErr) throw new Error(invErr.message);
+      if (invErr) throw sanitizeError(invErr, "Error al registrar la factura.");
       const inv = invRow as { id: string };
 
       return {
