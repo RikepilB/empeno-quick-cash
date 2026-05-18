@@ -38,6 +38,12 @@ SESSION-STATE.md
 handoff.md
 .claude/
 
+# Session working memos (per-session logs, never committed)
+backlog.md
+session.md
+session-*.md
+SESSION_*.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
