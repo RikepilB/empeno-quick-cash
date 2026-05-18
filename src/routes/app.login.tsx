@@ -4,6 +4,7 @@ import { Smartphone, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { z } from "zod";
 import { getSupabaseBrowser } from "@/lib/supabase/browser";
+import { safeRedirect } from "@/lib/safe-redirect";
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
@@ -34,7 +35,7 @@ function Login() {
       const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
       if (signInError) throw signInError;
 
-      await navigate({ to: search.redirect ?? "/app/dashboard" });
+      await navigate({ to: safeRedirect(search.redirect, "/app/dashboard") });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al iniciar sesión");
     } finally {

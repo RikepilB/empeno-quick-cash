@@ -1,75 +1,152 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { BusinessLayout } from "@/components/BusinessLayout";
 import { useState } from "react";
-import { MapPin, Clock, Users, FileText, Send, CheckCircle2 } from "lucide-react";
+import { MapPin, Clock, Users, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { z } from "zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getSolicitud } from "@/server-fns/solicitudes";
+import { createPropuesta } from "@/server-fns/propuestas";
+import { getBusinessContext } from "@/server-fns/business";
+import { categoryMeta, buildTitle, formatPEN } from "@/lib/categories";
 
-export const Route = createFileRoute("/negocio/solicitud")({ component: SolicitudDetalle });
+const searchSchema = z.object({ id: z.string().uuid() });
+
+export const Route = createFileRoute("/negocio/solicitud")({
+  component: SolicitudDetalle,
+  validateSearch: searchSchema,
+});
+
+const PLAZOS = [15, 30, 45, 60] as const;
 
 function SolicitudDetalle() {
-  const [monto, setMonto] = useState(2400);
-  const [tasa, setTasa] = useState(4.5);
-  const [plazo, setPlazo] = useState(30);
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { id } = useSearch({ from: "/negocio/solicitud" });
+
+  const solicitud = useQuery({
+    queryKey: ["solicitud", id],
+    queryFn: () => getSolicitud({ data: { id } }),
+  });
+  const context = useQuery({ queryKey: ["businessContext"], queryFn: () => getBusinessContext() });
+
+  const [monto, setMonto] = useState<number>(0);
+  const [tasa, setTasa] = useState<number>(4.5);
+  const [plazo, setPlazo] = useState<(typeof PLAZOS)[number]>(30);
+  const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+
+  const send = useMutation({
+    mutationFn: () =>
+      createPropuesta({
+        data: { solicitud_id: id, monto_pen: monto, tasa_mensual: tasa, plazo_dias: plazo },
+      }),
+    onSuccess: async () => {
+      setSent(true);
+      await queryClient.invalidateQueries({ queryKey: ["myPropuestas"] });
+      await queryClient.invalidateQueries({ queryKey: ["businessContext"] });
+      await queryClient.invalidateQueries({ queryKey: ["activeSolicitudes"] });
+    },
+    onError: (err) => setError(err instanceof Error ? err.message : "Error al enviar propuesta"),
+  });
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!monto || monto <= 0) {
+      setError("Ingresa un monto mayor a cero.");
+      return;
+    }
+    send.mutate();
+  };
 
   const total = monto + (monto * tasa) / 100;
 
+  if (solicitud.isLoading) {
+    return (
+      <BusinessLayout title="Cargando solicitud" subtitle="">
+        <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
+        </div>
+      </BusinessLayout>
+    );
+  }
+
+  if (!solicitud.data) {
+    return (
+      <BusinessLayout title="Solicitud no encontrada" subtitle="">
+        <Link to="/negocio/solicitudes" className="btn-primary">Volver a solicitudes</Link>
+      </BusinessLayout>
+    );
+  }
+
+  const s = solicitud.data;
+  const remaining = context.data?.subscription?.propuestas_remaining;
+
   return (
-    <BusinessLayout title="Solicitud S-4231" subtitle="Publicada hace 5 minutos · 0 propuestas recibidas">
+    <BusinessLayout
+      title={buildTitle(s)}
+      subtitle={`Publicada ${new Date(s.created_at).toLocaleString("es-PE")} · ${s.propuestas_count} propuestas recibidas`}
+    >
       <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
         <div className="space-y-6">
           {/* Photos */}
           <div className="rounded-2xl border border-border bg-surface p-5">
-            <div className="grid grid-cols-4 gap-2">
-              <div className="col-span-2 row-span-2 flex aspect-square items-center justify-center rounded-xl bg-gradient-to-br from-surface-2 to-background text-7xl">📱</div>
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="flex aspect-square items-center justify-center rounded-lg bg-surface-2 text-2xl">📱</div>
-              ))}
-            </div>
+            {s.photos.length === 0 ? (
+              <div className="rounded-xl bg-surface-2 py-10 text-center text-xs text-muted-foreground">
+                Sin fotografías.
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-2">
+                {s.photos.map((p, idx) => (
+                  <img
+                    key={p.id}
+                    src={p.public_url}
+                    alt=""
+                    className={`aspect-square rounded-xl bg-surface-2 object-cover ${idx === 0 ? "col-span-2 row-span-2" : ""}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="rounded-2xl border border-border bg-surface p-5">
             <div className="flex items-start justify-between">
               <div>
-                <span className="badge-dot badge-new">Nueva</span>
-                <h2 className="mt-2 font-display text-2xl font-bold uppercase">iPhone 14 Pro · 256 GB</h2>
-                <div className="mt-1 text-sm text-muted-foreground">Categoría: Celular · Estado: <span className="text-foreground">Bueno</span></div>
+                <span className="badge-dot badge-new">{categoryMeta(s.category).label}</span>
+                <h2 className="mt-2 font-display text-2xl font-bold uppercase">{buildTitle(s)}</h2>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  Estado: <span className="text-foreground">{s.condition ?? "—"}</span>
+                </div>
               </div>
               <div className="text-right text-xs text-muted-foreground">
-                <div className="flex items-center gap-1"><MapPin className="h-3 w-3" /> Surquillo</div>
-                <div className="mt-1 flex items-center gap-1"><Users className="h-3 w-3" /> 0 propuestas</div>
+                <div className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {s.district ?? "—"}</div>
+                <div className="mt-1 flex items-center gap-1"><Users className="h-3 w-3" /> {s.propuestas_count} propuestas</div>
               </div>
             </div>
 
             <div className="mt-5 grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
-              <Spec k="Marca" v="Apple" />
-              <Spec k="Modelo" v="iPhone 14 Pro" />
-              <Spec k="Año" v="2023" />
-              <Spec k="Almacenamiento" v="256 GB" />
-              <Spec k="Color" v="Morado profundo" />
-              <Spec k="Batería" v="91%" />
-              <Spec k="Caja" v="Sí" />
-              <Spec k="Factura" v="Sí" />
+              <Spec k="Marca" v={s.brand ?? "—"} />
+              <Spec k="Modelo" v={s.model ?? "—"} />
+              <Spec k="Año" v={s.year?.toString() ?? "—"} />
+              <Spec k="Almacenamiento" v={s.storage ?? "—"} />
             </div>
 
-            <div className="mt-5">
-              <div className="text-[11px] uppercase text-muted-foreground">Imperfecciones declaradas</div>
-              <p className="mt-1 text-sm">Ligero rayón en el marco superior. Pantalla y batería en perfecto estado. Incluye caja original, cable y factura de Plaza Vea.</p>
-            </div>
+            {s.description && (
+              <div className="mt-5">
+                <div className="text-[11px] uppercase text-muted-foreground">Descripción del cliente</div>
+                <p className="mt-1 text-sm">{s.description}</p>
+              </div>
+            )}
 
             <div className="mt-5 grid grid-cols-2 gap-3 border-t border-border pt-4">
               <div>
                 <div className="text-[11px] uppercase text-muted-foreground">Monto esperado</div>
-                <div className="font-display text-2xl font-bold">S/ 2,500</div>
+                <div className="font-display text-2xl font-bold">{formatPEN(s.expected_amount_pen)}</div>
               </div>
               <div>
                 <div className="text-[11px] uppercase text-muted-foreground">Plazo solicitado</div>
-                <div className="font-display text-2xl font-bold">30 días</div>
+                <div className="font-display text-2xl font-bold">{s.expected_term_days ?? "—"} días</div>
               </div>
-            </div>
-
-            <div className="mt-5 flex items-center gap-2 rounded-lg border border-border bg-background p-3 text-xs">
-              <FileText className="h-4 w-4 text-primary" />
-              <span>Documento adjunto: <span className="font-semibold">factura_apple.pdf</span></span>
             </div>
           </div>
         </div>
@@ -80,42 +157,61 @@ function SolicitudDetalle() {
             <div className="rounded-2xl border border-status-accepted/40 bg-status-accepted/10 p-6 text-center">
               <CheckCircle2 className="mx-auto h-10 w-10 text-status-accepted" />
               <div className="mt-3 font-display text-xl font-bold uppercase text-status-accepted">¡Propuesta enviada!</div>
-              <p className="mt-1 text-xs text-muted-foreground">El cliente recibirá la notificación al instante.</p>
-              <div className="mt-4 rounded-lg bg-background p-3 text-xs">
-                Te quedan <span className="font-display text-base font-bold text-primary">21</span> propuestas este mes.
-              </div>
+              <p className="mt-1 text-xs text-muted-foreground">El cliente recibirá la oferta de inmediato.</p>
+              {remaining !== null && remaining !== undefined && (
+                <div className="mt-4 rounded-lg bg-background p-3 text-xs">
+                  Te quedan{" "}
+                  <span className="font-display text-base font-bold text-primary">{Math.max(0, remaining - 1)}</span>{" "}
+                  propuestas este mes.
+                </div>
+              )}
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <Link to="/negocio/propuestas" className="btn-ghost text-xs">Ver mis propuestas</Link>
-                <Link to="/negocio/solicitudes" className="btn-primary text-xs">Otra solicitud</Link>
+                <button onClick={() => navigate({ to: "/negocio/solicitudes" })} className="btn-primary text-xs">
+                  Otra solicitud
+                </button>
               </div>
             </div>
           ) : (
-            <div className="rounded-2xl border border-primary/40 bg-surface p-5">
+            <form onSubmit={onSubmit} className="rounded-2xl border border-primary/40 bg-surface p-5">
               <h3 className="font-display text-lg font-bold uppercase">Enviar propuesta</h3>
               <p className="text-xs text-muted-foreground">Tu nombre será visible para el cliente.</p>
 
               <div className="mt-4 space-y-4">
                 <div>
                   <label className="label-field">Monto a prestar (S/) *</label>
-                  <input type="number" value={monto} onChange={(e) => setMonto(Number(e.target.value))} className="input-field font-display text-lg font-bold" />
+                  <input
+                    type="number"
+                    value={monto || ""}
+                    onChange={(e) => setMonto(Number(e.target.value))}
+                    className="input-field font-display text-lg font-bold"
+                    placeholder={s.expected_amount_pen?.toString() ?? "0"}
+                  />
                 </div>
                 <div>
                   <label className="label-field">Tasa interés mensual (%) *</label>
-                  <input type="number" step="0.1" value={tasa} onChange={(e) => setTasa(Number(e.target.value))} className="input-field" />
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={tasa}
+                    onChange={(e) => setTasa(Number(e.target.value))}
+                    className="input-field"
+                  />
                 </div>
                 <div>
                   <label className="label-field">Plazo</label>
                   <div className="grid grid-cols-4 gap-2">
-                    {[15, 30, 45, 60].map((d) => (
-                      <button key={d} onClick={() => setPlazo(d)} className={`rounded-lg border py-2 text-xs ${plazo === d ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"}`}>
+                    {PLAZOS.map((d) => (
+                      <button
+                        type="button"
+                        key={d}
+                        onClick={() => setPlazo(d)}
+                        className={`rounded-lg border py-2 text-xs ${plazo === d ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"}`}
+                      >
                         {d}d
                       </button>
                     ))}
                   </div>
-                </div>
-                <div>
-                  <label className="label-field">Nota para el cliente (opcional)</label>
-                  <textarea className="input-field min-h-[60px] text-sm" placeholder="Ej: Presentar artículo con caja original." />
                 </div>
 
                 <div className="rounded-xl border border-border bg-background p-4">
@@ -123,15 +219,26 @@ function SolicitudDetalle() {
                     <span>Total a devolver</span>
                     <Clock className="h-3 w-3" />
                   </div>
-                  <div className="mt-1 font-display text-3xl font-extrabold text-primary">S/ {total.toFixed(2)}</div>
-                  <div className="mt-1 text-[11px] text-muted-foreground">Interés: S/ {(total - monto).toFixed(2)} · {plazo} días</div>
+                  <div className="mt-1 font-display text-3xl font-extrabold text-primary">
+                    {formatPEN(Math.round(total))}
+                  </div>
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    Interés: {formatPEN(Math.round(total - monto))} · {plazo} días
+                  </div>
                 </div>
 
-                <button onClick={() => setSent(true)} className="btn-primary w-full">
-                  <Send className="h-4 w-4" /> Enviar propuesta
+                {error && (
+                  <div className="rounded-lg bg-status-reported/15 px-3 py-2 text-xs text-status-reported">
+                    {error}
+                  </div>
+                )}
+
+                <button type="submit" disabled={send.isPending} className="btn-primary w-full disabled:opacity-60">
+                  {send.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  {send.isPending ? "Enviando..." : "Enviar propuesta"}
                 </button>
               </div>
-            </div>
+            </form>
           )}
         </aside>
       </div>
