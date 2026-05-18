@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/ui/PhoneFrame";
 import { MapPin, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { acceptPropuesta, rejectPropuesta, getPropuestaForClient } from "@/server-fns/propuestas";
+import { acceptPropuesta, rejectPropuesta, getPropuestaForClient } from "@/services/propuestas";
 import { formatPEN } from "@/lib/categories";
 
 const searchSchema = z.object({ propuesta_id: z.string().uuid() });

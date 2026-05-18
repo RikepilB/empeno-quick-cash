@@ -1,12 +1,12 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { BusinessLayout } from "@/components/BusinessLayout";
+import { BusinessLayout } from "@/ui/BusinessLayout";
 import { useState } from "react";
 import { MapPin, Clock, Users, Send, CheckCircle2, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getSolicitud } from "@/server-fns/solicitudes";
-import { createPropuesta } from "@/server-fns/propuestas";
-import { getBusinessContext } from "@/server-fns/business";
+import { getSolicitud } from "@/services/solicitudes";
+import { createPropuesta } from "@/services/propuestas";
+import { getBusinessContext } from "@/services/business";
 import { categoryMeta, buildTitle, formatPEN } from "@/lib/categories";
 
 const searchSchema = z.object({ id: z.string().uuid() });

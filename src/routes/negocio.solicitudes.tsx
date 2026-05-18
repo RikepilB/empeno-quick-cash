@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BusinessLayout } from "@/components/BusinessLayout";
+import { BusinessLayout } from "@/ui/BusinessLayout";
 import { Filter, MapPin, Clock, Users, ArrowRight, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { listActiveSolicitudes } from "@/server-fns/solicitudes";
+import { listActiveSolicitudes } from "@/services/solicitudes";
 import { CATEGORIES, categoryMeta, buildTitle, relativeTime, formatPEN } from "@/lib/categories";
 
 export const Route = createFileRoute("/negocio/solicitudes")({ component: Solicitudes });

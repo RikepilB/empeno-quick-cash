@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/ui/PhoneFrame";
 import { Smartphone, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { getSupabaseBrowser } from "@/lib/supabase/browser";
+import { getSupabaseBrowser } from "@/lib/db/browser";
 
 export const Route = createFileRoute("/app/register")({ component: Register });
 

@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { getSupabaseServer } from "@/lib/supabase/server";
+import { getSupabaseServer } from "@/lib/db/server";
 
 // ============================================================================
 // Types
