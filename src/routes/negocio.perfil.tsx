@@ -1,12 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BusinessLayout } from "@/components/BusinessLayout";
+import { BusinessLayout } from "@/ui/BusinessLayout";
 import { Check, Loader2, ReceiptText, ShieldCheck, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getBusinessContext } from "@/server-fns/business";
-import { listPlans, listMyInvoices, startCheckout, getBillingMode } from "@/server-fns/billing";
+import { getBusinessContext } from "@/services/business";
+import { listPlans, listMyInvoices, startCheckout, getBillingMode } from "@/services/billing";
 import { formatPEN } from "@/lib/categories";
-import { openCheckout, getCulqiPublicKey } from "@/lib/culqi-checkout";
+import { openCheckout, getCulqiPublicKey } from "@/lib/payments/checkout";
 
 export const Route = createFileRoute("/negocio/perfil")({ component: Perfil });
 

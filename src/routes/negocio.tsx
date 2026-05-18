@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { getCurrentUser } from "@/server-fns/auth";
+import { getCurrentUser } from "@/services/auth";
 
 const PUBLIC_NEGOCIO_PATHS = new Set(["/negocio/login", "/negocio/register"]);
 

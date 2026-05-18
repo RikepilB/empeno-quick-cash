@@ -1,7 +1,7 @@
 import { Link, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ChevronLeft, LogOut } from "lucide-react";
-import { getSupabaseBrowser } from "@/lib/supabase/browser";
+import { getSupabaseBrowser } from "@/lib/db/browser";
 
 interface PhoneFrameProps {
   children: ReactNode;

@@ -12,8 +12,8 @@ import {
   LogOut,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getSupabaseBrowser } from "@/lib/supabase/browser";
-import { getBusinessContext } from "@/server-fns/business";
+import { getSupabaseBrowser } from "@/lib/db/browser";
+import { getBusinessContext } from "@/services/business";
 
 const nav = [
   { to: "/negocio/dashboard", label: "Panel", icon: LayoutDashboard },

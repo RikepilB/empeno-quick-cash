@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Building2, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { getSupabaseBrowser } from "@/lib/supabase/browser";
+import { getSupabaseBrowser } from "@/lib/db/browser";
 
 export const Route = createFileRoute("/negocio/register")({ component: BusinessRegister });
 

@@ -34,14 +34,12 @@ supabase/.branches/
 
 # AI assistant instructions and local state (private to local clone)
 CLAUDE.md
-SESSION-STATE.md
-handoff.md
 .claude/
 
 # Session working memos (per-session logs, never committed)
-backlog.md
 session.md
 session-*.md
+!docs/SESSION-STATE.md
 SESSION_*.md
 
 # Editor directories and files

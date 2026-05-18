@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BusinessLayout } from "@/components/BusinessLayout";
+import { BusinessLayout } from "@/ui/BusinessLayout";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { listMyPropuestas, type PropuestaForBusiness, type PropuestaStatus } from "@/server-fns/propuestas";
+import { listMyPropuestas, type PropuestaForBusiness, type PropuestaStatus } from "@/services/propuestas";
 import { categoryMeta, buildTitle, formatPEN } from "@/lib/categories";
 
 export const Route = createFileRoute("/negocio/propuestas")({ component: MisPropuestas });

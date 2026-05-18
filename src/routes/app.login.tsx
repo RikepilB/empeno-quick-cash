@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/ui/PhoneFrame";
 import { Smartphone, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { z } from "zod";
-import { getSupabaseBrowser } from "@/lib/supabase/browser";
+import { getSupabaseBrowser } from "@/lib/db/browser";
 import { safeRedirect } from "@/lib/safe-redirect";
 
 const searchSchema = z.object({

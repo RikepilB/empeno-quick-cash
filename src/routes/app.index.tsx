@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/ui/PhoneFrame";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/app/")({ component: AppLanding });

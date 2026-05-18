@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { BusinessLayout } from "@/components/BusinessLayout";
+import { BusinessLayout } from "@/ui/BusinessLayout";
 import { Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { listMyBusinessOperations, type OperationStatus } from "@/server-fns/operations";
+import { listMyBusinessOperations, type OperationStatus } from "@/services/operations";
 import { buildTitle, categoryMeta, formatPEN } from "@/lib/categories";
 
 export const Route = createFileRoute("/negocio/historial")({ component: Historial });

@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/ui/PhoneFrame";
 import { Camera, Plus, Loader2, X } from "lucide-react";
 import { useRef, useState, type FormEvent } from "react";
-import { getSupabaseBrowser } from "@/lib/supabase/browser";
-import { createSolicitud } from "@/server-fns/solicitudes";
+import { getSupabaseBrowser } from "@/lib/db/browser";
+import { createSolicitud } from "@/services/solicitudes";
 import { CATEGORIES, type CategoryKey } from "@/lib/categories";
 
 export const Route = createFileRoute("/app/publish")({ component: Publish });

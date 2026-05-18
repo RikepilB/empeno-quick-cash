@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/ui/PhoneFrame";
 import { Plus, Clock, Sparkles, History as HistoryIcon, Bell, Loader2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { listMySolicitudes, type SolicitudListItem } from "@/server-fns/solicitudes";
-import { listMyClientOperations } from "@/server-fns/operations";
-import { getCurrentUser } from "@/server-fns/auth";
+import { listMySolicitudes, type SolicitudListItem } from "@/services/solicitudes";
+import { listMyClientOperations } from "@/services/operations";
+import { getCurrentUser } from "@/services/auth";
 import { categoryMeta, buildTitle } from "@/lib/categories";
 
 export const Route = createFileRoute("/app/dashboard")({ component: Dashboard });

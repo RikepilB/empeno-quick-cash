@@ -9,8 +9,8 @@
 // Set the same secret as CULQI_SECRET_KEY.
 
 import { createServerFileRoute } from "@tanstack/react-start/server";
-import { getSupabaseAdmin } from "@/lib/supabase/admin";
-import { verifyWebhookSignature } from "@/lib/culqi";
+import { getSupabaseAdmin } from "@/lib/db/admin";
+import { verifyWebhookSignature } from "@/lib/payments/client";
 
 type CulqiEvent = {
   type: string; // e.g. "charge.succeeded", "charge.failed", "charge.refunded"

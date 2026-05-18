@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { PhoneFrame } from "@/components/PhoneFrame";
+import { PhoneFrame } from "@/ui/PhoneFrame";
 import { Loader2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { listMyClientOperations, type OperationStatus } from "@/server-fns/operations";
+import { listMyClientOperations, type OperationStatus } from "@/services/operations";
 import { buildTitle, categoryMeta, formatPEN } from "@/lib/categories";
 
 export const Route = createFileRoute("/app/history")({ component: History });
