@@ -156,7 +156,7 @@ export const createPropuesta = createServerFn({ method: "POST" })
     if (denied) {
       const { error: delErr } = await supabase.from("propuestas").delete().eq("id", row.id);
       if (delErr) {
-        console.warn("rollback propuesta failed after quota deny:", delErr.message);
+        log.warn("rollback propuesta failed after quota deny", { error: delErr.message });
       }
       throw new Error("Has alcanzado el límite de propuestas de tu plan.");
     }
