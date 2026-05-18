@@ -16,9 +16,33 @@ dist-ssr
 .nitro
 *.local
 
+# Env files (broader catch — covers .env.production.local, .env.staging, etc.)
+.env
+.env.*
+!.env.example
+
 # Wrangler / Cloudflare
 .wrangler/
 .dev.vars
+
+# Playwright MCP local artifacts (console logs + page snapshots)
+.playwright-mcp/
+
+# Supabase CLI local cache (regenerated on `supabase link`)
+supabase/.temp/
+supabase/.branches/
+
+# AI assistant instructions and local state (private to local clone)
+CLAUDE.md
+SESSION-STATE.md
+handoff.md
+.claude/
+
+# Session working memos (per-session logs, never committed)
+backlog.md
+session.md
+session-*.md
+SESSION_*.md
 
 # Editor directories and files
 .vscode/*

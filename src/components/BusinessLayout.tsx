@@ -1,4 +1,4 @@
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import {
   LayoutDashboard,
@@ -9,7 +9,11 @@ import {
   Bell,
   CreditCard,
   Search,
+  LogOut,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getSupabaseBrowser } from "@/lib/supabase/browser";
+import { getBusinessContext } from "@/server-fns/business";
 
 const nav = [
   { to: "/negocio/dashboard", label: "Panel", icon: LayoutDashboard },
@@ -21,6 +25,20 @@ const nav = [
 
 export function BusinessLayout({ children, title, subtitle, actions }: { children: ReactNode; title: string; subtitle?: string; actions?: ReactNode }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const router = useRouter();
+  const context = useQuery({ queryKey: ["businessContext"], queryFn: () => getBusinessContext() });
+
+  async function handleLogout() {
+    await getSupabaseBrowser().auth.signOut();
+    await router.invalidate();
+    await router.navigate({ to: "/negocio/login" });
+  }
+
+  const sub = context.data?.subscription;
+  const planName = sub?.plan.name ?? "Sin plan";
+  const limit = sub?.plan.monthly_propuestas ?? null;
+  const used = sub?.propuestas_used_this_period ?? 0;
+  const pct = limit === null ? 0 : Math.min(100, (used / Math.max(1, limit)) * 100);
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -56,15 +74,21 @@ export function BusinessLayout({ children, title, subtitle, actions }: { childre
 
           <div className="m-3 rounded-xl border border-border bg-surface p-4">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <CreditCard className="h-3.5 w-3.5" /> Plan Intermedio
+              <CreditCard className="h-3.5 w-3.5" /> Plan {planName}
             </div>
             <div className="mt-2 flex items-end justify-between">
-              <span className="font-display text-2xl font-bold">8/30</span>
-              <span className="text-[10px] uppercase text-muted-foreground">propuestas</span>
+              <span className="font-display text-2xl font-bold">
+                {limit === null ? `${used}` : `${used}/${limit}`}
+              </span>
+              <span className="text-[10px] uppercase text-muted-foreground">
+                {limit === null ? "ofertas (ilimitadas)" : "propuestas"}
+              </span>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
-              <div className="h-full rounded-full bg-primary" style={{ width: "27%" }} />
-            </div>
+            {limit !== null && (
+              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
+                <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+              </div>
+            )}
             <Link to="/negocio/perfil" className="mt-3 block text-center text-xs text-primary hover:underline">
               Cambiar plan
             </Link>
@@ -86,13 +110,14 @@ export function BusinessLayout({ children, title, subtitle, actions }: { childre
               <Bell className="h-4 w-4" />
               <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
             </button>
-            <div className="hidden items-center gap-3 rounded-xl border border-border bg-surface px-3 py-1.5 md:flex">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/20 font-display font-bold text-primary">JM</div>
-              <div className="text-xs leading-tight">
-                <div className="font-semibold">Joyería Miraflores</div>
-                <div className="text-muted-foreground">Admin</div>
-              </div>
-            </div>
+            <button
+              onClick={handleLogout}
+              className="hidden items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-xs text-muted-foreground hover:text-foreground md:flex"
+              title="Cerrar sesión"
+            >
+              <LogOut className="h-4 w-4" />
+              Salir
+            </button>
             {actions}
           </header>
 
