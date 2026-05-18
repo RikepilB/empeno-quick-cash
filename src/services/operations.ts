@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSupabaseServer } from "@/lib/db/server";
+import { sanitizeError } from "@/lib/logger";
 
 export type OperationStatus = "pending_pickup" | "completed" | "disputed" | "expired";
 
@@ -73,7 +74,7 @@ export const listMyClientOperations = createServerFn({ method: "GET" }).handler(
       )
       .order("accepted_at", { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar tus operaciones.");
 
     return (data ?? []).map((r: any) => ({
       id: r.id,
@@ -131,7 +132,7 @@ export const listMyBusinessOperations = createServerFn({ method: "GET" }).handle
       )
       .order("accepted_at", { ascending: false });
 
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar tus operaciones.");
 
     return (data ?? []).map((r: any) => ({
       id: r.id,
@@ -178,7 +179,7 @@ export const markOperationCompleted = createServerFn({ method: "POST" })
       .eq("id", data.operation_id)
       .single<{ redemption_code: string; status: string }>();
 
-    if (fetchErr || !op) throw new Error("Operación no encontrada.");
+    if (fetchErr || !op) throw sanitizeError(fetchErr, "Operación no encontrada.");
     if (op.redemption_code !== data.redemption_code) {
       throw new Error("Código de redención no coincide.");
     }
@@ -189,7 +190,7 @@ export const markOperationCompleted = createServerFn({ method: "POST" })
       .update({ status: "completed", completed_at: new Date().toISOString() })
       .eq("id", data.operation_id);
 
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar tus operaciones.");
     return { ok: true };
   });
 
@@ -220,7 +221,7 @@ export const getOperationByPropuesta = createServerFn({ method: "GET" })
       .eq("propuesta_id", data.propuesta_id)
       .maybeSingle();
 
-    if (error) throw new Error(error.message);
+    if (error) throw sanitizeError(error, "Error al cargar tus operaciones.");
     if (!row) return null;
 
     const r = row as any;

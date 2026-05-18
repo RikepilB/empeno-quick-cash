@@ -74,7 +74,9 @@ function SolicitudDetalle() {
   if (!solicitud.data) {
     return (
       <BusinessLayout title="Solicitud no encontrada" subtitle="">
-        <Link to="/negocio/solicitudes" className="btn-primary">Volver a solicitudes</Link>
+        <Link to="/negocio/solicitudes" className="btn-primary">
+          Volver a solicitudes
+        </Link>
       </BusinessLayout>
     );
   }
@@ -100,7 +102,7 @@ function SolicitudDetalle() {
                 {s.photos.map((p, idx) => (
                   <img
                     key={p.id}
-                    src={p.public_url}
+                    src={p.signed_url}
                     alt=""
                     className={`aspect-square rounded-xl bg-surface-2 object-cover ${idx === 0 ? "col-span-2 row-span-2" : ""}`}
                   />
@@ -119,8 +121,12 @@ function SolicitudDetalle() {
                 </div>
               </div>
               <div className="text-right text-xs text-muted-foreground">
-                <div className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {s.district ?? "—"}</div>
-                <div className="mt-1 flex items-center gap-1"><Users className="h-3 w-3" /> {s.propuestas_count} propuestas</div>
+                <div className="flex items-center gap-1">
+                  <MapPin className="h-3 w-3" /> {s.district ?? "—"}
+                </div>
+                <div className="mt-1 flex items-center gap-1">
+                  <Users className="h-3 w-3" /> {s.propuestas_count} propuestas
+                </div>
               </div>
             </div>
 
@@ -133,7 +139,9 @@ function SolicitudDetalle() {
 
             {s.description && (
               <div className="mt-5">
-                <div className="text-[11px] uppercase text-muted-foreground">Descripción del cliente</div>
+                <div className="text-[11px] uppercase text-muted-foreground">
+                  Descripción del cliente
+                </div>
                 <p className="mt-1 text-sm">{s.description}</p>
               </div>
             )}
@@ -141,11 +149,15 @@ function SolicitudDetalle() {
             <div className="mt-5 grid grid-cols-2 gap-3 border-t border-border pt-4">
               <div>
                 <div className="text-[11px] uppercase text-muted-foreground">Monto esperado</div>
-                <div className="font-display text-2xl font-bold">{formatPEN(s.expected_amount_pen)}</div>
+                <div className="font-display text-2xl font-bold">
+                  {formatPEN(s.expected_amount_pen)}
+                </div>
               </div>
               <div>
                 <div className="text-[11px] uppercase text-muted-foreground">Plazo solicitado</div>
-                <div className="font-display text-2xl font-bold">{s.expected_term_days ?? "—"} días</div>
+                <div className="font-display text-2xl font-bold">
+                  {s.expected_term_days ?? "—"} días
+                </div>
               </div>
             </div>
           </div>
@@ -156,26 +168,42 @@ function SolicitudDetalle() {
           {sent ? (
             <div className="rounded-2xl border border-status-accepted/40 bg-status-accepted/10 p-6 text-center">
               <CheckCircle2 className="mx-auto h-10 w-10 text-status-accepted" />
-              <div className="mt-3 font-display text-xl font-bold uppercase text-status-accepted">¡Propuesta enviada!</div>
-              <p className="mt-1 text-xs text-muted-foreground">El cliente recibirá la oferta de inmediato.</p>
+              <div className="mt-3 font-display text-xl font-bold uppercase text-status-accepted">
+                ¡Propuesta enviada!
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                El cliente recibirá la oferta de inmediato.
+              </p>
               {remaining !== null && remaining !== undefined && (
                 <div className="mt-4 rounded-lg bg-background p-3 text-xs">
                   Te quedan{" "}
-                  <span className="font-display text-base font-bold text-primary">{Math.max(0, remaining - 1)}</span>{" "}
+                  <span className="font-display text-base font-bold text-primary">
+                    {Math.max(0, remaining - 1)}
+                  </span>{" "}
                   propuestas este mes.
                 </div>
               )}
               <div className="mt-4 grid grid-cols-2 gap-2">
-                <Link to="/negocio/propuestas" className="btn-ghost text-xs">Ver mis propuestas</Link>
-                <button onClick={() => navigate({ to: "/negocio/solicitudes" })} className="btn-primary text-xs">
+                <Link to="/negocio/propuestas" className="btn-ghost text-xs">
+                  Ver mis propuestas
+                </Link>
+                <button
+                  onClick={() => navigate({ to: "/negocio/solicitudes" })}
+                  className="btn-primary text-xs"
+                >
                   Otra solicitud
                 </button>
               </div>
             </div>
           ) : (
-            <form onSubmit={onSubmit} className="rounded-2xl border border-primary/40 bg-surface p-5">
+            <form
+              onSubmit={onSubmit}
+              className="rounded-2xl border border-primary/40 bg-surface p-5"
+            >
               <h3 className="font-display text-lg font-bold uppercase">Enviar propuesta</h3>
-              <p className="text-xs text-muted-foreground">Tu nombre será visible para el cliente.</p>
+              <p className="text-xs text-muted-foreground">
+                Tu nombre será visible para el cliente.
+              </p>
 
               <div className="mt-4 space-y-4">
                 <div>
@@ -233,8 +261,16 @@ function SolicitudDetalle() {
                   </div>
                 )}
 
-                <button type="submit" disabled={send.isPending} className="btn-primary w-full disabled:opacity-60">
-                  {send.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                <button
+                  type="submit"
+                  disabled={send.isPending}
+                  className="btn-primary w-full disabled:opacity-60"
+                >
+                  {send.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
                   {send.isPending ? "Enviando..." : "Enviar propuesta"}
                 </button>
               </div>

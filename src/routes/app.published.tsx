@@ -29,8 +29,12 @@ function Published() {
         <div className="flex items-start gap-3 rounded-2xl border border-status-accepted/30 bg-status-accepted/10 p-4">
           <CheckCircle2 className="h-6 w-6 shrink-0 text-status-accepted" />
           <div>
-            <div className="font-display text-lg font-bold uppercase text-status-accepted">¡Publicado!</div>
-            <p className="text-xs text-foreground/80">Las casas de empeño afiliadas ya pueden ver tu solicitud.</p>
+            <div className="font-display text-lg font-bold uppercase text-status-accepted">
+              ¡Publicado!
+            </div>
+            <p className="text-xs text-foreground/80">
+              Las casas de empeño afiliadas ya pueden ver tu solicitud.
+            </p>
           </div>
         </div>
 
@@ -50,12 +54,17 @@ function Published() {
                     {categoryMeta(data.category).emoji}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <div className="font-display text-lg font-bold leading-tight">{buildTitle(data)}</div>
+                    <div className="font-display text-lg font-bold leading-tight">
+                      {buildTitle(data)}
+                    </div>
                     <div className="text-xs text-muted-foreground">
-                      {[data.brand, data.year, `Estado: ${data.condition ?? "—"}`].filter(Boolean).join(" · ")}
+                      {[data.brand, data.year, `Estado: ${data.condition ?? "—"}`]
+                        .filter(Boolean)
+                        .join(" · ")}
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
-                      Distrito: {data.district ?? "—"} · Plazo: {data.expected_term_days ?? "—"} días
+                      Distrito: {data.district ?? "—"} · Plazo: {data.expected_term_days ?? "—"}{" "}
+                      días
                     </div>
                   </div>
                 </div>
@@ -64,7 +73,7 @@ function Published() {
                     {data.photos.slice(0, 4).map((p) => (
                       <img
                         key={p.id}
-                        src={p.public_url}
+                        src={p.signed_url}
                         alt=""
                         className="h-12 flex-1 rounded-lg bg-surface-2 object-cover"
                       />
@@ -77,7 +86,9 @@ function Published() {
                 {data.expected_amount_pen && (
                   <div className="mt-3 flex items-center justify-between rounded-lg bg-background px-3 py-2 text-xs">
                     <span className="text-muted-foreground">Monto referencia</span>
-                    <span className="font-display font-bold">{formatPEN(data.expected_amount_pen)}</span>
+                    <span className="font-display font-bold">
+                      {formatPEN(data.expected_amount_pen)}
+                    </span>
                   </div>
                 )}
               </>
@@ -94,7 +105,8 @@ function Published() {
           </div>
           <div className="mt-4 font-display text-xl font-bold uppercase">Esperando propuestas</div>
           <p className="mt-1 max-w-xs text-xs text-muted-foreground">
-            Las casas de empeño afiliadas pueden ver tu solicitud y enviar ofertas. Revisa tu panel para verlas.
+            Las casas de empeño afiliadas pueden ver tu solicitud y enviar ofertas. Revisa tu panel
+            para verlas.
           </p>
           <div className="mt-3 flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <Bell className="h-3 w-3" /> Notificaciones activadas
@@ -107,7 +119,9 @@ function Published() {
               Ver propuestas
             </Link>
           )}
-          <Link to="/app/dashboard" className="btn-ghost w-full">Volver al inicio</Link>
+          <Link to="/app/dashboard" className="btn-ghost w-full">
+            Volver al inicio
+          </Link>
         </div>
       </div>
     </PhoneFrame>

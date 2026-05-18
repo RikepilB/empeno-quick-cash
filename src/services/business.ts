@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getSupabaseServer } from "@/lib/db/server";
+import { sanitizeError } from "@/lib/logger";
 
 export type BusinessContext = {
   business: {

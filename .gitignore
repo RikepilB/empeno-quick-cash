@@ -39,8 +39,15 @@ CLAUDE.md
 # Session working memos (per-session logs, never committed)
 session.md
 session-*.md
-!docs/SESSION-STATE.md
 SESSION_*.md
+handoff.md
+backlog.md
+
+# Docs directory: only API.md and ARCHITECTURE.md are tracked.
+# Everything else (roadmaps, session state, scratch notes) stays local.
+docs/*
+!docs/API.md
+!docs/ARCHITECTURE.md
 
 # Editor directories and files
 .vscode/*
@@ -52,3 +59,6 @@ SESSION_*.md
 *.njsproj
 *.sln
 *.sw?
+
+# Local Netlify folder
+.netlify
