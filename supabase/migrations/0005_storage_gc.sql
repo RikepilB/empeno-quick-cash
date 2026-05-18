@@ -92,17 +92,17 @@ REVOKE ALL ON FUNCTION public.gc_orphan_storage() FROM public;
 --    Note: pg_cron must be enabled in Supabase Dashboard → Extensions.
 --    If not available, schedule this function via Supabase Edge Function cron.
 -- ---------------------------------------------------------------------------
-DO $$ BEGIN
+DO $do$ BEGIN
   IF EXISTS (
     SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'
   ) THEN
     PERFORM cron.schedule(
       'gc-orphan-storage',
       '0 3 * * *',
-      $$SELECT public.gc_orphan_storage();$$
+      $job$SELECT public.gc_orphan_storage();$job$
     );
   END IF;
-END $$;
+END $do$;
 
 -- ---------------------------------------------------------------------------
 -- 4. Function: expire_old_propuestas (scheduled)
@@ -160,16 +160,16 @@ $$;
 REVOKE ALL ON FUNCTION public.expire_stale_rows() FROM public;
 
 -- Schedule every hour
-DO $$ BEGIN
+DO $do$ BEGIN
   IF EXISTS (
     SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'
   ) THEN
     PERFORM cron.schedule(
       'expire-stale-rows',
       '0 * * * *',
-      $$SELECT public.expire_stale_rows();$$
+      $job$SELECT public.expire_stale_rows();$job$
     );
   END IF;
-END $$;
+END $do$;
 
 COMMIT;
