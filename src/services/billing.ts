@@ -36,7 +36,7 @@ export const listPlans = createServerFn({ method: "GET" }).handler(async (): Pro
     .from("plans")
     .select("id, name, price_pen, monthly_propuestas, features")
     .order("price_pen", { ascending: true });
-  if (error) throw new Error(error.message);
+  if (error) throw sanitizeError(error, "Error al cargar los planes.");
   return (data ?? []).map((p: any) => ({
     id: p.id,
     name: p.name,
