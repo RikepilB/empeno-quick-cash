@@ -2,6 +2,7 @@ import { Link, useRouter } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ChevronLeft, LogOut } from "lucide-react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
+import { signOut } from "@/services/auth";
 
 interface PhoneFrameProps {
   children: ReactNode;
@@ -14,6 +15,7 @@ export function PhoneFrame({ children, title, back, hideHeader }: PhoneFrameProp
   const router = useRouter();
 
   async function handleLogout() {
+    await signOut();
     await getSupabaseBrowser().auth.signOut();
     await router.invalidate();
     await router.navigate({ to: "/app/login" });
