@@ -52,11 +52,14 @@ export type PropuestaForBusiness = {
 // Helpers
 // ============================================================================
 // Generate redemption code: EMP-XXXXX. 5-char base32 excluding ambiguous chars.
+// Crypto-secure RNG so codes can't be predicted by brute-forcing PRNG state.
 const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"; // no 0/1/I/O
 function generateRedemptionCode(): string {
+  const bytes = new Uint8Array(5);
+  crypto.getRandomValues(bytes);
   let code = "EMP-";
   for (let i = 0; i < 5; i++) {
-    code += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
+    code += CODE_ALPHABET[bytes[i] % CODE_ALPHABET.length];
   }
   return code;
 }
