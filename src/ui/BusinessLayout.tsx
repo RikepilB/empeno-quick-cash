@@ -14,6 +14,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/db/browser";
 import { getBusinessContext } from "@/services/business";
+import { signOut } from "@/services/auth";
 
 const nav = [
   { to: "/negocio/dashboard", label: "Panel", icon: LayoutDashboard },
@@ -29,6 +30,7 @@ export function BusinessLayout({ children, title, subtitle, actions }: { childre
   const context = useQuery({ queryKey: ["businessContext"], queryFn: () => getBusinessContext() });
 
   async function handleLogout() {
+    await signOut();
     await getSupabaseBrowser().auth.signOut();
     await router.invalidate();
     await router.navigate({ to: "/negocio/login" });
