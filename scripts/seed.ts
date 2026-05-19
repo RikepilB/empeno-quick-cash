@@ -41,7 +41,7 @@ type SeedUser = {
 const TEST_CLIENTS: SeedUser[] = [
   {
     email: "cliente.test@empenalo.local",
-    password: "TestCliente2026!",
+    password: DEMO_PASSWORD,
     full_name: "Cliente Test",
     role: "client",
   },
@@ -50,7 +50,7 @@ const TEST_CLIENTS: SeedUser[] = [
 const TEST_BUSINESSES: SeedUser[] = [
   {
     email: "negocio.test@empenalo.local",
-    password: "TestNegocio2026!",
+    password: DEMO_PASSWORD,
     full_name: "Negocio Test",
     role: "business",
     business_name: "Empeños Test",

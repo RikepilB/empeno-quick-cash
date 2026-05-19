@@ -43,15 +43,18 @@ SESSION_*.md
 handoff.md
 backlog.md
 
-# Docs directory: only tracked docs are whitelisted below.
-# Everything else (roadmaps, session state, scratch notes) stays local.
+# Docs directory: redesign reference docs are tracked; scratch notes stay local.
 docs/*
 !docs/API.md
 !docs/ARCHITECTURE.md
 !docs/PRODUCT.md
-!docs/SCALABILITY.md
+!docs/BILLING.md
 !docs/UI-UX.md
 !docs/DESIGN-SYSTEM.md
+!docs/SCALABILITY.md
+!docs/TESTING.md
+!docs/SEEDER.md
+!docs/REDESIGN-ROADMAP.md
 
 # Editor directories and files
 .vscode/*
