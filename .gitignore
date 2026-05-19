@@ -43,11 +43,15 @@ SESSION_*.md
 handoff.md
 backlog.md
 
-# Docs directory: only API.md and ARCHITECTURE.md are tracked.
+# Docs directory: only tracked docs are whitelisted below.
 # Everything else (roadmaps, session state, scratch notes) stays local.
 docs/*
 !docs/API.md
 !docs/ARCHITECTURE.md
+!docs/PRODUCT.md
+!docs/SCALABILITY.md
+!docs/UI-UX.md
+!docs/DESIGN-SYSTEM.md
 
 # Editor directories and files
 .vscode/*
@@ -62,3 +66,7 @@ docs/*
 
 # Local Netlify folder
 .netlify
+
+# Personal tool config (opencode); other devs use their own
+opencode.json
+.opencode/
