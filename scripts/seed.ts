@@ -29,7 +29,36 @@ const supabase = createClient(url, serviceKey, {
 // Demo data
 // ============================================================================
 
-const DEMO_CLIENTS = [
+type SeedUser = {
+  email: string;
+  password: string;
+  full_name: string;
+  role: "client" | "business";
+  business_name?: string;
+  district?: string;
+};
+
+const TEST_CLIENTS: SeedUser[] = [
+  {
+    email: "cliente.test@empenalo.local",
+    password: "TestCliente2026!",
+    full_name: "Cliente Test",
+    role: "client",
+  },
+];
+
+const TEST_BUSINESSES: SeedUser[] = [
+  {
+    email: "negocio.test@empenalo.local",
+    password: "TestNegocio2026!",
+    full_name: "Negocio Test",
+    role: "business",
+    business_name: "Empeños Test",
+    district: "Miraflores",
+  },
+];
+
+const DEMO_CLIENTS: SeedUser[] = [
   {
     email: "demo.cliente1@empenalo.local",
     password: DEMO_PASSWORD,
@@ -62,7 +91,7 @@ const DEMO_CLIENTS = [
   },
 ];
 
-const DEMO_BUSINESSES = [
+const DEMO_BUSINESSES: SeedUser[] = [
   {
     email: "demo.negocio1@empenalo.local",
     password: DEMO_PASSWORD,
@@ -352,7 +381,7 @@ const SOLICITUD_TEMPLATES = [
 // Helpers
 // ============================================================================
 
-async function createUser(u: (typeof DEMO_CLIENTS)[0]) {
+async function createUser(u: SeedUser) {
   const { data, error } = await supabase.auth.admin.createUser({
     email: u.email,
     password: u.password,
@@ -360,8 +389,8 @@ async function createUser(u: (typeof DEMO_CLIENTS)[0]) {
     user_metadata: {
       role: u.role,
       full_name: u.full_name,
-      business_name: (u as any).business_name,
-      district: (u as any).district,
+      business_name: u.business_name,
+      district: u.district,
     },
   });
   if (error) throw error;
@@ -370,16 +399,22 @@ async function createUser(u: (typeof DEMO_CLIENTS)[0]) {
 
 async function deleteExistingUsers() {
   const { data: list } = await supabase.auth.admin.listUsers();
-  const toDelete = (list?.users ?? []).filter((u) => u.email?.startsWith("demo."));
+  const resetEmails = new Set([
+    ...TEST_CLIENTS.map((u) => u.email),
+    ...TEST_BUSINESSES.map((u) => u.email),
+  ]);
+  const toDelete = (list?.users ?? []).filter(
+    (u) => u.email?.startsWith("demo.") || (u.email ? resetEmails.has(u.email) : false),
+  );
   for (const u of toDelete) {
     await supabase.auth.admin.deleteUser(u.id);
-    console.log(`  Deleted existing demo user: ${u.email}`);
+    console.log(`  Deleted existing seed user: ${u.email}`);
   }
 }
 
 async function seedClients() {
   const ids: string[] = [];
-  for (const u of DEMO_CLIENTS) {
+  for (const u of [...TEST_CLIENTS, ...DEMO_CLIENTS]) {
     const user = await createUser(u);
     ids.push(user.id);
     console.log(`  Created client: ${u.full_name} (${u.email})`);
@@ -389,7 +424,7 @@ async function seedClients() {
 
 async function seedBusinesses() {
   const results: Array<{ userId: string; businessId: string }> = [];
-  for (const u of DEMO_BUSINESSES) {
+  for (const u of [...TEST_BUSINESSES, ...DEMO_BUSINESSES]) {
     const user = await createUser(u);
     // handle_new_user trigger auto-creates business + trialing subscription
     const { data: biz } = await supabase
@@ -398,10 +433,24 @@ async function seedBusinesses() {
       .eq("owner_id", user.id)
       .single<{ id: string }>();
     if (!biz) throw new Error(`Business not created for ${u.email}`);
+    await setUnlimitedTrial(biz.id);
     results.push({ userId: user.id, businessId: biz.id });
     console.log(`  Created business: ${u.business_name} (${u.email})`);
   }
   return results;
+}
+
+async function setUnlimitedTrial(businessId: string) {
+  const { error } = await supabase
+    .from("subscriptions")
+    .update({
+      plan_id: "avanzado",
+      status: "trialing",
+      propuestas_used_this_period: 0,
+      current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    })
+    .eq("business_id", businessId);
+  if (error) throw error;
 }
 
 async function seedSolicitudes(clientIds: string[]) {
@@ -423,17 +472,17 @@ async function seedSolicitudes(clientIds: string[]) {
 
 async function seedPropuestas(solicitudIds: string[], businessIds: string[]) {
   const propuestaIds: string[] = [];
-  // Distribute propuestas so each solicitud gets 0-4 offers
+  // Deterministic distribution keeps the marketplace populated while leaving
+  // active solicitudes available for proposal testing.
   for (let i = 0; i < solicitudIds.length; i++) {
     const sid = solicitudIds[i];
-    const numPropuestas = Math.floor(Math.random() * 5); // 0-4
-    const shuffled = [...businessIds].sort(() => Math.random() - 0.5);
+    const numPropuestas = i % 4;
     for (let j = 0; j < numPropuestas; j++) {
-      const bid = shuffled[j];
+      const bid = businessIds[(i + j) % businessIds.length];
       const baseAmount = SOLICITUD_TEMPLATES[i].expected_amount_pen ?? 1000;
-      const monto = Math.round(baseAmount * (0.7 + Math.random() * 0.3)); // 70-100% of expected
-      const tasa = Number((3 + Math.random() * 4).toFixed(2)); // 3-7%
-      const plazo = [15, 30, 45, 60][Math.floor(Math.random() * 4)];
+      const monto = Math.round(baseAmount * (0.78 + j * 0.06));
+      const tasa = Number((3.5 + j * 0.7 + (i % 3) * 0.2).toFixed(2));
+      const plazo = [15, 30, 45, 60][(i + j) % 4];
       const { data, error } = await supabase
         .from("propuestas")
         .insert({
@@ -471,7 +520,7 @@ async function acceptSomePropuestas(propuestaIds: string[]) {
   }
 
   for (const pid of toAccept) {
-    const code = `EMP-${Array.from({ length: 5 }, () => "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"[Math.floor(Math.random() * 32)]).join("")}`;
+    const code = `EMP-SEED${toAccept.indexOf(pid) + 1}`;
     const { error } = await supabase.rpc("accept_propuesta", {
       p_propuesta_id: pid,
       p_redemption_code: code,
@@ -508,14 +557,14 @@ async function main() {
   await acceptSomePropuestas(propuestaIds);
 
   console.log("\n✅ Seeding complete!");
-  console.log(`   ${DEMO_CLIENTS.length} clients`);
-  console.log(`   ${DEMO_BUSINESSES.length} businesses`);
+  console.log(`   ${TEST_CLIENTS.length + DEMO_CLIENTS.length} clients`);
+  console.log(`   ${TEST_BUSINESSES.length + DEMO_BUSINESSES.length} businesses`);
   console.log(`   ${SOLICITUD_TEMPLATES.length} solicitudes`);
   console.log(`   ${propuestaIds.length} propuestas`);
   console.log(`   ${Math.min(5, propuestaIds.length)} accepted operations`);
-  console.log("\nDemo login credentials:");
-  console.log(`   Client:  ${DEMO_CLIENTS[0].email} / ${DEMO_CLIENTS[0].password}`);
-  console.log(`   Business: ${DEMO_BUSINESSES[0].email} / ${DEMO_BUSINESSES[0].password}`);
+  console.log("\nTest login credentials:");
+  console.log(`   Client:  ${TEST_CLIENTS[0].email} / ${TEST_CLIENTS[0].password}`);
+  console.log(`   Business: ${TEST_BUSINESSES[0].email} / ${TEST_BUSINESSES[0].password}`);
 }
 
 main().catch((err) => {

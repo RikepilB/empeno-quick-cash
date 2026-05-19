@@ -121,7 +121,8 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
         "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, created_at, propuestas(count)",
       )
       .eq("client_id", user.id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(50);
 
     if (error) throw sanitizeError(error, "Error al cargar tus solicitudes.");
 
@@ -166,7 +167,7 @@ export const listActiveSolicitudes = createServerFn({ method: "GET" })
     let query = supabase
       .from("solicitudes")
       .select(
-        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, created_at, propuestas(count)",
+        "id, category, brand, model, condition, expected_amount_pen, expected_term_days, district, status, created_at, propuestas(count)",
       )
       .eq("status", "active")
       .order("created_at", { ascending: false })
@@ -188,10 +189,10 @@ export const listActiveSolicitudes = createServerFn({ method: "GET" })
       category: row.category,
       brand: row.brand,
       model: row.model,
-      year: row.year,
-      storage: row.storage,
+      year: null,
+      storage: null,
       condition: row.condition,
-      description: row.description,
+      description: null,
       expected_amount_pen: row.expected_amount_pen,
       expected_term_days: row.expected_term_days,
       district: row.district,
