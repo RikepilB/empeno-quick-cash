@@ -99,6 +99,47 @@ done
 pass "no executable scripts in .claude/ or .vscode/"
 
 # ---------------------------------------------------------------------------
+# 6. hardcoded secrets in tracked or staged files
+# ---------------------------------------------------------------------------
+# Scans every git-tracked or untracked-but-not-ignored file for the most
+# common secret shapes. Skips binaries, node_modules, build outputs, and
+# files known to legitimately contain example secrets (this script,
+# docs/DEVELOPMENT.md, .env.example, .dev.vars.example).
+SECRET_EXCLUDE_RE='(^|/)(node_modules|dist|\.netlify|\.wrangler|\.tanstack|\.opencode|\.git|\.output|coverage|bun\.lock|package-lock\.json)(/|$)'
+SECRET_FILE_EXCLUDE_RE='(^|/)(scripts/security-scan\.sh|docs/DEVELOPMENT\.md|\.env\.example|\.dev\.vars\.example)$'
+mapfile -t SECRET_TARGETS < <(
+  { git ls-files --cached --others --exclude-standard 2>/dev/null; } \
+    | grep -Ev "$SECRET_EXCLUDE_RE" \
+    | grep -Ev "$SECRET_FILE_EXCLUDE_RE" \
+    | grep -Ev '\.(png|jpg|jpeg|gif|ico|pdf|zip|woff2?|ttf|eot|mp4|webm|webp|svg)$'
+)
+
+scan_secret() {
+  local label=$1 pattern=$2
+  if [ "${#SECRET_TARGETS[@]}" -eq 0 ]; then return; fi
+  local matches
+  matches=$(grep -InEH "$pattern" "${SECRET_TARGETS[@]}" 2>/dev/null || true)
+  if [ -n "$matches" ]; then
+    fail "$label"
+    echo "$matches" | head -20
+  fi
+}
+
+scan_secret "Supabase service_role / JWT in tracked source"  'eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}'
+scan_secret "Private key PEM block"                          'BEGIN (RSA|EC|OPENSSH|PRIVATE) KEY'
+scan_secret "AWS access key id"                              'AKIA[0-9A-Z]{16}'
+scan_secret "Culqi / Stripe-style key"                       '(sk|pk|rk)_(live|test)_[0-9a-zA-Z]{20,}'
+scan_secret "Postgres URL with embedded password"            'postgres(ql)?://[^:]+:[^@/]+@'
+scan_secret "GitHub personal access token"                   'gh[pousr]_[A-Za-z0-9]{20,}'
+scan_secret "Slack token"                                    'xox[abprs]-[A-Za-z0-9-]{10,}'
+scan_secret "Anthropic API key"                              'sk-ant-[A-Za-z0-9_-]{20,}'
+scan_secret "Hardcoded password assignment"                  '(password|secret|api_?key)[[:space:]]*[=:][[:space:]]*["'\''][A-Za-z0-9!@#$%^&*_+-]{8,}["'\'']'
+
+if [ "$FAIL" -eq 0 ] && [ "${#SECRET_TARGETS[@]}" -gt 0 ]; then
+  pass "no secret patterns matched in ${#SECRET_TARGETS[@]} tracked/staged files"
+fi
+
+# ---------------------------------------------------------------------------
 # Summary
 # ---------------------------------------------------------------------------
 echo

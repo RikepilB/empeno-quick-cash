@@ -7,9 +7,17 @@ config({ path: resolve(process.cwd(), ".dev.vars") });
 
 const url = process.env.SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const DEMO_PASSWORD = process.env.SEED_DEMO_PASSWORD;
 
 if (!url || !serviceKey) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .dev.vars");
+  process.exit(1);
+}
+
+if (!DEMO_PASSWORD || DEMO_PASSWORD.length < 8) {
+  console.error(
+    "Missing SEED_DEMO_PASSWORD in .dev.vars (>=8 chars). See docs/DEVELOPMENT.md.",
+  );
   process.exit(1);
 }
 
@@ -24,31 +32,31 @@ const supabase = createClient(url, serviceKey, {
 const DEMO_CLIENTS = [
   {
     email: "demo.cliente1@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "María González",
     role: "client",
   },
   {
     email: "demo.cliente2@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "Carlos Mendoza",
     role: "client",
   },
   {
     email: "demo.cliente3@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "Lucía Torres",
     role: "client",
   },
   {
     email: "demo.cliente4@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "Javier Ruiz",
     role: "client",
   },
   {
     email: "demo.cliente5@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "Ana Castillo",
     role: "client",
   },
@@ -57,7 +65,7 @@ const DEMO_CLIENTS = [
 const DEMO_BUSINESSES = [
   {
     email: "demo.negocio1@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "Pedro Sánchez",
     role: "business",
     business_name: "Joyería Miraflores",
@@ -65,7 +73,7 @@ const DEMO_BUSINESSES = [
   },
   {
     email: "demo.negocio2@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "Rosa Díaz",
     role: "business",
     business_name: "Empeños Lima Centro",
@@ -73,7 +81,7 @@ const DEMO_BUSINESSES = [
   },
   {
     email: "demo.negocio3@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "Luis Herrera",
     role: "business",
     business_name: "Casa Oro Surco",
@@ -81,7 +89,7 @@ const DEMO_BUSINESSES = [
   },
   {
     email: "demo.negocio4@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "Diana Flores",
     role: "business",
     business_name: "Préstamos San Isidro",
@@ -89,7 +97,7 @@ const DEMO_BUSINESSES = [
   },
   {
     email: "demo.negocio5@empenalo.local",
-    password: "Demo2026!",
+    password: DEMO_PASSWORD,
     full_name: "Miguel Vargas",
     role: "business",
     business_name: "Oro Express San Borja",
