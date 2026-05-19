@@ -1,7 +1,11 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getCurrentUser } from "@/services/auth";
 
-const PUBLIC_NEGOCIO_PATHS = new Set(["/negocio/login", "/negocio/register"]);
+const PUBLIC_NEGOCIO_PATHS = new Set([
+  "/negocio/login",
+  "/negocio/register",
+  "/negocio/forgot-password",
+]);
 
 export const Route = createFileRoute("/negocio")({
   beforeLoad: async ({ location }) => {
