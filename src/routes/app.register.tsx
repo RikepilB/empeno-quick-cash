@@ -1,5 +1,4 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { PhoneFrame } from "@/ui/PhoneFrame";
 import { Smartphone, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
@@ -47,41 +46,71 @@ function Register() {
   }
 
   return (
-    <PhoneFrame title="Crear cuenta" back="/app/login">
-      <form onSubmit={onSubmit} className="space-y-5 p-6">
-        <div>
-          <label className="label-field">Nombre completo</label>
-          <input name="full_name" required className="input-field" placeholder="María Fernández Castro" />
-        </div>
-        <div>
-          <label className="label-field">Correo electrónico</label>
-          <input name="email" type="email" required className="input-field" placeholder="maria@correo.com" />
-        </div>
-        <div>
-          <label className="label-field">Contraseña</label>
-          <input name="password" type="password" required minLength={6} className="input-field" placeholder="Mínimo 6 caracteres" />
-        </div>
-        <div>
-          <label className="label-field">Celular (opcional)</label>
-          <input name="phone" className="input-field" placeholder="+51 987 654 321" />
-        </div>
-
-        {error && (
-          <div className="rounded-lg bg-status-reported/15 px-3 py-2 text-xs text-status-reported">
-            {error}
+    <main className="min-h-dvh flex items-center justify-center bg-background p-4">
+      <div className="w-full max-w-[480px]">
+        <form onSubmit={onSubmit} className="space-y-5">
+          <div>
+            <label className="label-field">Nombre completo</label>
+            <input
+              name="full_name"
+              required
+              className="input-field"
+              placeholder="María Fernández Castro"
+            />
           </div>
-        )}
+          <div>
+            <label className="label-field">Correo electrónico</label>
+            <input
+              name="email"
+              type="email"
+              required
+              className="input-field"
+              placeholder="maria@correo.com"
+            />
+          </div>
+          <div>
+            <label className="label-field">Contraseña</label>
+            <input
+              name="password"
+              type="password"
+              required
+              minLength={6}
+              className="input-field"
+              placeholder="Mínimo 6 caracteres"
+            />
+          </div>
+          <div>
+            <label className="label-field">Celular (opcional)</label>
+            <input name="phone" className="input-field" placeholder="+51 987 654 321" />
+          </div>
 
-        <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
-          {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Smartphone className="h-4 w-4" />}
-          {submitting ? "Creando cuenta..." : "Crear cuenta"}
-        </button>
+          {error && (
+            <div className="rounded-lg bg-status-reported/15 px-3 py-2 text-xs text-status-reported">
+              {error}
+            </div>
+          )}
 
-        <p className="text-center text-xs text-muted-foreground">
-          ¿Ya tienes cuenta?{" "}
-          <Link to="/app/login" className="text-primary hover:underline">Inicia sesión</Link>
-        </p>
-      </form>
-    </PhoneFrame>
+          <button
+            type="submit"
+            disabled={submitting}
+            className="btn-primary w-full disabled:opacity-60"
+          >
+            {submitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Smartphone className="h-4 w-4" />
+            )}
+            {submitting ? "Creando cuenta..." : "Crear cuenta"}
+          </button>
+
+          <p className="text-center text-xs text-muted-foreground">
+            ¿Ya tienes cuenta?{" "}
+            <Link to="/app/login" className="text-primary hover:underline">
+              Inicia sesión
+            </Link>
+          </p>
+        </form>
+      </div>
+    </main>
   );
 }
