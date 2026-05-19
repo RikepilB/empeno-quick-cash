@@ -154,4 +154,18 @@ xl:  1280px  /* desktop wide */
 
 ---
 
-**See also**: `PRODUCT.md`, `SCALABILITY.md`, `API.md`, `UI-UX.md`, `DESIGN-SYSTEM.md`
+**See also**: `PRODUCT.md`, `BILLING.md`, `SCALABILITY.md`, `API.md`, `UI-UX.md`, `DESIGN-SYSTEM.md`, `TESTING.md`, `SEEDER.md`, `REDESIGN-ROADMAP.md`
+
+---
+
+## Planned in `0006_monetization.sql`
+
+See `REDESIGN-ROADMAP.md` Phase 2. Migration adds:
+
+- New plan rows: `free`, `starter`, `pro`, `unlim` (alongside existing `basico`/`intermedio`/`avanzado` — no rename).
+- `plans` extensions: `monthly_featured_credits`, `max_sucursales`, `max_users_per_sucursal`, `realtime_notifications`, `dashboard_tier`, `monthly_reports`, `support_tier`, `account_manager`.
+- `subscriptions` extensions: `featured_credits_used_this_period`, `payment_gateway`, `gateway_customer_id`, `gateway_subscription_id`.
+- New tables: `commission_config`, `featured_offers`, `payments`, `commissions`.
+- New RPCs: `compute_commission`, `boost_propuesta`, extended `accept_propuesta` (returns `operation_id`, `redemption_code`, `commission_pen`).
+- New view: `v_active_featured_propuestas`.
+- Widens `solicitudes.category` CHECK to all 11 categorías.

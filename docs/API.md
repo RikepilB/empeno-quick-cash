@@ -297,6 +297,23 @@ Scheduled jobs via `pg_cron`:
 - `gc-orphan-storage` — daily 03:00 UTC.
 - `expire-stale-rows` — hourly.
 
+### Planned in `0006_monetization.sql` (not yet applied — see `REDESIGN-ROADMAP.md`)
+
+| RPC / view | Purpose | Returns |
+|---|---|---|
+| `compute_commission(monto_pen, categoria, plan_slug)` | Lookup most-specific active config + apply mode | `numeric(10,2)` |
+| `accept_propuesta` *(extended)* | Adds commission ledger write + plan slug lookup | `(operation_id uuid, redemption_code text, commission_pen numeric)` |
+| `boost_propuesta(propuesta_id, hours, use_credit, payment_id)` | Atomic credit deduct OR record purchased boost | `uuid` (featured_offer.id) |
+| `v_active_featured_propuestas` | View for feed-side filtering on active boosts | rows: `(propuesta_id, solicitud_id, business_id, featured_until)` |
+
+### Planned tables (0006)
+- `commission_config` — per-(categoría, plan_slug) commission rules with effective windows.
+- `featured_offers` — one row per boost (plan credit or purchased).
+- `payments` — gateway-abstracted payment records (Culqi default; Stripe parked).
+- `commissions` — append-only ledger; one row per accepted propuesta, snapshot of config used.
+
+See `BILLING.md` for end-to-end flows.
+
 ---
 
 ## 9. Conventions

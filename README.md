@@ -82,27 +82,43 @@ Plataforma de empeños que conecta clientes con casas de empeño en Lima, Peru.
 
 ### Suscripciones
 
+#### Estado actual (migraciones 0001–0005)
+
 | Plan       | Precio (S/) | Propuestas/mes |
 | ---------- | ----------- | -------------- |
 | Básico     | S/ 10       | 5              |
 | Intermedio | S/ 20       | 30             |
 | Avanzado   | S/ 30       | Ilimitadas     |
 
+#### Planeado en `0006_monetization.sql` (ver [docs/REDESIGN-ROADMAP.md](./docs/REDESIGN-ROADMAP.md))
+
+| Plan      | Slug     | Propuestas/mes | Sucursales | Créditos destacar/mes | Notif RT | Dashboard | Reportes | Soporte |
+| --------- | -------- | -------------- | ---------- | --------------------- | -------- | --------- | -------- | ------- |
+| Gratuito  | `free`   | 10             | 1          | 0                     | —        | —         | —        | comunidad |
+| Plus      | `starter`| 50             | 1          | 2                     | ✅       | simple    | —        | email   |
+| Premium   | `pro`    | ilimitadas     | 5          | 10                    | ✅       | full      | ✅       | priority |
+| Pro       | `unlim`  | ilimitadas     | 15         | 30                    | ✅       | full      | ✅       | priority |
+
+Comisiones por trato cerrado, ofertas destacadas (créditos + compra) y pasarela Culqi (con fallback demo) se documentan en [docs/BILLING.md](./docs/BILLING.md).
+
 ---
 
 ## Stack técnico
 
-| Capa       | Tecnología                                      |
-| ---------- | ----------------------------------------------- |
-| Frontend   | React 19 + TypeScript                           |
-| Framework  | TanStack Start (SSR) + TanStack Router          |
-| Estilos    | Tailwind CSS v4 + Radix UI                      |
-| Estado     | TanStack Query (React Query)                    |
-| Validación | Zod + React Hook Form                           |
-| Backend    | Supabase (Auth + Postgres + Storage)            |
-| Pagos      | Culqi (Peru) — demo mode sin keys               |
-| Deploy     | Netlify (`@netlify/vite-plugin-tanstack-start`) |
-| Runtime    | Bun 1.3+                                        |
+| Capa        | Tecnología                                                |
+| ----------- | --------------------------------------------------------- |
+| Frontend    | React 19 + TypeScript                                     |
+| Framework   | TanStack Start (SSR) + TanStack Router (file routes)      |
+| Build       | Vite 7 vía `@lovable.dev/vite-tanstack-config`            |
+| Estilos     | Tailwind CSS v4 (CSS-first en `src/styles.css`) + shadcn  |
+| Estado     | TanStack Query (React Query)                              |
+| Validación  | Zod + React Hook Form                                     |
+| Backend     | Supabase (Auth + Postgres + Storage) — proyecto `raoprigiowskqnylapqs` |
+| Pagos       | Culqi (Peru) — demo mode sin keys, live con HMAC webhook  |
+| Deploy      | Netlify (`@netlify/vite-plugin-tanstack-start`)           |
+| Runtime     | Node 22 (Netlify Functions)                               |
+| Package mgr | Bun 1.3.13                                                |
+| Tests       | Playwright (E2E wired — sin archivos aún)                |
 
 ---
 
@@ -163,9 +179,23 @@ docs/
 
 ## Documentación
 
-- Referencia de API: [docs/API.md](docs/API.md)
-- Arquitectura: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- Setup de desarrollo (privado): `docs/DEVELOPMENT.md`
+Cualquier agente o developer nuevo debe leer primero [docs/REDESIGN-ROADMAP.md](./docs/REDESIGN-ROADMAP.md), que indica fase actual, qué está hecho y qué decisiones quedan abiertas.
+
+| Doc | Cuándo leer |
+| --- | ----------- |
+| [docs/REDESIGN-ROADMAP.md](./docs/REDESIGN-ROADMAP.md) | Plan maestro, fases, decisiones pendientes |
+| [docs/PRODUCT.md](./docs/PRODUCT.md) | Visión de producto, actores, planes |
+| [docs/BILLING.md](./docs/BILLING.md) | Comisiones, suscripciones, ofertas destacadas, Culqi |
+| [docs/UI-UX.md](./docs/UI-UX.md) | Comportamiento de pantallas, copy, responsive, formularios por categoría |
+| [docs/DESIGN-SYSTEM.md](./docs/DESIGN-SYSTEM.md) | Tokens, componentes, colores, tipografía |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | Cableado del sistema, modelo de datos |
+| [docs/API.md](./docs/API.md) | Server functions, RPCs, webhook |
+| [docs/SCALABILITY.md](./docs/SCALABILITY.md) | Plan de escala Etapa 1 → 2 |
+| [docs/TESTING.md](./docs/TESTING.md) | Cuentas de prueba, flujos QA |
+| [docs/SEEDER.md](./docs/SEEDER.md) | Spec del seeder |
+| `docs/DEVELOPMENT.md` | Setup local (privado, gitignored) |
+
+## Enlaces
 
 ## Seguridad
 
