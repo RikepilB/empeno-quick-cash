@@ -105,9 +105,12 @@ CREATE TABLE IF NOT EXISTS public.commission_config (
   )
 );
 
+-- Uniqueness only over open-ended active rows. now() is STABLE so cannot
+-- appear in index predicate (SQLSTATE 42P17). Archived configs must set
+-- active=false; compute_commission() still filters by effective_to at runtime.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_commission_config_unique_active
   ON public.commission_config(COALESCE(categoria, '*'), COALESCE(plan_slug, '*'))
-  WHERE active = true AND (effective_to IS NULL OR effective_to > now());
+  WHERE active = true AND effective_to IS NULL;
 
 DO $$ BEGIN
   CREATE TRIGGER commission_config_updated_at BEFORE UPDATE ON public.commission_config
@@ -172,6 +175,9 @@ $$;
 -- ---------------------------------------------------------------------------
 -- 5. featured_offers — boosted propuestas
 -- ---------------------------------------------------------------------------
+-- btree_gist needed for the no-overlap EXCLUDE constraint below
+CREATE EXTENSION IF NOT EXISTS btree_gist;
+
 CREATE TABLE IF NOT EXISTS public.featured_offers (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   propuesta_id   uuid NOT NULL REFERENCES public.propuestas(id) ON DELETE CASCADE,
@@ -184,18 +190,21 @@ CREATE TABLE IF NOT EXISTS public.featured_offers (
   payment_id     uuid,
   created_at     timestamptz NOT NULL DEFAULT now(),
   updated_at     timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT featured_offer_window CHECK (expires_at > starts_at)
+  CONSTRAINT featured_offer_window CHECK (expires_at > starts_at),
+  -- Hard guarantee: no two featured_offers can overlap in time for the same
+  -- propuesta. Replaces the original partial unique index that used now() in
+  -- its WHERE predicate (rejected by Postgres — not IMMUTABLE).
+  CONSTRAINT featured_offers_no_overlap
+    EXCLUDE USING gist (
+      propuesta_id WITH =,
+      tstzrange(starts_at, expires_at, '[)') WITH &&
+    )
 );
 
 CREATE INDEX IF NOT EXISTS idx_featured_offers_propuesta ON public.featured_offers(propuesta_id);
 CREATE INDEX IF NOT EXISTS idx_featured_offers_business  ON public.featured_offers(business_id);
-CREATE INDEX IF NOT EXISTS idx_featured_offers_active
-  ON public.featured_offers(propuesta_id)
-  WHERE expires_at > now();
-
-CREATE UNIQUE INDEX IF NOT EXISTS idx_featured_offers_no_overlap
-  ON public.featured_offers(propuesta_id)
-  WHERE expires_at > now();
+CREATE INDEX IF NOT EXISTS idx_featured_offers_expires
+  ON public.featured_offers(expires_at);
 
 DO $$ BEGIN
   CREATE TRIGGER featured_offers_updated_at BEFORE UPDATE ON public.featured_offers
