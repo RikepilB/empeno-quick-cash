@@ -2,6 +2,8 @@
 
 Plataforma de empeños que conecta clientes con casas de empeño en Lima, Peru.
 
+**Producción**: https://empenalo.netlify.app
+
 ---
 
 ## Flujo de usuario
@@ -88,63 +90,6 @@ Plataforma de empeños que conecta clientes con casas de empeño en Lima, Peru.
 
 ---
 
-## Cuentas de prueba
-
-### Clientes de demo
-
-| Email                          | Contraseña  | Nombre         |
-| ------------------------------ | ----------- | -------------- |
-| `demo.cliente1@empenalo.local` | `Demo2026!` | María González |
-| `demo.cliente2@empenalo.local` | `Demo2026!` | Carlos Mendoza |
-| `demo.cliente3@empenalo.local` | `Demo2026!` | Lucía Torres   |
-| `demo.cliente4@empenalo.local` | `Demo2026!` | Javier Ruiz    |
-| `demo.cliente5@empenalo.local` | `Demo2026!` | Ana Castillo   |
-
-### Negocios de demo
-
-| Email                          | Contraseña  | Negocio               | Distrito          |
-| ------------------------------ | ----------- | --------------------- | ----------------- |
-| `demo.negocio1@empenalo.local` | `Demo2026!` | Joyería Miraflores    | Miraflores        |
-| `demo.negocio2@empenalo.local` | `Demo2026!` | Empeños Lima Centro   | Cercado de Lima   |
-| `demo.negocio3@empenalo.local` | `Demo2026!` | Casa Oro Surco        | Santiago de Surco |
-| `demo.negocio4@empenalo.local` | `Demo2026!` | Préstamos San Isidro  | San Isidro        |
-| `demo.negocio5@empenalo.local` | `Demo2026!` | Oro Express San Borja | San Borja         |
-
-### Cuentas de desarrollo
-
-| Rol     | Email                         | Contraseña         |
-| ------- | ----------------------------- | ------------------ |
-| Cliente | `cliente.test@empenalo.local` | `TestCliente2026!` |
-| Negocio | `negocio.test@empenalo.local` | `TestNegocio2026!` |
-
----
-
-## Seeder
-
-El script `scripts/seed.ts` genera datos de demo completos: cuentas de desarrollo, 5 clientes, 5 negocios, 20 solicitudes, propuestas deterministas y operaciones aceptadas.
-
-### Requisitos
-
-- `.dev.vars` con `SUPABASE_URL` y `SUPABASE_SERVICE_ROLE_KEY` configurados
-- Email confirmation deshabilitado en Supabase Dashboard (Auth → Settings)
-
-### Ejecutar
-
-```bash
-bun run seed
-```
-
-### Lo que crea
-
-- 1 cliente y 1 negocio de desarrollo (`cliente.test@...`, `negocio.test@...`)
-- 5 clientes demo con perfiles
-- 5 negocios demo (trigger `handle_new_user` auto-crea negocio + suscripción trialing avanzada)
-- 20 solicitudes en categorías: celular, laptop, joya, reloj, vehículo, otro
-- 0-3 propuestas por solicitud (montos, tasas, plazos realistas)
-- 5 propuestas aceptadas con código de redención `EMP-XXXXX`
-
----
-
 ## Stack técnico
 
 | Capa       | Tecnología                                      |
@@ -157,44 +102,28 @@ bun run seed
 | Backend    | Supabase (Auth + Postgres + Storage)            |
 | Pagos      | Culqi (Peru) — demo mode sin keys               |
 | Deploy     | Netlify (`@netlify/vite-plugin-tanstack-start`) |
-| Runtime    | Bun 1.3.13                                      |
+| Runtime    | Bun 1.3+                                        |
 
 ---
 
-## Empezar
+## Empezar (desarrollo)
 
-### Requisitos
-
-- Bun >= 1.3
-- Cuenta Supabase (proyecto `raoprigiowskqnylapqs`)
-- `.dev.vars` con `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-
-### Instalación
+Requisitos: Bun >= 1.3 + cuenta Supabase + archivo `.dev.vars` con las llaves (ver `docs/DEVELOPMENT.md` — guía interna, no publicada).
 
 ```bash
 bun install
-```
-
-### Desarrollo
-
-```bash
 bun dev          # http://localhost:8080
+bun run build    # build producción
 ```
 
-### Base de datos
+Migraciones y seeder:
 
 ```bash
 npx supabase@latest db push   # aplicar migraciones
 bun run seed                  # poblar datos demo
 ```
 
-### Build
-
-```bash
-bun run build      # build producción
-bun run lint       # ESLint
-bun run format     # Prettier
-```
+Setup completo (variables de entorno, cuentas de prueba, deploy) en `docs/DEVELOPMENT.md`.
 
 ---
 
@@ -225,12 +154,19 @@ supabase/
   migrations/         Migraciones SQL (aditivas, nunca modificar)
 scripts/
   seed.ts             Seeder de datos demo
-docs/                 Documentación (arquitectura, roadmap)
+docs/
+  API.md              Referencia de server functions + webhook
+  ARCHITECTURE.md     Arquitectura + plan de escalado
 ```
 
 ---
 
-## Enlaces
+## Documentación
 
-- Producción: https://empenalo.netlify.app
-- Supabase Dashboard: https://supabase.com/dashboard/project/raoprigiowskqnylapqs
+- Referencia de API: [docs/API.md](docs/API.md)
+- Arquitectura: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- Setup de desarrollo (privado): `docs/DEVELOPMENT.md`
+
+## Seguridad
+
+Nunca cometer secretos, credenciales o keys al repositorio. Variables sensibles viven en `.dev.vars` (local, gitignored) o en variables de entorno del proveedor de deploy. Ejecutar `bash scripts/security-scan.sh` antes de cada PR para detectar patrones de secretos en el diff.
