@@ -121,7 +121,7 @@ Plataforma de empeños que conecta clientes con casas de empeño en Lima, Peru.
 
 ## Seeder
 
-El script `scripts/seed.ts` genera datos de demo completos: 5 clientes, 5 negocios, 20 solicitudes, propuestas aleatorias y operaciones aceptadas.
+El script `scripts/seed.ts` genera datos de demo completos: cuentas de desarrollo, 5 clientes, 5 negocios, 20 solicitudes, propuestas deterministas y operaciones aceptadas.
 
 ### Requisitos
 
@@ -136,10 +136,11 @@ bun run seed
 
 ### Lo que crea
 
+- 1 cliente y 1 negocio de desarrollo (`cliente.test@...`, `negocio.test@...`)
 - 5 clientes demo con perfiles
-- 5 negocios demo (trigger `handle_new_user` auto-crea negocio + suscripción trialing)
+- 5 negocios demo (trigger `handle_new_user` auto-crea negocio + suscripción trialing avanzada)
 - 20 solicitudes en categorías: celular, laptop, joya, reloj, vehículo, otro
-- 0-4 propuestas por solicitud (montos, tasas, plazos realistas)
+- 0-3 propuestas por solicitud (montos, tasas, plazos realistas)
 - 5 propuestas aceptadas con código de redención `EMP-XXXXX`
 
 ---

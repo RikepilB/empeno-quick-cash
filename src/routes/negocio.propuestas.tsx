@@ -3,7 +3,11 @@ import { BusinessLayout } from "@/ui/BusinessLayout";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { listMyPropuestas, type PropuestaForBusiness, type PropuestaStatus } from "@/services/propuestas";
+import {
+  listMyPropuestas,
+  type PropuestaForBusiness,
+  type PropuestaStatus,
+} from "@/services/propuestas";
 import { categoryMeta, buildTitle, formatPEN } from "@/lib/categories";
 
 export const Route = createFileRoute("/negocio/propuestas")({ component: MisPropuestas });
@@ -25,11 +29,21 @@ function statusBadge(s: PropuestaStatus): { label: string; badge: string } {
 
 function MisPropuestas() {
   const [filter, setFilter] = useState<"all" | PropuestaStatus>("all");
-  const list = useQuery({ queryKey: ["myPropuestas"], queryFn: () => listMyPropuestas() });
+  const list = useQuery({
+    queryKey: ["myPropuestas"],
+    queryFn: () => listMyPropuestas(),
+    staleTime: 30_000,
+  });
 
   const counts = useMemo(() => {
     const data = list.data ?? [];
-    const c: Record<string, number> = { all: data.length, pending: 0, accepted: 0, rejected: 0, expired: 0 };
+    const c: Record<string, number> = {
+      all: data.length,
+      pending: 0,
+      accepted: 0,
+      rejected: 0,
+      expired: 0,
+    };
     for (const p of data) c[p.status] = (c[p.status] ?? 0) + 1;
     return c;
   }, [list.data]);
@@ -80,14 +94,19 @@ function MisPropuestas() {
               {filtered.map((p) => {
                 const { label, badge } = statusBadge(p.status);
                 return (
-                  <tr key={p.id} className="border-b border-border last:border-0 hover:bg-surface-2">
+                  <tr
+                    key={p.id}
+                    className="border-b border-border last:border-0 hover:bg-surface-2"
+                  >
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-2 text-xl">
                           {categoryMeta(p.solicitud_summary.category).emoji}
                         </div>
                         <div>
-                          <div className="font-semibold">{buildTitle({ ...p.solicitud_summary })}</div>
+                          <div className="font-semibold">
+                            {buildTitle({ ...p.solicitud_summary })}
+                          </div>
                           <div className="text-[11px] text-muted-foreground">
                             {p.solicitud_summary.district ?? "—"}
                           </div>
@@ -98,9 +117,14 @@ function MisPropuestas() {
                     <td className="px-5 py-4">{p.tasa_mensual}%</td>
                     <td className="px-5 py-4">{p.plazo_dias}d</td>
                     <td className="px-5 py-4 text-muted-foreground">
-                      {new Date(p.created_at).toLocaleDateString("es-PE", { day: "numeric", month: "short" })}
+                      {new Date(p.created_at).toLocaleDateString("es-PE", {
+                        day: "numeric",
+                        month: "short",
+                      })}
                     </td>
-                    <td className="px-5 py-4"><span className={`badge-dot ${badge}`}>{label}</span></td>
+                    <td className="px-5 py-4">
+                      <span className={`badge-dot ${badge}`}>{label}</span>
+                    </td>
                     <td className="px-5 py-4 text-right">
                       {p.status === "accepted" && p.operation ? (
                         <Link

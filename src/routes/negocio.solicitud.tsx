@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { BusinessLayout } from "@/ui/BusinessLayout";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MapPin, Clock, Users, Send, CheckCircle2, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,14 +26,26 @@ function SolicitudDetalle() {
   const solicitud = useQuery({
     queryKey: ["solicitud", id],
     queryFn: () => getSolicitud({ data: { id } }),
+    staleTime: 60_000,
   });
-  const context = useQuery({ queryKey: ["businessContext"], queryFn: () => getBusinessContext() });
+  const context = useQuery({
+    queryKey: ["businessContext"],
+    queryFn: () => getBusinessContext(),
+    staleTime: 60_000,
+  });
 
   const [monto, setMonto] = useState<number>(0);
+  const [montoTouched, setMontoTouched] = useState(false);
   const [tasa, setTasa] = useState<number>(4.5);
   const [plazo, setPlazo] = useState<(typeof PLAZOS)[number]>(30);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+
+  useEffect(() => {
+    if (!montoTouched && monto === 0 && solicitud.data?.expected_amount_pen) {
+      setMonto(solicitud.data.expected_amount_pen);
+    }
+  }, [monto, montoTouched, solicitud.data?.expected_amount_pen]);
 
   const send = useMutation({
     mutationFn: () =>
@@ -211,7 +223,10 @@ function SolicitudDetalle() {
                   <input
                     type="number"
                     value={monto || ""}
-                    onChange={(e) => setMonto(Number(e.target.value))}
+                    onChange={(e) => {
+                      setMontoTouched(true);
+                      setMonto(Number(e.target.value));
+                    }}
                     className="input-field font-display text-lg font-bold"
                     placeholder={s.expected_amount_pen?.toString() ?? "0"}
                   />

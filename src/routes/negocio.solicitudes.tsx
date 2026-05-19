@@ -24,17 +24,24 @@ function Solicitudes() {
       listActiveSolicitudes({
         data: category === "all" ? {} : { category },
       }),
+    staleTime: 30_000,
+    placeholderData: (previous) => previous,
   });
 
   const items = useMemo(() => {
     const arr = list.data ?? [];
-    if (sort === "amount_desc") return [...arr].sort((a, b) => (b.expected_amount_pen ?? 0) - (a.expected_amount_pen ?? 0));
-    if (sort === "fewest_proposals") return [...arr].sort((a, b) => a.propuestas_count - b.propuestas_count);
+    if (sort === "amount_desc")
+      return [...arr].sort((a, b) => (b.expected_amount_pen ?? 0) - (a.expected_amount_pen ?? 0));
+    if (sort === "fewest_proposals")
+      return [...arr].sort((a, b) => a.propuestas_count - b.propuestas_count);
     return arr;
   }, [list.data, sort]);
 
   return (
-    <BusinessLayout title="Solicitudes" subtitle={`${items.length} solicitudes activas en este momento`}>
+    <BusinessLayout
+      title="Solicitudes"
+      subtitle={`${items.length} solicitudes activas en este momento`}
+    >
       <div className="mb-5 flex flex-wrap items-center gap-2">
         <button className="flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-xs">
           <Filter className="h-3.5 w-3.5" /> Filtros
@@ -46,7 +53,9 @@ function Solicitudes() {
         >
           <option value="all">Categoría: Todas</option>
           {CATEGORIES.map((c) => (
-            <option key={c.key} value={c.key}>{c.label}</option>
+            <option key={c.key} value={c.key}>
+              {c.label}
+            </option>
           ))}
         </select>
 
@@ -57,7 +66,9 @@ function Solicitudes() {
             className="rounded-xl border border-border bg-surface px-3 py-2 text-xs"
           >
             {SORTS.map((s) => (
-              <option key={s.key} value={s.key}>{s.label}</option>
+              <option key={s.key} value={s.key}>
+                {s.label}
+              </option>
             ))}
           </select>
         </div>
@@ -108,22 +119,28 @@ function Solicitudes() {
 
                 <div className="mt-4 flex items-end justify-between border-t border-border pt-3">
                   <div>
-                    <div className="text-[10px] uppercase text-muted-foreground">Monto referencia</div>
+                    <div className="text-[10px] uppercase text-muted-foreground">
+                      Monto referencia
+                    </div>
                     {s.expected_amount_pen ? (
-                      <div className="font-display text-xl font-bold">{formatPEN(s.expected_amount_pen)}</div>
+                      <div className="font-display text-xl font-bold">
+                        {formatPEN(s.expected_amount_pen)}
+                      </div>
                     ) : (
                       <span className="badge-dot badge-inactive">Sin precio ref.</span>
                     )}
                   </div>
                   <div className="space-y-1 text-right text-[11px] text-muted-foreground">
                     <div className="flex items-center justify-end gap-1">
-                      <Clock className="h-3 w-3" /> {s.expected_term_days ?? "—"} días · {relativeTime(s.created_at)}
+                      <Clock className="h-3 w-3" /> {s.expected_term_days ?? "—"} días ·{" "}
+                      {relativeTime(s.created_at)}
                     </div>
                     <div className="flex items-center justify-end gap-1">
                       <MapPin className="h-3 w-3" /> {s.district ?? "—"}
                     </div>
                     <div className="flex items-center justify-end gap-1">
-                      <Users className="h-3 w-3" /> {s.propuestas_count} {s.propuestas_count === 1 ? "propuesta" : "propuestas"}
+                      <Users className="h-3 w-3" /> {s.propuestas_count}{" "}
+                      {s.propuestas_count === 1 ? "propuesta" : "propuestas"}
                     </div>
                   </div>
                 </div>
