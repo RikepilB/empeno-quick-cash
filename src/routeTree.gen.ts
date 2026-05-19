@@ -23,6 +23,7 @@ import { Route as NegocioPlanRouteImport } from './routes/negocio.plan'
 import { Route as NegocioPerfilRouteImport } from './routes/negocio.perfil'
 import { Route as NegocioLoginRouteImport } from './routes/negocio.login'
 import { Route as NegocioHistorialRouteImport } from './routes/negocio.historial'
+import { Route as NegocioForgotPasswordRouteImport } from './routes/negocio.forgot-password'
 import { Route as NegocioDashboardRouteImport } from './routes/negocio.dashboard'
 import { Route as AppRegisterRouteImport } from './routes/app.register'
 import { Route as AppPublishedRouteImport } from './routes/app.published'
@@ -31,8 +32,10 @@ import { Route as AppProposalsRouteImport } from './routes/app.proposals'
 import { Route as AppProposalDetailRouteImport } from './routes/app.proposal-detail'
 import { Route as AppLoginRouteImport } from './routes/app.login'
 import { Route as AppHistoryRouteImport } from './routes/app.history'
+import { Route as AppForgotPasswordRouteImport } from './routes/app.forgot-password'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AppCodeRouteImport } from './routes/app.code'
+import { Route as ApiCulqiWebhookRouteImport } from './routes/api.culqi-webhook'
 
 const NegocioRoute = NegocioRouteImport.update({
   id: '/negocio',
@@ -104,6 +107,11 @@ const NegocioHistorialRoute = NegocioHistorialRouteImport.update({
   path: '/historial',
   getParentRoute: () => NegocioRoute,
 } as any)
+const NegocioForgotPasswordRoute = NegocioForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => NegocioRoute,
+} as any)
 const NegocioDashboardRoute = NegocioDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -144,6 +152,11 @@ const AppHistoryRoute = AppHistoryRouteImport.update({
   path: '/history',
   getParentRoute: () => AppRoute,
 } as any)
+const AppForgotPasswordRoute = AppForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -154,13 +167,20 @@ const AppCodeRoute = AppCodeRouteImport.update({
   path: '/code',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiCulqiWebhookRoute = ApiCulqiWebhookRouteImport.update({
+  id: '/api/culqi-webhook',
+  path: '/api/culqi-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/negocio': typeof NegocioRouteWithChildren
+  '/api/culqi-webhook': typeof ApiCulqiWebhookRoute
   '/app/code': typeof AppCodeRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
   '/app/login': typeof AppLoginRoute
   '/app/proposal-detail': typeof AppProposalDetailRoute
@@ -169,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/app/published': typeof AppPublishedRoute
   '/app/register': typeof AppRegisterRoute
   '/negocio/dashboard': typeof NegocioDashboardRoute
+  '/negocio/forgot-password': typeof NegocioForgotPasswordRoute
   '/negocio/historial': typeof NegocioHistorialRoute
   '/negocio/login': typeof NegocioLoginRoute
   '/negocio/perfil': typeof NegocioPerfilRoute
@@ -183,8 +204,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/culqi-webhook': typeof ApiCulqiWebhookRoute
   '/app/code': typeof AppCodeRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
   '/app/login': typeof AppLoginRoute
   '/app/proposal-detail': typeof AppProposalDetailRoute
@@ -193,6 +216,7 @@ export interface FileRoutesByTo {
   '/app/published': typeof AppPublishedRoute
   '/app/register': typeof AppRegisterRoute
   '/negocio/dashboard': typeof NegocioDashboardRoute
+  '/negocio/forgot-password': typeof NegocioForgotPasswordRoute
   '/negocio/historial': typeof NegocioHistorialRoute
   '/negocio/login': typeof NegocioLoginRoute
   '/negocio/perfil': typeof NegocioPerfilRoute
@@ -210,8 +234,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/app': typeof AppRouteWithChildren
   '/negocio': typeof NegocioRouteWithChildren
+  '/api/culqi-webhook': typeof ApiCulqiWebhookRoute
   '/app/code': typeof AppCodeRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
   '/app/login': typeof AppLoginRoute
   '/app/proposal-detail': typeof AppProposalDetailRoute
@@ -220,6 +246,7 @@ export interface FileRoutesById {
   '/app/published': typeof AppPublishedRoute
   '/app/register': typeof AppRegisterRoute
   '/negocio/dashboard': typeof NegocioDashboardRoute
+  '/negocio/forgot-password': typeof NegocioForgotPasswordRoute
   '/negocio/historial': typeof NegocioHistorialRoute
   '/negocio/login': typeof NegocioLoginRoute
   '/negocio/perfil': typeof NegocioPerfilRoute
@@ -238,8 +265,10 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/negocio'
+    | '/api/culqi-webhook'
     | '/app/code'
     | '/app/dashboard'
+    | '/app/forgot-password'
     | '/app/history'
     | '/app/login'
     | '/app/proposal-detail'
@@ -248,6 +277,7 @@ export interface FileRouteTypes {
     | '/app/published'
     | '/app/register'
     | '/negocio/dashboard'
+    | '/negocio/forgot-password'
     | '/negocio/historial'
     | '/negocio/login'
     | '/negocio/perfil'
@@ -262,8 +292,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/api/culqi-webhook'
     | '/app/code'
     | '/app/dashboard'
+    | '/app/forgot-password'
     | '/app/history'
     | '/app/login'
     | '/app/proposal-detail'
@@ -272,6 +304,7 @@ export interface FileRouteTypes {
     | '/app/published'
     | '/app/register'
     | '/negocio/dashboard'
+    | '/negocio/forgot-password'
     | '/negocio/historial'
     | '/negocio/login'
     | '/negocio/perfil'
@@ -288,8 +321,10 @@ export interface FileRouteTypes {
     | '/'
     | '/app'
     | '/negocio'
+    | '/api/culqi-webhook'
     | '/app/code'
     | '/app/dashboard'
+    | '/app/forgot-password'
     | '/app/history'
     | '/app/login'
     | '/app/proposal-detail'
@@ -298,6 +333,7 @@ export interface FileRouteTypes {
     | '/app/published'
     | '/app/register'
     | '/negocio/dashboard'
+    | '/negocio/forgot-password'
     | '/negocio/historial'
     | '/negocio/login'
     | '/negocio/perfil'
@@ -315,6 +351,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   NegocioRoute: typeof NegocioRouteWithChildren
+  ApiCulqiWebhookRoute: typeof ApiCulqiWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -417,6 +454,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NegocioHistorialRouteImport
       parentRoute: typeof NegocioRoute
     }
+    '/negocio/forgot-password': {
+      id: '/negocio/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/negocio/forgot-password'
+      preLoaderRoute: typeof NegocioForgotPasswordRouteImport
+      parentRoute: typeof NegocioRoute
+    }
     '/negocio/dashboard': {
       id: '/negocio/dashboard'
       path: '/dashboard'
@@ -473,6 +517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppHistoryRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/forgot-password': {
+      id: '/app/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/app/forgot-password'
+      preLoaderRoute: typeof AppForgotPasswordRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/dashboard': {
       id: '/app/dashboard'
       path: '/dashboard'
@@ -487,12 +538,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCodeRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/culqi-webhook': {
+      id: '/api/culqi-webhook'
+      path: '/api/culqi-webhook'
+      fullPath: '/api/culqi-webhook'
+      preLoaderRoute: typeof ApiCulqiWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 interface AppRouteChildren {
   AppCodeRoute: typeof AppCodeRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppForgotPasswordRoute: typeof AppForgotPasswordRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppLoginRoute: typeof AppLoginRoute
   AppProposalDetailRoute: typeof AppProposalDetailRoute
@@ -506,6 +565,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppCodeRoute: AppCodeRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppForgotPasswordRoute: AppForgotPasswordRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppLoginRoute: AppLoginRoute,
   AppProposalDetailRoute: AppProposalDetailRoute,
@@ -520,6 +580,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface NegocioRouteChildren {
   NegocioDashboardRoute: typeof NegocioDashboardRoute
+  NegocioForgotPasswordRoute: typeof NegocioForgotPasswordRoute
   NegocioHistorialRoute: typeof NegocioHistorialRoute
   NegocioLoginRoute: typeof NegocioLoginRoute
   NegocioPerfilRoute: typeof NegocioPerfilRoute
@@ -534,6 +595,7 @@ interface NegocioRouteChildren {
 
 const NegocioRouteChildren: NegocioRouteChildren = {
   NegocioDashboardRoute: NegocioDashboardRoute,
+  NegocioForgotPasswordRoute: NegocioForgotPasswordRoute,
   NegocioHistorialRoute: NegocioHistorialRoute,
   NegocioLoginRoute: NegocioLoginRoute,
   NegocioPerfilRoute: NegocioPerfilRoute,
@@ -553,6 +615,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   NegocioRoute: NegocioRouteWithChildren,
+  ApiCulqiWebhookRoute: ApiCulqiWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

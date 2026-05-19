@@ -351,10 +351,14 @@ export const rejectPropuesta = createServerFn({ method: "POST" })
   .inputValidator(rejectSchema)
   .handler(async ({ data }): Promise<{ ok: true }> => {
     const supabase = getSupabaseServer();
-    const { error } = await supabase
+    const { data: row, error } = await supabase
       .from("propuestas")
       .update({ status: "rejected" })
-      .eq("id", data.propuesta_id);
+      .eq("id", data.propuesta_id)
+      .eq("status", "pending")
+      .select("id")
+      .maybeSingle<{ id: string }>();
     if (error) throw sanitizeError(error, "Error al rechazar la propuesta.");
+    if (!row) throw new Error("La propuesta ya no está pendiente.");
     return { ok: true };
   });

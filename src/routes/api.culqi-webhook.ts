@@ -8,7 +8,7 @@
 //   https://<your-domain>/api/culqi-webhook
 // Set the same secret as CULQI_SECRET_KEY.
 
-import { createServerFileRoute } from "@tanstack/react-start/server";
+import { createFileRoute } from "@tanstack/react-router";
 import { getSupabaseAdmin } from "@/lib/db/admin";
 import { verifyWebhookSignature } from "@/lib/payments/client";
 
@@ -21,70 +21,92 @@ type CulqiEvent = {
   };
 };
 
-export const ServerRoute = createServerFileRoute("/api/culqi-webhook").methods({
-  POST: async ({ request }) => {
-    const raw = await request.text();
-    const sig = request.headers.get("culqi-signature") ?? "";
+type InvoiceUpdate = {
+  status: "paid" | "failed" | "refunded";
+  paid_at: string | null;
+};
 
-    if (!sig) {
-      return new Response(JSON.stringify({ error: "missing signature" }), {
-        status: 400,
-        headers: { "content-type": "application/json" },
-      });
-    }
+type InvoiceUpdater = {
+  from(table: "invoices"): {
+    update(values: InvoiceUpdate): {
+      eq(
+        column: "culqi_charge_id",
+        value: string,
+      ): Promise<{
+        error: { message: string } | null;
+      }>;
+    };
+  };
+};
 
-    const valid = await verifyWebhookSignature(raw, sig);
-    if (!valid) {
-      return new Response(JSON.stringify({ error: "invalid signature" }), {
-        status: 401,
-        headers: { "content-type": "application/json" },
-      });
-    }
+export const Route = createFileRoute("/api/culqi-webhook")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const raw = await request.text();
+        const sig = request.headers.get("culqi-signature") ?? "";
 
-    let event: CulqiEvent;
-    try {
-      event = JSON.parse(raw) as CulqiEvent;
-    } catch {
-      return new Response(JSON.stringify({ error: "invalid json" }), {
-        status: 400,
-        headers: { "content-type": "application/json" },
-      });
-    }
+        if (!sig) {
+          return new Response(JSON.stringify({ error: "missing signature" }), {
+            status: 400,
+            headers: { "content-type": "application/json" },
+          });
+        }
 
-    const admin = getSupabaseAdmin();
+        const valid = await verifyWebhookSignature(raw, sig);
+        if (!valid) {
+          return new Response(JSON.stringify({ error: "invalid signature" }), {
+            status: 401,
+            headers: { "content-type": "application/json" },
+          });
+        }
 
-    const chargeId = event.data?.id;
-    if (!chargeId) {
-      return new Response(JSON.stringify({ ok: true, noop: true }), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      });
-    }
+        let event: CulqiEvent;
+        try {
+          event = JSON.parse(raw) as CulqiEvent;
+        } catch {
+          return new Response(JSON.stringify({ error: "invalid json" }), {
+            status: 400,
+            headers: { "content-type": "application/json" },
+          });
+        }
 
-    let newStatus: "paid" | "failed" | "refunded" | null = null;
-    if (event.type === "charge.succeeded") newStatus = "paid";
-    else if (event.type === "charge.failed") newStatus = "failed";
-    else if (event.type === "charge.refunded") newStatus = "refunded";
+        const admin = getSupabaseAdmin();
 
-    if (newStatus) {
-      const { error } = await admin
-        .from("invoices")
-        .update({
-          status: newStatus,
-          paid_at: newStatus === "paid" ? new Date().toISOString() : null,
-        })
-        .eq("culqi_charge_id", chargeId);
-      if (error) {
-        return new Response(JSON.stringify({ error: error.message }), {
-          status: 500,
+        const chargeId = event.data?.id;
+        if (!chargeId) {
+          return new Response(JSON.stringify({ ok: true, noop: true }), {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          });
+        }
+
+        let newStatus: "paid" | "failed" | "refunded" | null = null;
+        if (event.type === "charge.succeeded") newStatus = "paid";
+        else if (event.type === "charge.failed") newStatus = "failed";
+        else if (event.type === "charge.refunded") newStatus = "refunded";
+
+        if (newStatus) {
+          const { error } = await (admin as unknown as InvoiceUpdater)
+            .from("invoices")
+            .update({
+              status: newStatus,
+              paid_at: newStatus === "paid" ? new Date().toISOString() : null,
+            })
+            .eq("culqi_charge_id", chargeId);
+          if (error) {
+            return new Response(JSON.stringify({ error: error.message }), {
+              status: 500,
+              headers: { "content-type": "application/json" },
+            });
+          }
+        }
+
+        return new Response(JSON.stringify({ ok: true, applied: newStatus }), {
+          status: 200,
           headers: { "content-type": "application/json" },
         });
-      }
-    }
-
-    return new Response(JSON.stringify({ ok: true, applied: newStatus }), {
-      status: 200,
-      headers: { "content-type": "application/json" },
-    });
+      },
+    },
   },
 });
