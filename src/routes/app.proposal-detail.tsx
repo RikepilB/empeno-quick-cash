@@ -49,13 +49,25 @@ function Detail() {
     onError: (err) => setError(err instanceof Error ? err.message : "Error al rechazar"),
   });
 
+  if (propuesta.isLoading) {
+    return (
+      <PhoneFrame title="Detalle" back="/app/dashboard">
+        <div className="flex items-center justify-center p-12 text-xs text-muted-foreground">
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando propuesta...
+        </div>
+      </PhoneFrame>
+    );
+  }
+
   if (!propuesta.data) {
     return (
       <PhoneFrame title="Detalle" back="/app/dashboard">
         <div className="p-6 text-sm text-muted-foreground">
           No encontramos esta propuesta en tu sesión actual. Vuelve al listado para verla.
           <div className="mt-4">
-            <Link to="/app/dashboard" className="btn-primary w-full">Volver al panel</Link>
+            <Link to="/app/dashboard" className="btn-primary w-full">
+              Volver al panel
+            </Link>
           </div>
         </div>
       </PhoneFrame>
@@ -84,7 +96,9 @@ function Detail() {
           <div className="flex items-end justify-between border-b border-border pb-4">
             <div>
               <div className="text-[10px] uppercase text-muted-foreground">Te prestamos</div>
-              <div className="font-display text-4xl font-extrabold text-primary">{formatPEN(p.monto_pen)}</div>
+              <div className="font-display text-4xl font-extrabold text-primary">
+                {formatPEN(p.monto_pen)}
+              </div>
             </div>
           </div>
           <div className="mt-4 space-y-2.5 text-sm">
@@ -128,7 +142,9 @@ function Row({ k, v, highlight }: { k: string; v: string; highlight?: boolean })
   return (
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{k}</span>
-      <span className={highlight ? "font-display text-lg font-bold text-primary" : "font-semibold"}>{v}</span>
+      <span className={highlight ? "font-display text-lg font-bold text-primary" : "font-semibold"}>
+        {v}
+      </span>
     </div>
   );
 }

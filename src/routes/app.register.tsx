@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Smartphone, Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
 
@@ -30,8 +30,6 @@ function Register() {
       });
       if (signUpError) throw signUpError;
 
-      // If email confirmation is disabled in Supabase dashboard, a session is created immediately
-      // and beforeLoad on /app/dashboard will pass. Otherwise the user will see the login page.
       const { data: sessionData } = await supabase.auth.getSession();
       if (sessionData.session) {
         await navigate({ to: "/app/dashboard" });
@@ -46,71 +44,126 @@ function Register() {
   }
 
   return (
-    <main className="min-h-dvh flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-[480px]">
-        <form onSubmit={onSubmit} className="space-y-5">
-          <div>
-            <label className="label-field">Nombre completo</label>
-            <input
-              name="full_name"
-              required
-              className="input-field"
-              placeholder="María Fernández Castro"
-            />
+    <div className="grid min-h-dvh grid-cols-1 lg:grid-cols-2">
+      <aside className="hidden items-center justify-center border-r border-border bg-surface lg:flex">
+        <div className="text-center">
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-primary font-display text-4xl font-bold text-primary-foreground shadow-glow">
+            E
           </div>
-          <div>
-            <label className="label-field">Correo electrónico</label>
-            <input
-              name="email"
-              type="email"
-              required
-              className="input-field"
-              placeholder="maria@correo.com"
-            />
+          <div className="mt-6 font-display text-3xl font-bold uppercase tracking-widest">
+            EMPEÑALO
           </div>
-          <div>
-            <label className="label-field">Contraseña</label>
-            <input
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              className="input-field"
-              placeholder="Mínimo 6 caracteres"
-            />
-          </div>
-          <div>
-            <label className="label-field">Celular (opcional)</label>
-            <input name="phone" className="input-field" placeholder="+51 987 654 321" />
-          </div>
-
-          {error && (
-            <div className="rounded-lg bg-status-reported/15 px-3 py-2 text-xs text-status-reported">
-              {error}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="btn-primary w-full disabled:opacity-60"
-          >
-            {submitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Smartphone className="h-4 w-4" />
-            )}
-            {submitting ? "Creando cuenta..." : "Crear cuenta"}
-          </button>
-
-          <p className="text-center text-xs text-muted-foreground">
-            ¿Ya tienes cuenta?{" "}
-            <Link to="/app/login" className="text-primary hover:underline">
-              Inicia sesión
-            </Link>
+          <p className="mt-3 max-w-xs text-sm text-muted-foreground">
+            Publica una vez. Múltiples casas de empeño compiten por ofrecerte la mejor propuesta.
           </p>
-        </form>
-      </div>
-    </main>
+        </div>
+      </aside>
+
+      <main className="flex flex-col">
+        <header className="flex items-center justify-between px-4 py-4 md:px-8">
+          <Link
+            to="/"
+            aria-label="Volver al inicio"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border bg-surface text-foreground transition hover:bg-surface-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+          <div className="flex items-center gap-2 lg:hidden">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground">
+              E
+            </div>
+            <span className="font-display text-sm font-bold tracking-widest">EMPEÑALO</span>
+          </div>
+          <div className="w-10" aria-hidden />
+        </header>
+
+        <div className="flex flex-1 items-center justify-center px-4 pb-10 md:px-8">
+          <div className="w-full max-w-[420px]">
+            <div className="mb-8 lg:hidden text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-primary font-display text-3xl font-bold text-primary-foreground">
+                E
+              </div>
+              <h2 className="mt-3 font-display text-xl font-bold uppercase tracking-widest">
+                EMPEÑALO
+              </h2>
+            </div>
+
+            <div className="rounded-2xl border border-border bg-surface p-6 md:p-8">
+              <h1 className="font-display text-2xl font-bold">Crear cuenta</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Publica solicitudes y recibe propuestas de casas de empeño verificadas.
+              </p>
+
+              <form onSubmit={onSubmit} className="mt-6 space-y-5">
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Nombre completo</label>
+                  <input
+                    name="full_name"
+                    required
+                    className="input-field"
+                    placeholder="María Fernández"
+                    autoComplete="name"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Correo electrónico</label>
+                  <input
+                    name="email"
+                    type="email"
+                    required
+                    className="input-field"
+                    placeholder="maria@correo.com"
+                    autoComplete="email"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Contraseña</label>
+                  <input
+                    name="password"
+                    type="password"
+                    required
+                    minLength={6}
+                    className="input-field"
+                    placeholder="Mínimo 6 caracteres"
+                    autoComplete="new-password"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Celular (opcional)</label>
+                  <input
+                    name="phone"
+                    className="input-field"
+                    placeholder="+51 987 654 321"
+                    autoComplete="tel"
+                  />
+                </div>
+
+                {error && (
+                  <div className="rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="btn-primary w-full disabled:opacity-60"
+                >
+                  {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                  {submitting ? "Creando cuenta..." : "Crear cuenta"}
+                </button>
+              </form>
+
+              <p className="mt-6 text-center text-sm text-muted-foreground">
+                ¿Ya tienes cuenta?{" "}
+                <Link to="/app/login" className="font-medium text-primary hover:underline">
+                  Inicia sesión
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
   );
 }

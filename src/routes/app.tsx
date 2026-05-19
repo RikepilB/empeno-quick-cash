@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { getCurrentUser } from "@/services/auth";
 
-const PUBLIC_APP_PATHS = new Set(["/app/login", "/app/register"]);
+const PUBLIC_APP_PATHS = new Set(["/app/login", "/app/register", "/app/forgot-password"]);
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async ({ location }) => {
