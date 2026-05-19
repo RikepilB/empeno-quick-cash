@@ -1,10 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { PhoneFrame } from "@/ui/PhoneFrame";
-import { Plus, Clock, Sparkles, History as HistoryIcon, Bell, Loader2 } from "lucide-react";
+import { Plus, Clock, Sparkles, History as HistoryIcon, Bell, Loader2, LogOut } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { listMySolicitudes, type SolicitudListItem } from "@/services/solicitudes";
 import { listMyClientOperations } from "@/services/operations";
-import { getCurrentUser } from "@/services/auth";
+import { getCurrentUser, signOut } from "@/services/auth";
+import { getSupabaseBrowser } from "@/lib/db/browser";
 import { categoryMeta, buildTitle } from "@/lib/categories";
 
 export const Route = createFileRoute("/app/dashboard")({ component: Dashboard });
@@ -18,7 +19,16 @@ function statusBadge(s: SolicitudListItem): { label: string; badge: string } {
 }
 
 function Dashboard() {
+  const router = useRouter();
   const user = useQuery({ queryKey: ["currentUser"], queryFn: () => getCurrentUser() });
+
+  async function handleLogout() {
+    await signOut();
+    await getSupabaseBrowser().auth.signOut();
+    await router.invalidate();
+    await router.navigate({ to: "/app/login" });
+  }
+
   const solicitudes = useQuery({
     queryKey: ["mySolicitudes"],
     queryFn: () => listMySolicitudes(),
@@ -41,10 +51,20 @@ function Dashboard() {
             <div className="text-xs text-muted-foreground">¡Hola,</div>
             <div className="font-display text-2xl font-bold uppercase">{firstName || "Cliente"}! 👋</div>
           </div>
-          <button className="relative rounded-xl border border-border bg-surface p-2.5">
-            <Bell className="h-5 w-5" />
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button className="relative rounded-xl border border-border bg-surface p-2.5">
+              <Bell className="h-5 w-5" />
+              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
+            </button>
+            <button
+              onClick={handleLogout}
+              className="rounded-xl border border-border bg-surface p-2.5 text-muted-foreground hover:text-foreground"
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         <div className="px-6">
