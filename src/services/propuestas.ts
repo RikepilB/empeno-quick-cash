@@ -259,7 +259,8 @@ export const listMyPropuestas = createServerFn({ method: "GET" }).handler(
           "operations(id, redemption_code, status, accepted_at, completed_at)",
       )
       .eq("business_id", business.id)
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(80);
 
     if (error) throw sanitizeError(error, "Error al cargar las propuestas.");
 

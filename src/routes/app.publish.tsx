@@ -10,8 +10,9 @@ export const Route = createFileRoute("/app/publish")({ component: Publish });
 
 const CONDITIONS = ["Nuevo", "Bueno", "Regular", "Detalles"] as const;
 const PLAZOS = [15, 30, 45, 60] as const;
-const MIN_PHOTOS = 2;
-const MAX_PHOTOS = 8;
+const MIN_PHOTOS = 1;
+const MAX_PHOTOS = 6;
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const BUCKET = "solicitud-photos";
 
 type LocalPhoto = { file: File; previewUrl: string; storagePath?: string };
@@ -30,7 +31,14 @@ function Publish() {
   function handleFiles(filesList: FileList | null) {
     if (!filesList || filesList.length === 0) return;
     const remaining = MAX_PHOTOS - photos.length;
-    const incoming = Array.from(filesList).slice(0, remaining);
+    const incoming = Array.from(filesList)
+      .filter((file) => file.size <= MAX_PHOTO_BYTES)
+      .slice(0, remaining);
+    if (incoming.length < Math.min(filesList.length, remaining)) {
+      setError("Cada foto debe pesar 5 MB o menos.");
+    } else {
+      setError(null);
+    }
     setPhotos((prev) => [
       ...prev,
       ...incoming.map((f) => ({ file: f, previewUrl: URL.createObjectURL(f) })),
@@ -47,18 +55,17 @@ function Publish() {
   async function uploadAllPhotos(userId: string): Promise<string[]> {
     if (photos.length === 0) return [];
     const supabase = getSupabaseBrowser();
-    const paths: string[] = [];
-    for (let i = 0; i < photos.length; i++) {
-      const photo = photos[i]!;
-      const ext = photo.file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${userId}/${crypto.randomUUID()}-${i}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from(BUCKET)
-        .upload(path, photo.file, { contentType: photo.file.type || "image/jpeg" });
-      if (upErr) throw new Error(`Error subiendo foto ${i + 1}: ${upErr.message}`);
-      paths.push(path);
-    }
-    return paths;
+    return Promise.all(
+      photos.map(async (photo, i) => {
+        const ext = photo.file.name.split(".").pop()?.toLowerCase() || "jpg";
+        const path = `${userId}/${crypto.randomUUID()}-${i}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from(BUCKET)
+          .upload(path, photo.file, { contentType: photo.file.type || "image/jpeg" });
+        if (upErr) throw new Error(`Error subiendo foto ${i + 1}: ${upErr.message}`);
+        return path;
+      }),
+    );
   }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -139,7 +146,13 @@ function Publish() {
           </div>
           <div>
             <label className="label-field">Año</label>
-            <input name="year" type="number" inputMode="numeric" className="input-field" placeholder="2023" />
+            <input
+              name="year"
+              type="number"
+              inputMode="numeric"
+              className="input-field"
+              placeholder="2023"
+            />
           </div>
           <div>
             <label className="label-field">Almacenamiento</label>
@@ -173,10 +186,15 @@ function Publish() {
         </div>
 
         <div>
-          <label className="label-field">Fotografías (mín. {MIN_PHOTOS} · máx. {MAX_PHOTOS})</label>
+          <label className="label-field">
+            Fotografías (mín. {MIN_PHOTOS} · máx. {MAX_PHOTOS})
+          </label>
           <div className="grid grid-cols-4 gap-2">
             {photos.map((p, idx) => (
-              <div key={idx} className="relative aspect-square overflow-hidden rounded-lg bg-surface-2">
+              <div
+                key={idx}
+                className="relative aspect-square overflow-hidden rounded-lg bg-surface-2"
+              >
                 <img src={p.previewUrl} alt="" className="h-full w-full object-cover" />
                 <button
                   type="button"
@@ -217,7 +235,12 @@ function Publish() {
           <div className="space-y-4 border-t border-border p-4">
             <div>
               <label className="label-field">Monto esperado (S/)</label>
-              <input name="expected_amount_pen" inputMode="numeric" className="input-field" placeholder="2,500" />
+              <input
+                name="expected_amount_pen"
+                inputMode="numeric"
+                className="input-field"
+                placeholder="2,500"
+              />
             </div>
             <div>
               <label className="label-field">Plazo deseado</label>
@@ -247,7 +270,11 @@ function Publish() {
           </div>
         )}
 
-        <button type="submit" disabled={submitting} className="btn-primary w-full disabled:opacity-60">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="btn-primary w-full disabled:opacity-60"
+        >
           {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           {submitting ? "Publicando..." : "Publicar y esperar propuestas"}
         </button>
