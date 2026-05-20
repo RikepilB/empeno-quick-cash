@@ -30,8 +30,15 @@ export const log = {
 export function sanitizeError(err: unknown, userMessage: string): Error {
   if (err instanceof Error) {
     log.error(err.message, { stack: err.stack?.slice(0, 500) });
+  } else if (err && typeof err === "object") {
+    const e = err as { message?: string; code?: string; details?: string; hint?: string };
+    log.error(e.message ?? "unknown_error", {
+      code: e.code,
+      details: e.details,
+      hint: e.hint,
+    });
   } else {
-    log.error(String(err));
+    log.error(typeof err === "string" ? err : JSON.stringify(err ?? null));
   }
   return new Error(userMessage);
 }
