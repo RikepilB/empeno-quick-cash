@@ -38,11 +38,18 @@ async function main() {
   check("Auth users present", demoUsers.length >= 12, `${demoUsers.length} demo users`);
 
   // Profiles
-  const { data: profiles } = await supabase.from("profiles").select("id, document_number").in(
-    "id",
-    demoUsers.map((u) => u.id),
+  const { data: profiles } = await supabase
+    .from("profiles")
+    .select("id, document_number")
+    .in(
+      "id",
+      demoUsers.map((u) => u.id),
+    );
+  check(
+    "Profiles match users",
+    (profiles?.length ?? 0) === demoUsers.length,
+    `${profiles?.length}/${demoUsers.length}`,
   );
-  check("Profiles match users", (profiles?.length ?? 0) === demoUsers.length, `${profiles?.length}/${demoUsers.length}`);
 
   // Businesses verified
   const { data: businesses } = await supabase
@@ -54,7 +61,10 @@ async function main() {
     );
   const verified = (businesses ?? []).filter((b) => b.verification_status === "verified");
   check("Businesses verified", verified.length >= 6, `${verified.length} verified`);
-  check("Businesses RUC populated", (businesses ?? []).every((b) => b.ruc?.length === 11));
+  check(
+    "Businesses RUC populated",
+    (businesses ?? []).every((b) => b.ruc?.length === 11),
+  );
 
   // Subscriptions
   const { data: subs } = await supabase
@@ -133,7 +143,11 @@ async function main() {
   if (commErr) {
     console.log(`  (commissions check skipped: ${commErr.message})`);
   } else {
-    check("Commissions ledger populated", (commissions?.length ?? 0) >= 1, `${commissions?.length}`);
+    check(
+      "Commissions ledger populated",
+      (commissions?.length ?? 0) >= 1,
+      `${commissions?.length}`,
+    );
   }
 
   console.log(`\n${failures === 0 ? "✅" : "❌"} ${failures} failures\n`);

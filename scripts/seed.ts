@@ -14,9 +14,7 @@ if (!url || !serviceKey) {
 }
 
 if (!DEMO_PASSWORD || DEMO_PASSWORD.length < 8) {
-  console.error(
-    "Missing SEED_DEMO_PASSWORD in .dev.vars (>=8 chars). See docs/DEVELOPMENT.md.",
-  );
+  console.error("Missing SEED_DEMO_PASSWORD in .dev.vars (>=8 chars). See docs/DEVELOPMENT.md.");
   process.exit(1);
 }
 
@@ -68,11 +66,41 @@ const TEST_BUSINESS: SeedBusiness = {
 };
 
 const DEMO_CLIENTS: SeedUser[] = [
-  { email: "demo.cliente1@empenalo.local", full_name: "María González", role: "client", document_number: "40000001", phone: "+51 999 100 001" },
-  { email: "demo.cliente2@empenalo.local", full_name: "Carlos Mendoza", role: "client", document_number: "40000002", phone: "+51 999 100 002" },
-  { email: "demo.cliente3@empenalo.local", full_name: "Lucía Torres", role: "client", document_number: "40000003", phone: "+51 999 100 003" },
-  { email: "demo.cliente4@empenalo.local", full_name: "Javier Ruiz", role: "client", document_number: "40000004", phone: "+51 999 100 004" },
-  { email: "demo.cliente5@empenalo.local", full_name: "Ana Castillo", role: "client", document_number: "40000005", phone: "+51 999 100 005" },
+  {
+    email: "demo.cliente1@empenalo.local",
+    full_name: "María González",
+    role: "client",
+    document_number: "40000001",
+    phone: "+51 999 100 001",
+  },
+  {
+    email: "demo.cliente2@empenalo.local",
+    full_name: "Carlos Mendoza",
+    role: "client",
+    document_number: "40000002",
+    phone: "+51 999 100 002",
+  },
+  {
+    email: "demo.cliente3@empenalo.local",
+    full_name: "Lucía Torres",
+    role: "client",
+    document_number: "40000003",
+    phone: "+51 999 100 003",
+  },
+  {
+    email: "demo.cliente4@empenalo.local",
+    full_name: "Javier Ruiz",
+    role: "client",
+    document_number: "40000004",
+    phone: "+51 999 100 004",
+  },
+  {
+    email: "demo.cliente5@empenalo.local",
+    full_name: "Ana Castillo",
+    role: "client",
+    document_number: "40000005",
+    phone: "+51 999 100 005",
+  },
 ];
 
 const DEMO_BUSINESSES: SeedBusiness[] = [
@@ -153,58 +181,427 @@ type SolicitudTemplate = {
 
 const SOLICITUD_TEMPLATES: SolicitudTemplate[] = [
   // Celular ×6
-  { category: "celular", brand: "Apple", model: "iPhone 14 Pro", year: 2023, storage: "256 GB", condition: "Bueno", description: "Ligero rayón en marco superior. Pantalla y batería perfectas.", expected_amount_pen: 2500, expected_term_days: 30, district: "Miraflores", detalles: { battery_health: 92, almacenamiento_gb: 256 } },
-  { category: "celular", brand: "Samsung", model: "Galaxy S23 Ultra", year: 2023, storage: "256 GB", condition: "Bueno", description: "Mica desde día uno. Cargador original incluido.", expected_amount_pen: 2100, expected_term_days: 30, district: "San Isidro", detalles: { battery_health: 95, almacenamiento_gb: 256 } },
-  { category: "celular", brand: "Apple", model: "iPhone 13 Pro Max", year: 2022, storage: "128 GB", condition: "Regular", description: "Batería al 82%. Funciona perfecto.", expected_amount_pen: 1600, expected_term_days: 30, district: "Santiago de Surco", detalles: { battery_health: 82, almacenamiento_gb: 128 } },
-  { category: "celular", brand: "Xiaomi", model: "13T Pro", year: 2023, storage: "512 GB", condition: "Nuevo", description: "Desempaquetado pero sin uso. Plásticos puestos.", expected_amount_pen: 1500, expected_term_days: 30, district: "Santiago de Surco", detalles: { battery_health: 100, almacenamiento_gb: 512 } },
-  { category: "celular", brand: "Google", model: "Pixel 8 Pro", year: 2023, storage: "256 GB", condition: "Bueno", description: "Caja original. Sin detalles visibles.", expected_amount_pen: 1900, expected_term_days: 30, district: "Miraflores", detalles: { battery_health: 93, almacenamiento_gb: 256 } },
-  { category: "celular", brand: "Apple", model: "iPhone 15", year: 2024, storage: "128 GB", condition: "Nuevo", description: "Sellado. Garantía Apple vigente 11 meses.", expected_amount_pen: 2800, expected_term_days: 45, district: "San Isidro", detalles: { battery_health: 100, almacenamiento_gb: 128 } },
+  {
+    category: "celular",
+    brand: "Apple",
+    model: "iPhone 14 Pro",
+    year: 2023,
+    storage: "256 GB",
+    condition: "Bueno",
+    description: "Ligero rayón en marco superior. Pantalla y batería perfectas.",
+    expected_amount_pen: 2500,
+    expected_term_days: 30,
+    district: "Miraflores",
+    detalles: { battery_health: 92, almacenamiento_gb: 256 },
+  },
+  {
+    category: "celular",
+    brand: "Samsung",
+    model: "Galaxy S23 Ultra",
+    year: 2023,
+    storage: "256 GB",
+    condition: "Bueno",
+    description: "Mica desde día uno. Cargador original incluido.",
+    expected_amount_pen: 2100,
+    expected_term_days: 30,
+    district: "San Isidro",
+    detalles: { battery_health: 95, almacenamiento_gb: 256 },
+  },
+  {
+    category: "celular",
+    brand: "Apple",
+    model: "iPhone 13 Pro Max",
+    year: 2022,
+    storage: "128 GB",
+    condition: "Regular",
+    description: "Batería al 82%. Funciona perfecto.",
+    expected_amount_pen: 1600,
+    expected_term_days: 30,
+    district: "Santiago de Surco",
+    detalles: { battery_health: 82, almacenamiento_gb: 128 },
+  },
+  {
+    category: "celular",
+    brand: "Xiaomi",
+    model: "13T Pro",
+    year: 2023,
+    storage: "512 GB",
+    condition: "Nuevo",
+    description: "Desempaquetado pero sin uso. Plásticos puestos.",
+    expected_amount_pen: 1500,
+    expected_term_days: 30,
+    district: "Santiago de Surco",
+    detalles: { battery_health: 100, almacenamiento_gb: 512 },
+  },
+  {
+    category: "celular",
+    brand: "Google",
+    model: "Pixel 8 Pro",
+    year: 2023,
+    storage: "256 GB",
+    condition: "Bueno",
+    description: "Caja original. Sin detalles visibles.",
+    expected_amount_pen: 1900,
+    expected_term_days: 30,
+    district: "Miraflores",
+    detalles: { battery_health: 93, almacenamiento_gb: 256 },
+  },
+  {
+    category: "celular",
+    brand: "Apple",
+    model: "iPhone 15",
+    year: 2024,
+    storage: "128 GB",
+    condition: "Nuevo",
+    description: "Sellado. Garantía Apple vigente 11 meses.",
+    expected_amount_pen: 2800,
+    expected_term_days: 45,
+    district: "San Isidro",
+    detalles: { battery_health: 100, almacenamiento_gb: 128 },
+  },
 
   // Laptop ×4
-  { category: "laptop", brand: "Apple", model: 'MacBook Pro M2 14"', year: 2023, storage: "512 GB SSD", condition: "Nuevo", description: "Comprado hace 3 meses. Factura. Garantía.", expected_amount_pen: 5500, expected_term_days: 60, district: "San Isidro", detalles: { ram_gb: 16, ssd_gb: 512 } },
-  { category: "laptop", brand: "Dell", model: "XPS 13 Plus", year: 2022, storage: "1 TB SSD", condition: "Bueno", description: "Pantalla OLED. Teclado táctil. Cuidada.", expected_amount_pen: 3200, expected_term_days: 30, district: "Miraflores", detalles: { ram_gb: 32, ssd_gb: 1024 } },
-  { category: "laptop", brand: "Lenovo", model: "ThinkPad X1 Carbon", year: 2022, storage: "512 GB SSD", condition: "Bueno", description: "Empresarial. Batería excelente.", expected_amount_pen: 2800, expected_term_days: 45, district: "San Isidro", detalles: { ram_gb: 16, ssd_gb: 512 } },
-  { category: "laptop", brand: "HP", model: "Spectre x360", year: 2023, storage: "512 GB SSD", condition: "Nuevo", description: "Convertible 2-en-1. Stylus incluido.", expected_amount_pen: 3600, expected_term_days: 30, district: "San Isidro", detalles: { ram_gb: 16, ssd_gb: 512 } },
+  {
+    category: "laptop",
+    brand: "Apple",
+    model: 'MacBook Pro M2 14"',
+    year: 2023,
+    storage: "512 GB SSD",
+    condition: "Nuevo",
+    description: "Comprado hace 3 meses. Factura. Garantía.",
+    expected_amount_pen: 5500,
+    expected_term_days: 60,
+    district: "San Isidro",
+    detalles: { ram_gb: 16, ssd_gb: 512 },
+  },
+  {
+    category: "laptop",
+    brand: "Dell",
+    model: "XPS 13 Plus",
+    year: 2022,
+    storage: "1 TB SSD",
+    condition: "Bueno",
+    description: "Pantalla OLED. Teclado táctil. Cuidada.",
+    expected_amount_pen: 3200,
+    expected_term_days: 30,
+    district: "Miraflores",
+    detalles: { ram_gb: 32, ssd_gb: 1024 },
+  },
+  {
+    category: "laptop",
+    brand: "Lenovo",
+    model: "ThinkPad X1 Carbon",
+    year: 2022,
+    storage: "512 GB SSD",
+    condition: "Bueno",
+    description: "Empresarial. Batería excelente.",
+    expected_amount_pen: 2800,
+    expected_term_days: 45,
+    district: "San Isidro",
+    detalles: { ram_gb: 16, ssd_gb: 512 },
+  },
+  {
+    category: "laptop",
+    brand: "HP",
+    model: "Spectre x360",
+    year: 2023,
+    storage: "512 GB SSD",
+    condition: "Nuevo",
+    description: "Convertible 2-en-1. Stylus incluido.",
+    expected_amount_pen: 3600,
+    expected_term_days: 30,
+    district: "San Isidro",
+    detalles: { ram_gb: 16, ssd_gb: 512 },
+  },
 
   // Joya ×4
-  { category: "joya", brand: null, model: "Anillo de oro 18k", year: null, storage: null, condition: "Bueno", description: "8.4 g de oro amarillo 18k. Diseño clásico.", expected_amount_pen: 1200, expected_term_days: 45, district: "Miraflores", detalles: { tipo_joya: "anillo", material: "oro", kilataje: 18, peso_g: 8.4 } },
-  { category: "joya", brand: null, model: "Cadena de oro 14k", year: null, storage: null, condition: "Regular", description: "12 g. Eslabón requiere soldadura. Valor en oro.", expected_amount_pen: 900, expected_term_days: 30, district: "San Borja", detalles: { tipo_joya: "cadena", material: "oro", kilataje: 14, peso_g: 12 } },
-  { category: "joya", brand: null, model: "Pulsera de plata 925", year: null, storage: null, condition: "Bueno", description: "20 g. Artesanal peruano. Caja terciopelo.", expected_amount_pen: 450, expected_term_days: 15, district: "Miraflores", detalles: { tipo_joya: "pulsera", material: "plata", kilataje: null, peso_g: 20 } },
-  { category: "joya", brand: null, model: "Aros de oro 18k", year: null, storage: null, condition: "Nuevo", description: "3 g. Diseño minimalista. Caja de regalo.", expected_amount_pen: 380, expected_term_days: 15, district: "Miraflores", detalles: { tipo_joya: "aros", material: "oro", kilataje: 18, peso_g: 3 } },
+  {
+    category: "joya",
+    brand: null,
+    model: "Anillo de oro 18k",
+    year: null,
+    storage: null,
+    condition: "Bueno",
+    description: "8.4 g de oro amarillo 18k. Diseño clásico.",
+    expected_amount_pen: 1200,
+    expected_term_days: 45,
+    district: "Miraflores",
+    detalles: { tipo_joya: "anillo", material: "oro", kilataje: 18, peso_g: 8.4 },
+  },
+  {
+    category: "joya",
+    brand: null,
+    model: "Cadena de oro 14k",
+    year: null,
+    storage: null,
+    condition: "Regular",
+    description: "12 g. Eslabón requiere soldadura. Valor en oro.",
+    expected_amount_pen: 900,
+    expected_term_days: 30,
+    district: "San Borja",
+    detalles: { tipo_joya: "cadena", material: "oro", kilataje: 14, peso_g: 12 },
+  },
+  {
+    category: "joya",
+    brand: null,
+    model: "Pulsera de plata 925",
+    year: null,
+    storage: null,
+    condition: "Bueno",
+    description: "20 g. Artesanal peruano. Caja terciopelo.",
+    expected_amount_pen: 450,
+    expected_term_days: 15,
+    district: "Miraflores",
+    detalles: { tipo_joya: "pulsera", material: "plata", kilataje: null, peso_g: 20 },
+  },
+  {
+    category: "joya",
+    brand: null,
+    model: "Aros de oro 18k",
+    year: null,
+    storage: null,
+    condition: "Nuevo",
+    description: "3 g. Diseño minimalista. Caja de regalo.",
+    expected_amount_pen: 380,
+    expected_term_days: 15,
+    district: "Miraflores",
+    detalles: { tipo_joya: "aros", material: "oro", kilataje: 18, peso_g: 3 },
+  },
 
   // Reloj ×3
-  { category: "reloj", brand: "Tissot", model: "PRX Powermatic 80", year: 2022, storage: null, condition: "Nuevo", description: "Caja original y papeles. Sin uso.", expected_amount_pen: 1800, expected_term_days: 30, district: "San Isidro" },
-  { category: "reloj", brand: "Casio", model: "G-Shock GA-2100", year: 2023, storage: null, condition: "Nuevo", description: "Edición Carbon Core Guard. Sin estrenar.", expected_amount_pen: 600, expected_term_days: 15, district: "San Borja" },
-  { category: "reloj", brand: "Fossil", model: "Machine FS4656", year: 2021, storage: null, condition: "Bueno", description: "Automático. Correa cuero original.", expected_amount_pen: 350, expected_term_days: 15, district: "San Borja" },
+  {
+    category: "reloj",
+    brand: "Tissot",
+    model: "PRX Powermatic 80",
+    year: 2022,
+    storage: null,
+    condition: "Nuevo",
+    description: "Caja original y papeles. Sin uso.",
+    expected_amount_pen: 1800,
+    expected_term_days: 30,
+    district: "San Isidro",
+  },
+  {
+    category: "reloj",
+    brand: "Casio",
+    model: "G-Shock GA-2100",
+    year: 2023,
+    storage: null,
+    condition: "Nuevo",
+    description: "Edición Carbon Core Guard. Sin estrenar.",
+    expected_amount_pen: 600,
+    expected_term_days: 15,
+    district: "San Borja",
+  },
+  {
+    category: "reloj",
+    brand: "Fossil",
+    model: "Machine FS4656",
+    year: 2021,
+    storage: null,
+    condition: "Bueno",
+    description: "Automático. Correa cuero original.",
+    expected_amount_pen: 350,
+    expected_term_days: 15,
+    district: "San Borja",
+  },
 
   // Vehículo ×3
-  { category: "vehiculo", brand: "Toyota", model: "Yaris 1.3", year: 2019, storage: null, condition: "Bueno", description: "Sedán. 65,000 km. SOAT vigente. Único dueño.", expected_amount_pen: 12000, expected_term_days: 60, district: "Santiago de Surco", detalles: { kilometraje: 65000, transmision: "manual", combustible: "gasolina", soat_vigente: true, revision_tecnica: true } },
-  { category: "vehiculo", brand: "Hyundai", model: "Accent", year: 2020, storage: null, condition: "Bueno", description: "Sedán. 48,000 km. Mantenimientos al día.", expected_amount_pen: 14000, expected_term_days: 90, district: "San Borja", detalles: { kilometraje: 48000, transmision: "automatico", combustible: "gasolina", soat_vigente: true, revision_tecnica: true } },
-  { category: "vehiculo", brand: "Kia", model: "Picanto", year: 2021, storage: null, condition: "Bueno", description: "Hatchback. 30,000 km. Ideal ciudad.", expected_amount_pen: 10500, expected_term_days: 60, district: "Cercado de Lima", detalles: { kilometraje: 30000, transmision: "manual", combustible: "gasolina", soat_vigente: true, revision_tecnica: true } },
+  {
+    category: "vehiculo",
+    brand: "Toyota",
+    model: "Yaris 1.3",
+    year: 2019,
+    storage: null,
+    condition: "Bueno",
+    description: "Sedán. 65,000 km. SOAT vigente. Único dueño.",
+    expected_amount_pen: 12000,
+    expected_term_days: 60,
+    district: "Santiago de Surco",
+    detalles: {
+      kilometraje: 65000,
+      transmision: "manual",
+      combustible: "gasolina",
+      soat_vigente: true,
+      revision_tecnica: true,
+    },
+  },
+  {
+    category: "vehiculo",
+    brand: "Hyundai",
+    model: "Accent",
+    year: 2020,
+    storage: null,
+    condition: "Bueno",
+    description: "Sedán. 48,000 km. Mantenimientos al día.",
+    expected_amount_pen: 14000,
+    expected_term_days: 90,
+    district: "San Borja",
+    detalles: {
+      kilometraje: 48000,
+      transmision: "automatico",
+      combustible: "gasolina",
+      soat_vigente: true,
+      revision_tecnica: true,
+    },
+  },
+  {
+    category: "vehiculo",
+    brand: "Kia",
+    model: "Picanto",
+    year: 2021,
+    storage: null,
+    condition: "Bueno",
+    description: "Hatchback. 30,000 km. Ideal ciudad.",
+    expected_amount_pen: 10500,
+    expected_term_days: 60,
+    district: "Cercado de Lima",
+    detalles: {
+      kilometraje: 30000,
+      transmision: "manual",
+      combustible: "gasolina",
+      soat_vigente: true,
+      revision_tecnica: true,
+    },
+  },
 
   // Moto ×2
-  { category: "moto", brand: "Honda", model: "CBR 250R", year: 2021, storage: null, condition: "Bueno", description: "Deportiva. 8,500 km. SOAT vigente.", expected_amount_pen: 4200, expected_term_days: 45, district: "Cercado de Lima", detalles: { kilometraje: 8500, cilindrada_cc: 250, soat_vigente: true } },
-  { category: "moto", brand: "Yamaha", model: "NMAX 155", year: 2022, storage: null, condition: "Bueno", description: "Scooter automático. 12,000 km. Único dueño.", expected_amount_pen: 3800, expected_term_days: 60, district: "Santiago de Surco", detalles: { kilometraje: 12000, cilindrada_cc: 155, soat_vigente: true } },
+  {
+    category: "moto",
+    brand: "Honda",
+    model: "CBR 250R",
+    year: 2021,
+    storage: null,
+    condition: "Bueno",
+    description: "Deportiva. 8,500 km. SOAT vigente.",
+    expected_amount_pen: 4200,
+    expected_term_days: 45,
+    district: "Cercado de Lima",
+    detalles: { kilometraje: 8500, cilindrada_cc: 250, soat_vigente: true },
+  },
+  {
+    category: "moto",
+    brand: "Yamaha",
+    model: "NMAX 155",
+    year: 2022,
+    storage: null,
+    condition: "Bueno",
+    description: "Scooter automático. 12,000 km. Único dueño.",
+    expected_amount_pen: 3800,
+    expected_term_days: 60,
+    district: "Santiago de Surco",
+    detalles: { kilometraje: 12000, cilindrada_cc: 155, soat_vigente: true },
+  },
 
   // Electrodoméstico ×2
-  { category: "electrodomestico", brand: "Samsung", model: 'Smart TV 65" QLED', year: 2023, storage: null, condition: "Nuevo", description: "Caja original. Garantía 22 meses restantes.", expected_amount_pen: 2200, expected_term_days: 30, district: "San Isidro" },
-  { category: "electrodomestico", brand: "LG", model: "Refrigerador InstaView 30 cu.ft", year: 2022, storage: null, condition: "Bueno", description: "Door-in-door. Filtro de agua incluido.", expected_amount_pen: 2800, expected_term_days: 45, district: "Miraflores" },
+  {
+    category: "electrodomestico",
+    brand: "Samsung",
+    model: 'Smart TV 65" QLED',
+    year: 2023,
+    storage: null,
+    condition: "Nuevo",
+    description: "Caja original. Garantía 22 meses restantes.",
+    expected_amount_pen: 2200,
+    expected_term_days: 30,
+    district: "San Isidro",
+  },
+  {
+    category: "electrodomestico",
+    brand: "LG",
+    model: "Refrigerador InstaView 30 cu.ft",
+    year: 2022,
+    storage: null,
+    condition: "Bueno",
+    description: "Door-in-door. Filtro de agua incluido.",
+    expected_amount_pen: 2800,
+    expected_term_days: 45,
+    district: "Miraflores",
+  },
 
   // Consola ×2
-  { category: "consola", brand: "Sony", model: "PlayStation 5 Slim", year: 2024, storage: "1 TB", condition: "Nuevo", description: "Edición digital. 1 mes uso. 2 controles.", expected_amount_pen: 1400, expected_term_days: 30, district: "Cercado de Lima" },
-  { category: "consola", brand: "Microsoft", model: "Xbox Series X", year: 2023, storage: "1 TB", condition: "Bueno", description: "Caja completa. 1 control. Pads de repuesto.", expected_amount_pen: 1500, expected_term_days: 30, district: "San Borja" },
+  {
+    category: "consola",
+    brand: "Sony",
+    model: "PlayStation 5 Slim",
+    year: 2024,
+    storage: "1 TB",
+    condition: "Nuevo",
+    description: "Edición digital. 1 mes uso. 2 controles.",
+    expected_amount_pen: 1400,
+    expected_term_days: 30,
+    district: "Cercado de Lima",
+  },
+  {
+    category: "consola",
+    brand: "Microsoft",
+    model: "Xbox Series X",
+    year: 2023,
+    storage: "1 TB",
+    condition: "Bueno",
+    description: "Caja completa. 1 control. Pads de repuesto.",
+    expected_amount_pen: 1500,
+    expected_term_days: 30,
+    district: "San Borja",
+  },
 
   // Cámara ×1
-  { category: "camara", brand: "Canon", model: "EOS R6 Mark II", year: 2023, storage: null, condition: "Nuevo", description: "Cuerpo solo. 2,000 disparos. Garantía 2025.", expected_amount_pen: 4800, expected_term_days: 60, district: "Cercado de Lima", detalles: { tipo: "mirrorless", incluye_lente: false, disparos: 2000 } },
+  {
+    category: "camara",
+    brand: "Canon",
+    model: "EOS R6 Mark II",
+    year: 2023,
+    storage: null,
+    condition: "Nuevo",
+    description: "Cuerpo solo. 2,000 disparos. Garantía 2025.",
+    expected_amount_pen: 4800,
+    expected_term_days: 60,
+    district: "Cercado de Lima",
+    detalles: { tipo: "mirrorless", incluye_lente: false, disparos: 2000 },
+  },
 
   // Herramienta ×1
-  { category: "herramienta", brand: "DeWalt", model: "Combo 5 herramientas 20V MAX", year: 2023, storage: null, condition: "Bueno", description: "Taladro, atornillador, sierra, lijadora, linterna. 2 baterías.", expected_amount_pen: 1100, expected_term_days: 30, district: "Cercado de Lima" },
+  {
+    category: "herramienta",
+    brand: "DeWalt",
+    model: "Combo 5 herramientas 20V MAX",
+    year: 2023,
+    storage: null,
+    condition: "Bueno",
+    description: "Taladro, atornillador, sierra, lijadora, linterna. 2 baterías.",
+    expected_amount_pen: 1100,
+    expected_term_days: 30,
+    district: "Cercado de Lima",
+  },
 
   // Instrumento musical ×1
-  { category: "instrumento", brand: "Fender", model: "Stratocaster Player Series", year: 2022, storage: null, condition: "Bueno", description: "Guitarra eléctrica. Funda incluida. Cuerdas nuevas.", expected_amount_pen: 1300, expected_term_days: 45, district: "Santiago de Surco" },
+  {
+    category: "instrumento",
+    brand: "Fender",
+    model: "Stratocaster Player Series",
+    year: 2022,
+    storage: null,
+    condition: "Bueno",
+    description: "Guitarra eléctrica. Funda incluida. Cuerdas nuevas.",
+    expected_amount_pen: 1300,
+    expected_term_days: 45,
+    district: "Santiago de Surco",
+  },
 
   // Lujo ×1
-  { category: "lujo", brand: "Louis Vuitton", model: "Neverfull MM", year: 2023, storage: null, condition: "Nuevo", description: "Bolso autenticado. Dust bag y certificado.", expected_amount_pen: 3400, expected_term_days: 60, district: "Miraflores", detalles: { tipo_articulo: "bolso", autenticado: true } },
+  {
+    category: "lujo",
+    brand: "Louis Vuitton",
+    model: "Neverfull MM",
+    year: 2023,
+    storage: null,
+    condition: "Nuevo",
+    description: "Bolso autenticado. Dust bag y certificado.",
+    expected_amount_pen: 3400,
+    expected_term_days: 60,
+    district: "Miraflores",
+    detalles: { tipo_articulo: "bolso", autenticado: true },
+  },
 ];
 
 // ============================================================================
@@ -389,7 +786,9 @@ async function seedSolicitudes(clients: { userId: string; meta: SeedUser }[]) {
     if (error) throw error;
     ids.push(data.id);
   }
-  console.log(`  ${ids.length} solicitudes seeded across ${new Set(SOLICITUD_TEMPLATES.map(t => t.category)).size} categorías`);
+  console.log(
+    `  ${ids.length} solicitudes seeded across ${new Set(SOLICITUD_TEMPLATES.map((t) => t.category)).size} categorías`,
+  );
   return ids;
 }
 
@@ -486,7 +885,9 @@ async function closeSomeOperations(operations: { operation_id: string }[]) {
       .eq("id", operations[3].operation_id);
     if (error) throw error;
   }
-  console.log(`  ${completed.length} operations completed, ${operations.length >= 4 ? 1 : 0} disputed`);
+  console.log(
+    `  ${completed.length} operations completed, ${operations.length >= 4 ? 1 : 0} disputed`,
+  );
 }
 
 async function seedFeaturedOffers(
@@ -598,8 +999,12 @@ async function main() {
 
   console.log("\n✅ Seeding complete!");
   console.log(`   ${1 + DEMO_CLIENTS.length} clients`);
-  console.log(`   ${1 + DEMO_BUSINESSES.length} businesses (plans: ${[TEST_BUSINESS, ...DEMO_BUSINESSES].map((b) => b.plan).join(", ")})`);
-  console.log(`   ${SOLICITUD_TEMPLATES.length} solicitudes (${new Set(SOLICITUD_TEMPLATES.map((t) => t.category)).size} categorías)`);
+  console.log(
+    `   ${1 + DEMO_BUSINESSES.length} businesses (plans: ${[TEST_BUSINESS, ...DEMO_BUSINESSES].map((b) => b.plan).join(", ")})`,
+  );
+  console.log(
+    `   ${SOLICITUD_TEMPLATES.length} solicitudes (${new Set(SOLICITUD_TEMPLATES.map((t) => t.category)).size} categorías)`,
+  );
   console.log(`   ${propuestas.length} propuestas`);
   console.log(`   ${operations.length} accepted operations`);
   console.log("\nTest credentials:");
