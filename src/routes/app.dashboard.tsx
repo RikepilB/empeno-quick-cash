@@ -131,7 +131,7 @@ function Dashboard() {
                     s.status === "accepted"
                       ? {
                           to: "/app/code" as const,
-                          search: { propuesta_id: undefined as string | undefined },
+                          search: { propuesta_id: s.accepted_propuesta_id ?? undefined },
                         }
                       : s.propuestas_count > 0
                         ? { to: "/app/proposals" as const, search: { id: s.id } }
