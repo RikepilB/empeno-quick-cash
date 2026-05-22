@@ -76,11 +76,7 @@ export async function openCheckout(args: {
       } else if (Culqi.error) {
         Culqi.close();
         reject(
-          new Error(
-            Culqi.error.user_message ||
-              Culqi.error.merchant_message ||
-              "Error de Culqi",
-          ),
+          new Error(Culqi.error.user_message || Culqi.error.merchant_message || "Error de Culqi"),
         );
       } else {
         resolve(null);
