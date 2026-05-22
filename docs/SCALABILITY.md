@@ -6,12 +6,12 @@
 
 ## Sizing assumptions
 
-| Stage | Active clientes | Active negocios | Solicitudes/day | Propuestas/day | DB rows (24mo) | Platforms |
-|---|---|---|---|---|---|---|
-| Prototype (private alpha) | 50 | 10 | 30 | 90 | <100K | responsive web |
-| Etapa 1 (public beta) | 5,000 | 100 | 500 | 1,500 | <5M | responsive web |
-| Etapa 2 (beta+) | 30,000 | 500 | 3,000 | 9,000 | <30M | responsive web |
-| Etapa 3 (scale) | 200K | 2,000 | 15,000 | 45,000 | <200M | + native mobile (RN/Expo) |
+| Stage                     | Active clientes | Active negocios | Solicitudes/day | Propuestas/day | DB rows (24mo) | Platforms                 |
+| ------------------------- | --------------- | --------------- | --------------- | -------------- | -------------- | ------------------------- |
+| Prototype (private alpha) | 50              | 10              | 30              | 90             | <100K          | responsive web            |
+| Etapa 1 (public beta)     | 5,000           | 100             | 500             | 1,500          | <5M            | responsive web            |
+| Etapa 2 (beta+)           | 30,000          | 500             | 3,000           | 9,000          | <30M           | responsive web            |
+| Etapa 3 (scale)           | 200K            | 2,000           | 15,000          | 45,000         | <200M          | + native mobile (RN/Expo) |
 
 Architecture below must hold to **Etapa 2** without rewrites. Etapa 3 needs targeted rework (read replicas, separate audit DB, native app backend).
 
@@ -86,13 +86,13 @@ Prototype on Supabase US-East. Latency Lima → US-East ~120 ms p50 — acceptab
 
 ### What to cache by TTL
 
-| Data | TTL | Pattern | Notes |
-|---|---|---|---|
-| `profiles` lookup | 5 min | Cache-aside | Invalidate on update |
-| `solicitudes` feed | 30 s | Cache-aside | Invalidate on realtime event |
-| `operations.status` | 1 min | Cache-aside | Invalidate on update |
-| **Money / billing** | **No cache** | Direct DB + cache-aside *read* post-commit | Never write-behind |
-| Rate-limit counters | TTL-bound | Source of truth in Redis (Etapa 2) |  |
+| Data                | TTL          | Pattern                                    | Notes                        |
+| ------------------- | ------------ | ------------------------------------------ | ---------------------------- |
+| `profiles` lookup   | 5 min        | Cache-aside                                | Invalidate on update         |
+| `solicitudes` feed  | 30 s         | Cache-aside                                | Invalidate on realtime event |
+| `operations.status` | 1 min        | Cache-aside                                | Invalidate on update         |
+| **Money / billing** | **No cache** | Direct DB + cache-aside _read_ post-commit | Never write-behind           |
+| Rate-limit counters | TTL-bound    | Source of truth in Redis (Etapa 2)         |                              |
 
 ---
 
@@ -162,14 +162,17 @@ Prototype on Supabase US-East. Latency Lima → US-East ~120 ms p50 — acceptab
 ## Notifications
 
 ### Prototype
+
 - In-app only. `notifications` table RLS-scoped. Polling-based inbox.
 - Realtime channel pushes new notifications.
 
 ### Etapa 1
+
 - **Email** via Resend (free tier 3K/mo). Templates: business verified, propuesta received, propuesta accepted, operation completed.
 - **WhatsApp** is the killer channel in Peru, but defer to Etapa 2 (WhatsApp Business API cost + approval non-trivial). Twilio sandbox for prototype if needed.
 
 ### Etapa 2
+
 - **WhatsApp Business API** via Twilio or Meta directly. Critical for negocio engagement.
 - **SMS (OTP only)** for verification via Twilio. **Never SMS for marketing.**
 - **Push** (web push, then RN push at Etapa 2.5) via OneSignal free tier.
@@ -179,16 +182,19 @@ Prototype on Supabase US-East. Latency Lima → US-East ~120 ms p50 — acceptab
 ## Payments
 
 ### Prototype (current)
+
 - Culqi (default Peru) live + demo. See `BILLING.md`.
 - Subscriptions live (basico/intermedio/avanzado).
 - Commissions + featured offers: **planned in `0006_monetization.sql`** — see `REDESIGN-ROADMAP.md`.
 
 ### Etapa 1 (post-0006)
+
 - Full Etapa 1 monetization wired (subscriptions + commissions + featured boosts).
 - Webhook handlers verify signatures, use idempotency keys.
 - Hosted Culqi Checkout — PCI scope SAQ A.
 
 ### Etapa 2
+
 - Auto-invoicing for commissions (manual in Etapa 1).
 - Points wallet (`points_wallets` + `points_transactions`).
 - Payouts to negocios for incentive points (wallet-only initially).
@@ -200,16 +206,19 @@ Prototype on Supabase US-East. Latency Lima → US-East ~120 ms p50 — acceptab
 ## Observability
 
 ### Prototype
+
 - Logger (`src/lib/logger.ts`): structured JSON + `sanitizeError`. Pino-style.
 - Sentry — **not yet wired**. Plan: free tier 5K errors/mo at Etapa 1.
 
 ### Etapa 1
+
 - **Sentry Team ($26/mo)** at >3K errors/mo.
 - **PostHog free** (1M events) for product analytics. Cap per-product billing.
 - **Better Stack free** (10 monitors).
 - **Axiom free** (0.5 GB logs/mo). Upgrade when volume justifies.
 
 ### Etapa 2
+
 - Real-time error alerting → Slack/Discord.
 - Dashboards: API p95 latency, DB query p95, rate-limit hits, RLS denials.
 
@@ -220,6 +229,7 @@ Prototype on Supabase US-East. Latency Lima → US-East ~120 ms p50 — acceptab
 See `audit.md` (not yet in repo — `REDESIGN-ROADMAP.md` task) for the comprehensive policy.
 
 Etapa 1 → 2 critical additions:
+
 - **WAF / Bot protection**: Cloudflare in front of Netlify (or Netlify Edge Functions w/ rate gate). Add Turnstile / hCaptcha on public mutations.
 - **Pen test** before Etapa 2 public beta — $3–8K USD with a regional firm.
 - **Bug bounty** (HackerOne / Intigriti) at Etapa 2.5 once stable.
@@ -229,16 +239,16 @@ Etapa 1 → 2 critical additions:
 
 ## Cost model (monthly USD, optimistic)
 
-| Item | Prototype | Etapa 1 (1K active) | Etapa 2 (10K active) |
-|---|---|---|---|
-| Netlify | 0 (Starter) | 19 (Pro) | 19 (Pro) |
-| Supabase | 0 (Free) | 25 (Pro) | 25 (Pro) + compute add-on ~25 |
-| Upstash | 0 | 5 | 15 |
-| Sentry | 0 | 0 | 26 (Team) |
-| Resend | 0 | 0 (under 3K) | 20 |
-| Culqi | 0 | revenue share | revenue share |
-| Domain + email | 1 | 1 | 5 (workspace email) |
-| **Total fixed** | **$1** | **$50** | **$110+** |
+| Item            | Prototype   | Etapa 1 (1K active) | Etapa 2 (10K active)          |
+| --------------- | ----------- | ------------------- | ----------------------------- |
+| Netlify         | 0 (Starter) | 19 (Pro)            | 19 (Pro)                      |
+| Supabase        | 0 (Free)    | 25 (Pro)            | 25 (Pro) + compute add-on ~25 |
+| Upstash         | 0           | 5                   | 15                            |
+| Sentry          | 0           | 0                   | 26 (Team)                     |
+| Resend          | 0           | 0 (under 3K)        | 20                            |
+| Culqi           | 0           | revenue share       | revenue share                 |
+| Domain + email  | 1           | 1                   | 5 (workspace email)           |
+| **Total fixed** | **$1**      | **$50**             | **$110+**                     |
 
 Variable (storage bandwidth, Upstash commands, Inngest runs) on top.
 
@@ -274,6 +284,7 @@ ADR before any change that violates one of these.
 ## Decision: upgrade vs optimize
 
 Solo-dev rule of thumb:
+
 - **<$50/mo infra** → optimize. Investigate cache hit rate, query plans, dead code.
 - **$50–200/mo** → mix. Optimize hot paths, upgrade the bottleneck.
 - **>$200/mo** → upgrade infra unless spend can be cut >50% in <1 week.

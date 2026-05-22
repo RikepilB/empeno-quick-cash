@@ -1,0 +1,14 @@
+## Summary
+- **C1** `app.register.tsx`: DNI-first field order, mock RENIEC autofill on blur, email_verified checkbox → signUp metadata
+- **C2** `negocio.register.tsx`: RUC field + mock verify button, DNI rep legal, email_verified checkbox, 7-day horario grid (Lun–Dom)
+- **C3** Per-category schemas + CategoryFields renderer: celular (conditional battery pct for iPhone/Apple), laptop, joya, reloj, vehiculo, otro
+- **C4** Terminology: "Descripcion / imperfecciones" → "Detalles adicionales", "Opciones avanzadas" → "Condiciones del prestamo"; Plazo segmented control adds "Otros..." option with custom inline input
+- `app.mis-articulos.tsx`: Prettier formatting fixes (pre-existing)
+
+## Files
+- `src/lib/categories/{celular,laptop,joya,reloj,vehiculo,otro}/index.tsx` — new
+- `src/ui/CategoryFields.tsx` — new
+- `src/routes/app.register.tsx` — modified
+- `src/routes/negocio.register.tsx` — modified
+- `src/routes/app.publish.tsx` — modified
+- `src/routes/app.mis-articulos.tsx` — modified (prettier)

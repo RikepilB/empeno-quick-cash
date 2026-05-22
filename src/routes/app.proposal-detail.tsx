@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { PhoneFrame } from "@/ui/PhoneFrame";
+import { ClientLayout } from "@/ui/ClientLayout";
 import { MapPin, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useState } from "react";
@@ -22,7 +22,7 @@ function Detail() {
 
   const propuesta = useQuery({
     queryKey: ["propuesta-detail", propuesta_id],
-    queryFn: () => getPropuestaForClient({ data: { propuesta_id } }),
+    fn: () => getPropuestaForClient({ data: { propuesta_id } }),
   });
 
   const accept = useMutation({
@@ -51,26 +51,29 @@ function Detail() {
 
   if (propuesta.isLoading) {
     return (
-      <PhoneFrame title="Detalle" back="/app/dashboard">
-        <div className="flex items-center justify-center p-12 text-xs text-muted-foreground">
+      <ClientLayout title="Detalle de propuesta" subtitle="Cargando...">
+        <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
           <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando propuesta...
         </div>
-      </PhoneFrame>
+      </ClientLayout>
     );
   }
 
   if (!propuesta.data) {
     return (
-      <PhoneFrame title="Detalle" back="/app/dashboard">
-        <div className="p-6 text-sm text-muted-foreground">
-          No encontramos esta propuesta en tu sesión actual. Vuelve al listado para verla.
-          <div className="mt-4">
-            <Link to="/app/dashboard" className="btn-primary w-full">
+      <ClientLayout title="Detalle de propuesta" subtitle="No encontrada">
+        <div className="flex items-center justify-center py-16 text-center">
+          <div>
+            <div className="font-display text-xl font-bold uppercase">Propuesta no encontrada</div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              No encontramos esta propuesta en tu sesión actual.
+            </p>
+            <Link to="/app/dashboard" className="btn-primary mt-5 inline-flex">
               Volver al panel
             </Link>
           </div>
         </div>
-      </PhoneFrame>
+      </ClientLayout>
     );
   }
 
@@ -78,63 +81,71 @@ function Detail() {
   const total = p.monto_pen + (p.monto_pen * p.tasa_mensual) / 100;
 
   return (
-    <PhoneFrame title="Detalle" back="/app/proposals">
-      <div className="space-y-5 p-6">
-        <div className="rounded-2xl border border-primary bg-primary/5 p-5">
+    <ClientLayout title="Detalle de propuesta" subtitle={p.business.name}>
+      <div className="mx-auto max-w-2xl space-y-6">
+        {/* Business card */}
+        <div className="rounded-2xl border border-primary/40 bg-primary/5 p-6">
           <div className="flex items-start justify-between">
             <div>
-              <div className="font-display text-xl font-bold uppercase">{p.business.name}</div>
-              <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3" /> {p.business.district ?? "—"}
+              <div className="font-display text-2xl font-bold uppercase">{p.business.name}</div>
+              <div className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" /> {p.business.district ?? "—"}
               </div>
             </div>
-            <span className="badge-dot badge-accepted">Pendiente</span>
+            <span className="badge-dot badge-pending">Pendiente</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-surface p-5">
-          <div className="flex items-end justify-between border-b border-border pb-4">
+        {/* Amount and terms */}
+        <div className="rounded-2xl border border-border bg-surface p-6">
+          <div className="flex items-end justify-between border-b border-dashed border-border pb-5 mb-5">
             <div>
-              <div className="text-[10px] uppercase text-muted-foreground">Te prestamos</div>
-              <div className="font-display text-4xl font-extrabold text-primary">
+              <div className="text-xs uppercase text-muted-foreground">Te prestamos</div>
+              <div className="font-display text-5xl font-extrabold text-primary">
                 {formatPEN(p.monto_pen)}
               </div>
             </div>
           </div>
-          <div className="mt-4 space-y-2.5 text-sm">
+          <div className="space-y-3 text-sm">
             <Row k="Tasa de interés" v={`${p.tasa_mensual}% mensual`} />
             <Row k="Plazo del préstamo" v={`${p.plazo_dias} días`} />
             <Row k="Interés total" v={formatPEN(Math.round(total - p.monto_pen))} />
-            <div className="my-2 border-t border-dashed border-border" />
-            <Row k="Total a devolver" v={formatPEN(Math.round(total))} highlight />
+            <div className="border-t border-dashed border-border pt-3">
+              <Row k="Total a devolver" v={formatPEN(Math.round(total))} highlight />
+            </div>
           </div>
         </div>
 
+        {/* Actions */}
         {error && (
-          <div className="rounded-lg bg-status-reported/15 px-3 py-2 text-xs text-status-reported">
+          <div className="rounded-lg bg-status-reported/15 px-4 py-3 text-sm text-status-reported">
             {error}
           </div>
         )}
 
-        <div className="space-y-2">
+        <div className="space-y-3">
           <button
             onClick={() => accept.mutate()}
             disabled={accept.isPending || reject.isPending}
-            className="btn-primary w-full disabled:opacity-60"
+            className="btn-primary w-full py-3 text-base disabled:opacity-60"
           >
-            {accept.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {accept.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin inline" /> : null}
             {accept.isPending ? "Aceptando..." : "Aceptar esta oferta"}
           </button>
           <button
             onClick={() => reject.mutate()}
             disabled={accept.isPending || reject.isPending}
-            className="btn-ghost w-full"
+            className="btn-ghost w-full py-3 text-base"
           >
-            Rechazar
+            Rechazar esta oferta
           </button>
         </div>
+
+        <p className="text-center text-xs text-muted-foreground">
+          Al aceptar, la casa de empeño te contactará con el código de validación.
+        </p>
       </div>
-    </PhoneFrame>
+    </ClientLayout>
   );
 }
 

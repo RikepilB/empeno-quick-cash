@@ -1,10 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { PhoneFrame } from "@/ui/PhoneFrame";
 import { ArrowRight, ShieldCheck } from "lucide-react";
+import { getCurrentUser } from "@/services/auth";
 
-export const Route = createFileRoute("/app/")({ component: AppLanding });
+export const Route = createFileRoute("/app/")({
+  component: AppLanding,
+});
 
-function AppLanding() {
+async function AppLanding() {
+  const session = await getCurrentUser();
+  if (session?.profile.role === "client") {
+    throw redirect({ to: "/app/dashboard" });
+  }
+
   return (
     <PhoneFrame hideHeader>
       <div className="flex min-h-[680px] flex-col bg-gradient-to-b from-surface to-background p-6">

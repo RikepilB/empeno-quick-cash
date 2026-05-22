@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BusinessLayout } from "@/ui/BusinessLayout";
-import { Check, Loader2, ReceiptText, ShieldCheck, Sparkles } from "lucide-react";
+import { Check, Loader2, ReceiptText, ShieldCheck, Sparkles, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getBusinessContext } from "@/services/business";
@@ -40,6 +40,34 @@ function Perfil() {
 
   const sub = context.data?.subscription;
   const business = context.data?.business;
+
+  if (context.isLoading) {
+    return (
+      <BusinessLayout title="Negocio" subtitle="Datos del negocio, plan y facturación">
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </BusinessLayout>
+    );
+  }
+
+  if (!business?.verified_at) {
+    return (
+      <BusinessLayout title="Negocio" subtitle="Datos del negocio, plan y facturación">
+        <div className="flex items-center justify-center px-4 py-16">
+          <div className="max-w-md space-y-4 rounded-2xl border border-status-pending/30 bg-status-pending/10 p-8 text-center">
+            <AlertTriangle className="mx-auto h-10 w-10 text-status-pending" />
+            <h2 className="font-display text-2xl font-bold uppercase">Negocio no verificado</h2>
+            <p className="text-sm text-muted-foreground">
+              Tu negocio aún no ha sido aprobado. Completa el proceso de verificación para acceder a
+              los datos de tu cuenta y cambiar de plan.
+            </p>
+          </div>
+        </div>
+      </BusinessLayout>
+    );
+  }
+
   const currentPlanId = sub?.plan.id ?? null;
   const isDemo = billingMode.data?.mode === "demo";
   const missingPublicKey = !isDemo && !getCulqiPublicKey();

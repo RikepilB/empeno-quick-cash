@@ -168,7 +168,7 @@ Client accepts an offer. Creates an `operations` row with a generated 5-char bas
   {
     operation_id: string;
     propuesta_id: string;
-    redemption_code: string;  // "EMP-XXXXX"
+    redemption_code: string; // "EMP-XXXXX"
   }
   ```
 
@@ -273,6 +273,7 @@ Receives Culqi event callbacks. HMAC-SHA256 signature verification via Web Crypt
 - **Returns**: `200 { received: true }` on accept, `400`/`401` on bad signature.
 
 **Configure** in Culqi dashboard once `CULQI_SECRET_KEY` lands:
+
 ```
 https://empenalo.netlify.app/api/culqi-webhook
 ```
@@ -283,30 +284,32 @@ https://empenalo.netlify.app/api/culqi-webhook
 
 Server fns call these SECURITY DEFINER functions for atomic operations. See `supabase/migrations/000{1..5}_*.sql` for definitions.
 
-| RPC | Purpose | Returns |
-|---|---|---|
-| `increment_propuestas_used` | Atomic quota counter + cap check | `(used integer, allowed boolean)` |
-| `change_subscription_plan` | Flip business sub to new plan + period | `subscriptions` row |
-| `record_invoice` | Insert invoice row tied to subscription | `invoices` row |
-| `accept_propuesta` | Mark accepted + create operation row | `operations` row |
-| `find_orphan_photos(interval)` | List unreferenced storage objects | `(storage_path, created_at, size_bytes)` |
-| `gc_orphan_storage` | Delete orphan photos (advisory-locked) | `integer` (n removed) |
-| `expire_stale_rows` | Expire pending/active rows past deadline | `integer` (n updated) |
+| RPC                            | Purpose                                  | Returns                                  |
+| ------------------------------ | ---------------------------------------- | ---------------------------------------- |
+| `increment_propuestas_used`    | Atomic quota counter + cap check         | `(used integer, allowed boolean)`        |
+| `change_subscription_plan`     | Flip business sub to new plan + period   | `subscriptions` row                      |
+| `record_invoice`               | Insert invoice row tied to subscription  | `invoices` row                           |
+| `accept_propuesta`             | Mark accepted + create operation row     | `operations` row                         |
+| `find_orphan_photos(interval)` | List unreferenced storage objects        | `(storage_path, created_at, size_bytes)` |
+| `gc_orphan_storage`            | Delete orphan photos (advisory-locked)   | `integer` (n removed)                    |
+| `expire_stale_rows`            | Expire pending/active rows past deadline | `integer` (n updated)                    |
 
 Scheduled jobs via `pg_cron`:
+
 - `gc-orphan-storage` — daily 03:00 UTC.
 - `expire-stale-rows` — hourly.
 
 ### Planned in `0006_monetization.sql` (not yet applied — see `REDESIGN-ROADMAP.md`)
 
-| RPC / view | Purpose | Returns |
-|---|---|---|
-| `compute_commission(monto_pen, categoria, plan_slug)` | Lookup most-specific active config + apply mode | `numeric(10,2)` |
-| `accept_propuesta` *(extended)* | Adds commission ledger write + plan slug lookup | `(operation_id uuid, redemption_code text, commission_pen numeric)` |
-| `boost_propuesta(propuesta_id, hours, use_credit, payment_id)` | Atomic credit deduct OR record purchased boost | `uuid` (featured_offer.id) |
-| `v_active_featured_propuestas` | View for feed-side filtering on active boosts | rows: `(propuesta_id, solicitud_id, business_id, featured_until)` |
+| RPC / view                                                     | Purpose                                         | Returns                                                             |
+| -------------------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------- |
+| `compute_commission(monto_pen, categoria, plan_slug)`          | Lookup most-specific active config + apply mode | `numeric(10,2)`                                                     |
+| `accept_propuesta` _(extended)_                                | Adds commission ledger write + plan slug lookup | `(operation_id uuid, redemption_code text, commission_pen numeric)` |
+| `boost_propuesta(propuesta_id, hours, use_credit, payment_id)` | Atomic credit deduct OR record purchased boost  | `uuid` (featured_offer.id)                                          |
+| `v_active_featured_propuestas`                                 | View for feed-side filtering on active boosts   | rows: `(propuesta_id, solicitud_id, business_id, featured_until)`   |
 
 ### Planned tables (0006)
+
 - `commission_config` — per-(categoría, plan_slug) commission rules with effective windows.
 - `featured_offers` — one row per boost (plan credit or purchased).
 - `payments` — gateway-abstracted payment records (Culqi default; Stripe parked).

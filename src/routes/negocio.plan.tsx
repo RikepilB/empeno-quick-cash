@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Check, X } from "lucide-react";
+import { Check, X, Loader2, AlertTriangle } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getBusinessContext } from "@/services/business";
 
 export const Route = createFileRoute("/negocio/plan")({ component: PlanPage });
 
@@ -47,6 +49,31 @@ const compareRows = [
 ];
 
 function PlanPage() {
+  const context = useQuery({ queryKey: ["businessContext"], queryFn: () => getBusinessContext() });
+
+  if (context.isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!context.data?.business.verified_at) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="max-w-md space-y-4 rounded-2xl border border-status-pending/30 bg-status-pending/10 p-8 text-center">
+          <AlertTriangle className="mx-auto h-10 w-10 text-status-pending" />
+          <h2 className="font-display text-2xl font-bold uppercase">Negocio no verificado</h2>
+          <p className="text-sm text-muted-foreground">
+            Tu negocio aún no ha sido aprobado. Completa el proceso de verificación para acceder a
+            los planes y comenzar a enviar propuestas.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background py-12">
       <div className="mx-auto max-w-6xl px-6">

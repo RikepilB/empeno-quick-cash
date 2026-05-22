@@ -85,11 +85,11 @@
   --ring: oklch(0.92 0.21 124);
 
   /* Status colors */
-  --status-new: oklch(0.7 0.16 250);          /* azul */
-  --status-pending: oklch(0.85 0.17 90);      /* amarillo */
-  --status-accepted: oklch(0.85 0.2 145);     /* verde */
-  --status-inactive: oklch(0.6 0.01 200);     /* gris */
-  --status-reported: oklch(0.65 0.22 25);     /* rojo */
+  --status-new: oklch(0.7 0.16 250); /* azul */
+  --status-pending: oklch(0.85 0.17 90); /* amarillo */
+  --status-accepted: oklch(0.85 0.2 145); /* verde */
+  --status-inactive: oklch(0.6 0.01 200); /* gris */
+  --status-reported: oklch(0.65 0.22 25); /* rojo */
 
   --sidebar: oklch(0.19 0.012 200);
   --sidebar-foreground: oklch(0.95 0.01 120);
@@ -102,14 +102,21 @@
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  html, body {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-  h1, h2, h3, h4, .font-display {
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
@@ -119,11 +126,26 @@
   .badge-dot {
     @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium;
   }
-  .badge-new { background: color-mix(in oklab, var(--status-new) 20%, transparent); color: var(--status-new); }
-  .badge-pending { background: color-mix(in oklab, var(--status-pending) 18%, transparent); color: var(--status-pending); }
-  .badge-accepted { background: color-mix(in oklab, var(--status-accepted) 20%, transparent); color: var(--status-accepted); }
-  .badge-inactive { background: color-mix(in oklab, var(--status-inactive) 22%, transparent); color: var(--status-inactive); }
-  .badge-reported { background: color-mix(in oklab, var(--status-reported) 22%, transparent); color: var(--status-reported); }
+  .badge-new {
+    background: color-mix(in oklab, var(--status-new) 20%, transparent);
+    color: var(--status-new);
+  }
+  .badge-pending {
+    background: color-mix(in oklab, var(--status-pending) 18%, transparent);
+    color: var(--status-pending);
+  }
+  .badge-accepted {
+    background: color-mix(in oklab, var(--status-accepted) 20%, transparent);
+    color: var(--status-accepted);
+  }
+  .badge-inactive {
+    background: color-mix(in oklab, var(--status-inactive) 22%, transparent);
+    color: var(--status-inactive);
+  }
+  .badge-reported {
+    background: color-mix(in oklab, var(--status-reported) 22%, transparent);
+    color: var(--status-reported);
+  }
 
   .btn-primary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-95 active:scale-[0.98];

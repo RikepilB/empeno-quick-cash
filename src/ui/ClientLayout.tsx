@@ -1,19 +1,18 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Inbox, Send, Bell, CreditCard, LogOut, User } from "lucide-react";
+import { LayoutDashboard, Plus, FileText, Bell, LogOut, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/db/browser";
-import { getBusinessContext } from "@/services/business";
 import { signOut } from "@/services/auth";
+import { getCurrentUser } from "@/services/auth";
 
 const nav = [
-  { to: "/negocio/dashboard", label: "Panel", icon: LayoutDashboard },
-  { to: "/negocio/solicitudes", label: "Solicitudes", icon: Inbox },
-  { to: "/negocio/propuestas", label: "Mis propuestas", icon: Send },
-  { to: "/negocio/perfil", label: "Cuenta", icon: User },
+  { to: "/app/dashboard", label: "Inicio", icon: LayoutDashboard },
+  { to: "/app/mis-articulos", label: "Mis publicaciones", icon: FileText },
+  { to: "/app/history", label: "Historial", icon: User },
 ];
 
-export function BusinessLayout({
+export function ClientLayout({
   children,
   title,
   subtitle,
@@ -26,32 +25,23 @@ export function BusinessLayout({
 }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const router = useRouter();
-  const context = useQuery({
-    queryKey: ["businessContext"],
-    queryFn: () => getBusinessContext(),
-    staleTime: 60_000,
-  });
+  const user = useQuery({ queryKey: ["currentUser"], queryFn: () => getCurrentUser() });
 
   async function handleLogout() {
     await signOut();
     await getSupabaseBrowser().auth.signOut();
     await router.invalidate();
-    await router.navigate({ to: "/negocio/login" });
+    await router.navigate({ to: "/app/login" });
   }
 
-  const sub = context.data?.subscription;
-  const planName = sub?.plan.name ?? "Sin plan";
-  const limit = sub?.plan.monthly_propuestas ?? null;
-  const used = sub?.propuestas_used_this_period ?? 0;
-  const pct = limit === null ? 0 : Math.min(100, (used / Math.max(1, limit)) * 100);
+  const firstName = user.data?.profile.full_name?.split(" ")[0] ?? "Cliente";
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen">
-        {/* Sidebar */}
         <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
           <Link
-            to="/negocio/dashboard"
+            to="/app/dashboard"
             className="flex items-center gap-2 border-b border-sidebar-border px-6 py-5"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-display text-lg font-bold text-primary-foreground">
@@ -59,7 +49,7 @@ export function BusinessLayout({
             </div>
             <span className="font-display text-lg font-bold tracking-wider">EMPEÑALO</span>
             <span className="ml-auto rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
-              B2B
+              B2C
             </span>
           </Link>
 
@@ -85,27 +75,12 @@ export function BusinessLayout({
           </nav>
 
           <div className="m-3 rounded-xl border border-border bg-surface p-4">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <CreditCard className="h-3.5 w-3.5" /> Plan {planName}
-            </div>
-            <div className="mt-2 flex items-end justify-between">
-              <span className="font-display text-2xl font-bold">
-                {limit === null ? `${used}` : `${used}/${limit}`}
-              </span>
-              <span className="text-[10px] uppercase text-muted-foreground">
-                {limit === null ? "ofertas (ilimitadas)" : "propuestas"}
-              </span>
-            </div>
-            {limit !== null && (
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-              </div>
-            )}
+            <div className="text-xs text-muted-foreground">¡Hola, {firstName}!</div>
             <Link
-              to="/negocio/perfil"
-              className="mt-3 block text-center text-xs text-primary hover:underline"
+              to="/app/notifications"
+              className="mt-3 flex items-center gap-2 text-xs text-primary hover:underline"
             >
-              Ver cuenta
+              <Bell className="h-3.5 w-3.5" /> Notificaciones
             </Link>
           </div>
         </aside>
@@ -120,7 +95,14 @@ export function BusinessLayout({
               {subtitle && <p className="truncate text-sm text-muted-foreground">{subtitle}</p>}
             </div>
             <Link
-              to="/negocio/notifications"
+              to="/app/publish"
+              className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+            >
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Publicar artículo</span>
+            </Link>
+            <Link
+              to="/app/notifications"
               className="rounded-xl border border-border bg-surface p-2.5 text-foreground transition hover:bg-surface-2"
               title="Notificaciones"
               aria-label="Notificaciones"
