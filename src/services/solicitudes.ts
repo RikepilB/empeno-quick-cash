@@ -25,6 +25,7 @@ export type SolicitudListItem = {
   status: SolicitudStatus;
   created_at: string;
   propuestas_count: number;
+  accepted_propuesta_id: string | null;
 };
 
 export type SolicitudPhoto = {
@@ -118,7 +119,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabase
       .from("solicitudes")
       .select(
-        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, created_at, propuestas(count)",
+        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, created_at, propuestas(count), operations(id, propuesta_id)",
       )
       .eq("client_id", user.id)
       .order("created_at", { ascending: false })
@@ -157,6 +158,10 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       status: row.status,
       created_at: row.created_at,
       propuestas_count: row.propuestas?.[0]?.count ?? 0,
+      accepted_propuesta_id:
+        row.status === "accepted" && row.operations?.[0]?.propuesta_id
+          ? row.operations[0].propuesta_id
+          : null,
     }));
   },
 );

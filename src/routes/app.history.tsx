@@ -41,7 +41,7 @@ function History() {
 
   return (
     <PhoneFrame title="Historial" back="/app/dashboard">
-      <div className="p-6">
+      <div className="p-6 md:p-8">
         <div className="flex gap-2 overflow-x-auto pb-3">
           {FILTERS.map((f) => (
             <button
@@ -54,13 +54,13 @@ function History() {
           ))}
         </div>
 
-        <div className="space-y-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {ops.isLoading ? (
-            <div className="flex items-center justify-center py-8 text-xs text-muted-foreground">
+            <div className="col-span-full flex items-center justify-center py-8 text-xs text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando historial...
             </div>
           ) : filtered.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-surface p-6 text-center text-xs text-muted-foreground">
+            <div className="col-span-full rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-xs text-muted-foreground">
               No tienes operaciones {filter === "all" ? "aún" : "en este estado"}.
             </div>
           ) : (
