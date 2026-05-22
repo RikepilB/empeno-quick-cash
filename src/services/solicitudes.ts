@@ -8,7 +8,7 @@ import { rateLimitByUser } from "@/lib/rate-limit";
 // ============================================================================
 // Shared types
 // ============================================================================
-export type SolicitudStatus = "active" | "accepted" | "closed" | "expired";
+export type SolicitudStatus = "active" | "accepted" | "closed" | "expired" | "borrado";
 
 export type SolicitudListItem = {
   id: string;
@@ -24,6 +24,7 @@ export type SolicitudListItem = {
   district: string | null;
   status: SolicitudStatus;
   created_at: string;
+  deleted_at: string | null;
   propuestas_count: number;
   accepted_propuesta_id: string | null;
 };
@@ -119,7 +120,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabase
       .from("solicitudes")
       .select(
-        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, created_at, propuestas(count), operations(id, propuesta_id)",
+        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, deleted_at, created_at, propuestas(count), operations(id, propuesta_id)",
       )
       .eq("client_id", user.id)
       .order("created_at", { ascending: false })
@@ -141,7 +142,9 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       district: string | null;
       status: SolicitudStatus;
       created_at: string;
+      deleted_at: string | null;
       propuestas: { count: number }[] | null;
+      operations: { id: string; propuesta_id: string }[] | null;
     };
     return (data ?? []).map((row: SolicitudRow) => ({
       id: row.id,
@@ -156,6 +159,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       expected_term_days: row.expected_term_days,
       district: row.district,
       status: row.status,
+      deleted_at: row.deleted_at,
       created_at: row.created_at,
       propuestas_count: row.propuestas?.[0]?.count ?? 0,
       accepted_propuesta_id:
@@ -231,9 +235,114 @@ export const listActiveSolicitudes = createServerFn({ method: "GET" })
       expected_term_days: row.expected_term_days,
       district: row.district,
       status: row.status,
+      deleted_at: null,
       created_at: row.created_at,
       propuestas_count: row.propuestas?.[0]?.count ?? 0,
+      accepted_propuesta_id: null,
     }));
+  });
+
+// ============================================================================
+// softDeleteSolicitud — client marks their solicitud as 'borrado' (recoverable)
+// ============================================================================
+const softDeleteSchema = z.object({ id: z.string().uuid() });
+
+export const softDeleteSolicitud = createServerFn({ method: "POST" })
+  .inputValidator(softDeleteSchema)
+  .handler(async ({ data }) => {
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("No autenticado");
+
+    const { error } = await supabase.rpc("soft_delete_solicitud", { p_id: data.id });
+    if (error) throw sanitizeError(error, "No se pudo eliminar la solicitud.");
+    log.info("solicitud_soft_deleted", { id: data.id, user_id: user.id });
+  });
+
+// ============================================================================
+// restoreSolicitud — client restores a 'borrado' solicitud within 24h window
+// ============================================================================
+const restoreSchema = z.object({ id: z.string().uuid() });
+
+export const restoreSolicitud = createServerFn({ method: "POST" })
+  .inputValidator(restoreSchema)
+  .handler(async ({ data }) => {
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("No autenticado");
+
+    const { error } = await supabase.rpc("restore_borrado_solicitud", { p_id: data.id });
+    if (error) throw sanitizeError(error, "No se pudo restaurar la solicitud.");
+    log.info("solicitud_restored", { id: data.id, user_id: user.id });
+  });
+
+// ============================================================================
+// hardDeleteSolicitud — permanent delete after 24h recovery window
+// ============================================================================
+const hardDeleteSchema = z.object({ id: z.string().uuid() });
+
+export const hardDeleteSolicitud = createServerFn({ method: "POST" })
+  .inputValidator(hardDeleteSchema)
+  .handler(async ({ data }) => {
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("No autenticado");
+
+    const { error } = await supabase.rpc("hard_delete_borrado_solicitud", { p_id: data.id });
+    if (error) throw sanitizeError(error, "No se pudo eliminar permanentemente.");
+    log.info("solicitud_hard_deleted", { id: data.id, user_id: user.id });
+  });
+
+// ============================================================================
+// updateSolicitud — client edits their own active solicitud
+// ============================================================================
+const updateSolicitudSchema = z.object({
+  id: z.string().uuid(),
+  brand: z.string().optional().nullable(),
+  model: z.string().optional().nullable(),
+  year: z.number().int().nullable().optional(),
+  storage: z.string().optional().nullable(),
+  condition: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  expected_amount_pen: z.number().int().nullable().optional(),
+  expected_term_days: z.number().int().nullable().optional(),
+  district: z.string().optional().nullable(),
+});
+
+export const updateSolicitud = createServerFn({ method: "POST" })
+  .inputValidator(updateSolicitudSchema)
+  .handler(async ({ data }) => {
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("No autenticado");
+
+    const { error } = await supabase
+      .from("solicitudes")
+      .update({
+        brand: data.brand ?? null,
+        model: data.model ?? null,
+        year: data.year ?? null,
+        storage: data.storage ?? null,
+        condition: data.condition ?? null,
+        description: data.description ?? null,
+        expected_amount_pen: data.expected_amount_pen ?? null,
+        expected_term_days: data.expected_term_days ?? null,
+        district: data.district ?? null,
+      })
+      .eq("id", data.id)
+      .eq("client_id", user.id)
+      .eq("status", "active");
+
+    if (error) throw sanitizeError(error, "No se pudo actualizar la solicitud.");
+    log.info("solicitud_updated", { id: data.id, user_id: user.id });
   });
 
 // ============================================================================
@@ -301,8 +410,10 @@ export const getSolicitud = createServerFn({ method: "GET" })
       expected_term_days: r.expected_term_days,
       district: r.district,
       status: r.status,
+      deleted_at: null,
       created_at: r.created_at,
       photos,
       propuestas_count: r.propuestas?.[0]?.count ?? 0,
+      accepted_propuesta_id: null,
     };
   });
