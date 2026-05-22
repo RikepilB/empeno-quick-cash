@@ -44,12 +44,40 @@ function statusInfo(s: SolicitudListItem): StatusInfo {
       color: "text-muted-foreground",
     };
   }
-  if (s.status === "accepted") return { label: "Aceptado", icon: CheckCircle2, badge: "badge-new", color: "text-status-accepted" };
-  if (s.status === "closed") return { label: "Cerrado", icon: CheckCircle2, badge: "badge-inactive", color: "text-muted-foreground" };
-  if (s.status === "expired") return { label: "Expirado", icon: Clock, badge: "badge-inactive", color: "text-muted-foreground" };
+  if (s.status === "accepted")
+    return {
+      label: "Aceptado",
+      icon: CheckCircle2,
+      badge: "badge-new",
+      color: "text-status-accepted",
+    };
+  if (s.status === "closed")
+    return {
+      label: "Cerrado",
+      icon: CheckCircle2,
+      badge: "badge-inactive",
+      color: "text-muted-foreground",
+    };
+  if (s.status === "expired")
+    return {
+      label: "Expirado",
+      icon: Clock,
+      badge: "badge-inactive",
+      color: "text-muted-foreground",
+    };
   if (s.propuestas_count > 0)
-    return { label: `${s.propuestas_count} propuesta${s.propuestas_count > 1 ? "s" : ""}`, icon: Eye, badge: "badge-accepted", color: "text-status-accepted" };
-  return { label: "Esperando", icon: Clock, badge: "badge-pending", color: "text-muted-foreground" };
+    return {
+      label: `${s.propuestas_count} propuesta${s.propuestas_count > 1 ? "s" : ""}`,
+      icon: Eye,
+      badge: "badge-accepted",
+      color: "text-status-accepted",
+    };
+  return {
+    label: "Esperando",
+    icon: Clock,
+    badge: "badge-pending",
+    color: "text-muted-foreground",
+  };
 }
 
 function MisArticulos() {
@@ -112,7 +140,10 @@ function MisArticulos() {
                     const isDeletable = s.status === "active" || s.status === "expired";
                     const target =
                       s.status === "accepted"
-                        ? { to: "/app/code" as const, search: { propuesta_id: s.accepted_propuesta_id ?? undefined } }
+                        ? {
+                            to: "/app/code" as const,
+                            search: { propuesta_id: s.accepted_propuesta_id ?? undefined },
+                          }
                         : s.propuestas_count > 0
                           ? { to: "/app/proposals" as const, search: { id: s.id } }
                           : { to: "/app/published" as const, search: { id: s.id } };
@@ -177,7 +208,9 @@ function MisArticulos() {
                               className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground hover:text-status-reported transition"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
-                              {deleteMut.isPending && s.id === deleteMut.variables ? "Eliminando..." : "Eliminar"}
+                              {deleteMut.isPending && s.id === deleteMut.variables
+                                ? "Eliminando..."
+                                : "Eliminar"}
                             </button>
                           ) : (
                             <span className="flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs text-muted-foreground/40">
@@ -196,7 +229,8 @@ function MisArticulos() {
             {borrados.length > 0 && (
               <section>
                 <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
-                  <Trash2 className="h-3.5 w-3.5" /> Papelera ({borrados.length}) · Se elimina en 24h
+                  <Trash2 className="h-3.5 w-3.5" /> Papelera ({borrados.length}) · Se elimina en
+                  24h
                 </div>
                 <div className="space-y-2">
                   {borrados.map((s) => (
@@ -222,7 +256,9 @@ function MisArticulos() {
                         className="flex items-center gap-1.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-medium hover:bg-surface-2 transition shrink-0"
                       >
                         <RotateCcw className="h-3 w-3" />
-                        {restoreMut.isPending && s.id === restoreMut.variables ? "Restaurando..." : "Restaurar"}
+                        {restoreMut.isPending && s.id === restoreMut.variables
+                          ? "Restaurando..."
+                          : "Restaurar"}
                       </button>
                     </div>
                   ))}

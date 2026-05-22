@@ -1,14 +1,57 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Building2, Loader2 } from "lucide-react";
+import { ArrowLeft, Building2, CheckCircle, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
 
 export const Route = createFileRoute("/negocio/register")({ component: BusinessRegister });
 
+const DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"] as const;
+const HORA_APERTURA = ["09:00", "09:30", "10:00", "10:30", "11:00"];
+const HORA_CIERRE = [
+  "17:00",
+  "17:30",
+  "18:00",
+  "18:30",
+  "19:00",
+  "19:30",
+  "20:00",
+  "20:30",
+  "21:00",
+];
+
 function BusinessRegister() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [rucVerified, setRucVerified] = useState(false);
+  const [rucLoading, setRucLoading] = useState(false);
+  const [horario, setHorario] = useState<
+    Record<string, { open: string; close: string; closed: boolean }>
+  >(Object.fromEntries(DIAS.map((d) => [d, { open: "09:00", close: "18:00", closed: false }])));
+
+  function handleRucVerify(ruc: string) {
+    if (!/^\d{11}$/.test(ruc)) return;
+    setRucLoading(true);
+    setTimeout(() => {
+      setRucVerified(true);
+      setRucLoading(false);
+    }, 800);
+  }
+
+  function toggleClosed(dia: string) {
+    setHorario((prev) => ({
+      ...prev,
+      [dia]: { ...prev[dia]!, closed: !prev[dia]!.closed },
+    }));
+  }
+
+  function updateTime(dia: string, field: "open" | "close", value: string) {
+    setHorario((prev) => ({
+      ...prev,
+      [dia]: { ...prev[dia]!, [field]: value },
+    }));
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -18,6 +61,8 @@ function BusinessRegister() {
       const form = new FormData(e.currentTarget);
       const business_name = String(form.get("business_name") ?? "").trim();
       const district = String(form.get("district") ?? "").trim();
+      const ruc = String(form.get("ruc") ?? "").trim();
+      const dni_rep_legal = String(form.get("dni_rep_legal") ?? "").trim();
       const full_name = String(form.get("full_name") ?? "").trim();
       const email = String(form.get("email") ?? "").trim();
       const password = String(form.get("password") ?? "");
@@ -26,7 +71,18 @@ function BusinessRegister() {
       const { error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { role: "business", full_name, business_name, district } },
+        options: {
+          data: {
+            role: "business",
+            full_name,
+            business_name,
+            district,
+            ruc,
+            dni_rep_legal,
+            email_verified: emailVerified,
+            horario,
+          },
+        },
       });
       if (signUpError) throw signUpError;
 
@@ -115,12 +171,58 @@ function BusinessRegister() {
                   />
                 </div>
                 <div>
+                  <label className="mb-1.5 block text-sm font-medium">RUC</label>
+                  <div className="flex gap-2">
+                    <input
+                      name="ruc"
+                      required
+                      pattern="\d{11}"
+                      maxLength={11}
+                      inputMode="numeric"
+                      className="input-field flex-1"
+                      placeholder="20123456789"
+                      autoComplete="off"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleRucVerify(String(new FormData(document.forms[0]!).get("ruc") ?? ""))
+                      }
+                      disabled={rucLoading || rucVerified}
+                      className={`btn-secondary shrink-0 ${rucVerified ? "border-status-approved text-status-approved" : ""}`}
+                    >
+                      {rucLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : rucVerified ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        "Verificar RUC"
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div>
                   <label className="mb-1.5 block text-sm font-medium">Distrito</label>
                   <input
                     name="district"
                     className="input-field"
                     placeholder="Miraflores"
                     autoComplete="address-level2"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">
+                    DNI del representante legal
+                  </label>
+                  <input
+                    name="dni_rep_legal"
+                    required
+                    pattern="\d{8}"
+                    maxLength={8}
+                    inputMode="numeric"
+                    className="input-field"
+                    placeholder="87654321"
+                    autoComplete="off"
                   />
                 </div>
                 <div>
@@ -146,6 +248,19 @@ function BusinessRegister() {
                     autoComplete="email"
                   />
                 </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    name="email_verified"
+                    type="checkbox"
+                    id="email-verified-negocio"
+                    checked={emailVerified}
+                    onChange={(e) => setEmailVerified(e.target.checked)}
+                    className="h-4 w-4 rounded border-border accent-primary"
+                  />
+                  <label htmlFor="email-verified-negocio" className="text-sm">
+                    Ya verificaste tu correo
+                  </label>
+                </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium">Contraseña</label>
                   <input
@@ -156,6 +271,47 @@ function BusinessRegister() {
                     className="input-field"
                     autoComplete="new-password"
                   />
+                </div>
+                <div>
+                  <label className="mb-1.5 block text-sm font-medium">Horario de atención</label>
+                  <div className="space-y-2 rounded-lg border border-border p-3">
+                    {DIAS.map((dia) => (
+                      <div key={dia} className="flex items-center gap-3">
+                        <div className="w-8 text-xs font-medium text-muted-foreground">{dia}</div>
+                        <input
+                          type="checkbox"
+                          checked={!horario[dia]!.closed}
+                          onChange={() => toggleClosed(dia)}
+                          className="h-4 w-4 rounded border-border accent-primary"
+                        />
+                        <select
+                          value={horario[dia]!.open}
+                          onChange={(e) => updateTime(dia, "open", e.target.value)}
+                          disabled={horario[dia]!.closed}
+                          className="input-field flex-1 text-xs"
+                        >
+                          {HORA_APERTURA.map((h) => (
+                            <option key={h} value={h}>
+                              {h}
+                            </option>
+                          ))}
+                        </select>
+                        <span className="text-xs text-muted-foreground">a</span>
+                        <select
+                          value={horario[dia]!.close}
+                          onChange={(e) => updateTime(dia, "close", e.target.value)}
+                          disabled={horario[dia]!.closed}
+                          className="input-field flex-1 text-xs"
+                        >
+                          {HORA_CIERRE.map((h) => (
+                            <option key={h} value={h}>
+                              {h}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 {error && (
