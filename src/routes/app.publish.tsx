@@ -59,7 +59,7 @@ function Publish() {
         setCondition((s.condition as (typeof CONDITIONS)[number]) ?? "Bueno");
         setDescription(s.description ?? "");
         setExpectedAmount(s.expected_amount_pen ? String(s.expected_amount_pen) : "");
-        setPlazo((s.expected_term_days as (typeof PLAZOS)[number]) ?? 30);
+        setPlazo(s.expected_term_days ?? 30);
         setDistrict(s.district ?? "");
       })
       .catch(() => setError("No se pudo cargar la publicación."))
