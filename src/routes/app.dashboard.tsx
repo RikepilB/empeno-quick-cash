@@ -106,8 +106,8 @@ function Dashboard() {
               <h3 className="font-display text-base font-bold uppercase tracking-wide md:text-lg">
                 Mis publicaciones
               </h3>
-              <Link to="/app/history" className="text-xs text-primary hover:underline md:hidden">
-                Ver historial
+              <Link to="/app/mis-articulos" className="text-xs text-primary hover:underline">
+                Ver todos
               </Link>
             </div>
 
