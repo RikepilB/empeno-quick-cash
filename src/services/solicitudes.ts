@@ -140,7 +140,10 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
         .eq("status", "accepted");
 
       acceptedMap = Object.fromEntries(
-        (acceptedRows ?? []).map((r: { id: string; solicitud_id: string }) => [r.solicitud_id, r.id]),
+        (acceptedRows ?? []).map((r: { id: string; solicitud_id: string }) => [
+          r.solicitud_id,
+          r.id,
+        ]),
       );
     }
 

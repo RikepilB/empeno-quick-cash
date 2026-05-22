@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { PhoneFrame } from "@/ui/PhoneFrame";
+import { ClientLayout } from "@/ui/ClientLayout";
 import { Camera, Plus, Loader2, X, Sparkles } from "lucide-react";
 import { useMemo, useRef, useState, type FormEvent, useEffect } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
@@ -59,7 +59,7 @@ function Publish() {
         setCondition((s.condition as (typeof CONDITIONS)[number]) ?? "Bueno");
         setDescription(s.description ?? "");
         setExpectedAmount(s.expected_amount_pen ? String(s.expected_amount_pen) : "");
-        setPlazo((s.expected_term_days as (typeof PLAZOS)[number]) ?? 30);
+        setPlazo(s.expected_term_days ?? 30);
         setDistrict(s.district ?? "");
       })
       .catch(() => setError("No se pudo cargar la publicación."))
@@ -190,12 +190,16 @@ function Publish() {
   const amountNum = expectedAmount.replace(/[^\d]/g, "");
 
   return (
-    <PhoneFrame title="Publicar artículo" back="/app/dashboard">
-      <form onSubmit={onSubmit} className="md:grid md:grid-cols-[1fr_320px] md:gap-8 md:p-8">
-        <div className="space-y-5 p-6 pb-10 md:p-0 md:pb-0">
+    <ClientLayout
+      title={isEditing ? "Editar publicación" : "Publicar artículo"}
+      subtitle="Completa los datos de tu artículo"
+    >
+      <form onSubmit={onSubmit} className="grid gap-8 lg:grid-cols-[1fr_340px]">
+        <div className="space-y-6">
+          {/* Category */}
           <div>
             <label className="label-field">Categoría</label>
-            <div className="grid grid-cols-3 gap-2 md:grid-cols-4">
+            <div className="grid grid-cols-3 gap-2 md:grid-cols-4 lg:grid-cols-6">
               {CATEGORIES.map((c) => {
                 const Icon = c.icon;
                 const active = category === c.key;
@@ -204,7 +208,7 @@ function Publish() {
                     type="button"
                     key={c.key}
                     onClick={() => setCategory(c.key)}
-                    className={`flex flex-col items-center gap-1 rounded-xl border p-3 text-xs transition ${active ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface text-muted-foreground"}`}
+                    className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 text-xs transition ${active ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface text-muted-foreground"}`}
                   >
                     <Icon className="h-5 w-5" />
                     {c.label}
@@ -216,6 +220,7 @@ function Publish() {
 
           <CategoryFields category={category} />
 
+          {/* Condition */}
           <div>
             <label className="label-field">Estado del artículo</label>
             <div className="grid grid-cols-4 gap-2">
@@ -224,7 +229,7 @@ function Publish() {
                   type="button"
                   key={e}
                   onClick={() => setCondition(e)}
-                  className={`rounded-lg border px-2 py-2 text-xs ${condition === e ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface text-muted-foreground"}`}
+                  className={`rounded-lg border px-3 py-2.5 text-sm ${condition === e ? "border-primary bg-primary/10 text-primary" : "border-border bg-surface text-muted-foreground"}`}
                 >
                   {e}
                 </button>
@@ -232,30 +237,32 @@ function Publish() {
             </div>
           </div>
 
+          {/* Description */}
           <div>
             <label className="label-field">Detalles adicionales (opcional)</label>
             <textarea
               name="description"
-              className="input-field min-h-[70px]"
+              className="input-field min-h-[80px]"
               placeholder="Cuéntale a la casa de empeño el estado real del artículo."
             />
           </div>
 
+          {/* Photos */}
           <div>
             <label className="label-field">
               Fotografías (mín. {MIN_PHOTOS} · máx. {MAX_PHOTOS})
             </label>
-            <div className="grid grid-cols-4 gap-2 md:grid-cols-6">
+            <div className="grid grid-cols-3 gap-3 md:grid-cols-6">
               {photos.map((p, idx) => (
                 <div
                   key={idx}
-                  className="relative aspect-square overflow-hidden rounded-lg bg-surface-2"
+                  className="relative aspect-square overflow-hidden rounded-xl bg-surface-2"
                 >
                   <img src={p.previewUrl} alt="" className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => removePhoto(idx)}
-                    className="absolute right-1 top-1 rounded-full bg-black/70 p-1 text-white"
+                    className="absolute right-1 top-1 rounded-full bg-black/70 p-1.5 text-white"
                     aria-label="Quitar foto"
                   >
                     <X className="h-3 w-3" />
@@ -266,10 +273,10 @@ function Publish() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex aspect-square flex-col items-center justify-center rounded-lg border-2 border-dashed border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"
+                  className="flex aspect-square flex-col items-center justify-center rounded-xl border-2 border-dashed border-border bg-surface text-muted-foreground hover:border-primary hover:text-primary"
                 >
-                  <Camera className="h-5 w-5" />
-                  <span className="mt-1 text-[10px]">Agregar</span>
+                  <Camera className="h-6 w-6" />
+                  <span className="mt-1.5 text-xs">Agregar</span>
                 </button>
               )}
             </div>
@@ -283,12 +290,12 @@ function Publish() {
             />
           </div>
 
-          <details className="group rounded-xl border border-border bg-surface" open>
-            <summary className="flex cursor-pointer items-center justify-between p-4 text-sm font-medium">
+          {/* Loan conditions */}
+          <div className="rounded-2xl border border-border bg-surface p-6">
+            <div className="mb-4 font-display text-lg font-bold uppercase">
               Condiciones del préstamo
-              <Plus className="h-4 w-4 transition group-open:rotate-45" />
-            </summary>
-            <div className="space-y-4 border-t border-border p-4">
+            </div>
+            <div className="grid gap-5 md:grid-cols-2">
               <div>
                 <label className="label-field">Monto esperado (S/)</label>
                 <input
@@ -301,40 +308,6 @@ function Publish() {
                 />
               </div>
               <div>
-                <label className="label-field">Plazo deseado</label>
-                <div className="grid grid-cols-5 gap-2">
-                  {([15, 30, 45, 60, "custom"] as const).map((d) => (
-                    <button
-                      type="button"
-                      key={String(d)}
-                      onClick={() => setPlazo(d)}
-                      className={`rounded-lg border py-2 text-xs ${plazo === d ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"}`}
-                    >
-                      {d === "custom" ? "Otros…" : `${d} días`}
-                    </button>
-                  ))}
-                </div>
-                {plazo === "custom" && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <input
-                      type="number"
-                      min={1}
-                      max={365}
-                      value={customPlazoDays ?? ""}
-                      onChange={(e) => setCustomPlazoDays(Number(e.target.value))}
-                      className="input-field"
-                      placeholder="Ingresa los días exactos"
-                    />
-                    <span className="text-sm text-muted-foreground">días</span>
-                  </div>
-                )}
-                {plazo === "custom" && (
-                  <p className="text-xs text-muted-foreground">
-                    Ingresa los días exactos que necesitas.
-                  </p>
-                )}
-              </div>
-              <div>
                 <label className="label-field">Distrito</label>
                 <input
                   name="district"
@@ -344,11 +317,40 @@ function Publish() {
                   placeholder="Miraflores"
                 />
               </div>
+              <div className="md:col-span-2">
+                <label className="label-field">Plazo deseado</label>
+                <div className="grid grid-cols-5 gap-2">
+                  {([15, 30, 45, 60, "custom"] as const).map((d) => (
+                    <button
+                      type="button"
+                      key={String(d)}
+                      onClick={() => setPlazo(d)}
+                      className={`rounded-lg border py-2.5 text-sm ${plazo === d ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"}`}
+                    >
+                      {d === "custom" ? "Otros…" : `${d} días`}
+                    </button>
+                  ))}
+                </div>
+                {plazo === "custom" && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      max={365}
+                      value={customPlazoDays ?? ""}
+                      onChange={(e) => setCustomPlazoDays(Number(e.target.value))}
+                      className="input-field max-w-[160px]"
+                      placeholder="Días exactos"
+                    />
+                    <span className="text-sm text-muted-foreground">días</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </details>
+          </div>
 
           {error && (
-            <div className="rounded-lg bg-status-reported/15 px-3 py-2 text-xs text-status-reported">
+            <div className="rounded-lg bg-status-reported/15 px-4 py-3 text-sm text-status-reported">
               {error}
             </div>
           )}
@@ -356,35 +358,40 @@ function Publish() {
           <button
             type="submit"
             disabled={submitting}
-            className="btn-primary w-full disabled:opacity-60 md:hidden"
+            className="btn-primary w-full py-3 text-base disabled:opacity-60"
           >
-            {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
             {submitting ? "Publicando..." : "Publicar y esperar propuestas"}
           </button>
+          <p className="text-center text-xs text-muted-foreground">
+            Las ofertas de casa de empeño están sujetas a previa evaluación física.
+          </p>
         </div>
 
-        <aside className="hidden md:block">
-          <div className="sticky top-6 space-y-4">
-            <div className="rounded-2xl border border-border bg-surface p-5">
-              <div className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" /> Resumen
+        {/* Sidebar summary */}
+        <aside className="hidden lg:block">
+          <div className="sticky top-24 space-y-4">
+            <div className="rounded-2xl border border-border bg-surface p-6">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+                <Sparkles className="h-4 w-4 text-primary" /> Resumen
               </div>
-              <div className="mt-3 flex items-start gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-2 text-2xl">
+              <div className="mt-4 flex items-start gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-surface-2 text-3xl">
                   {meta.emoji}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[10px] uppercase text-muted-foreground">{meta.label}</div>
-                  <div className="truncate font-display text-base font-bold">
+                  <div className="text-[11px] uppercase text-muted-foreground">{meta.label}</div>
+                  <div className="truncate font-display text-lg font-bold">
                     {summary || "Sin datos aún"}
                   </div>
-                  <div className="mt-0.5 text-[11px] text-muted-foreground">
-                    Estado: {condition}
-                  </div>
+                  <div className="mt-0.5 text-xs text-muted-foreground">Estado: {condition}</div>
                 </div>
               </div>
-              <div className="mt-4 space-y-2 text-xs">
-                <Row k="Plazo" v={`${plazo} días`} />
+              <div className="mt-4 space-y-2.5 border-t border-border pt-4 text-sm">
+                <Row
+                  k="Plazo"
+                  v={plazo === "custom" ? `${customPlazoDays ?? "—"} días` : `${plazo} días`}
+                />
                 <Row
                   k="Monto esperado"
                   v={amountNum ? `S/ ${Number(amountNum).toLocaleString("es-PE")}` : "—"}
@@ -394,32 +401,24 @@ function Publish() {
               </div>
             </div>
 
-            <div className="rounded-2xl border border-border bg-surface p-5 text-xs text-muted-foreground">
+            <div className="rounded-2xl border border-border bg-surface p-5">
               <div className="font-semibold text-foreground">Antes de publicar</div>
-              <ul className="mt-2 space-y-1.5">
-                <li>
-                  · Mínimo {MIN_PHOTOS} foto · máximo {MAX_PHOTOS}
+              <ul className="mt-2.5 space-y-2 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2">
+                  <span>·</span> Mínimo {MIN_PHOTOS} foto · máximo {MAX_PHOTOS}
                 </li>
-                <li>· 5 MB por archivo</li>
-                <li>· Fotos claras = mejores ofertas</li>
+                <li className="flex items-start gap-2">
+                  <span>·</span> 5 MB por archivo máximo
+                </li>
+                <li className="flex items-start gap-2">
+                  <span>·</span> Fotos claras = mejores ofertas
+                </li>
               </ul>
             </div>
-
-            <button
-              type="submit"
-              disabled={submitting}
-              className="btn-primary w-full disabled:opacity-60"
-            >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              {submitting ? "Publicando..." : "Publicar y esperar propuestas"}
-            </button>
-            <p className="text-center text-xs text-muted-foreground">
-              Las ofertas de casa de empieño están sujetas a previa evaluación física.
-            </p>
           </div>
         </aside>
       </form>
-    </PhoneFrame>
+    </ClientLayout>
   );
 }
 

@@ -15,41 +15,24 @@
 ### Brand greens
 
 ```css
---brand-50:  #E8F8EF
---brand-100: #C6EFD4
---brand-200: #93DFA9
---brand-300: #5FCD7E
---brand-400: #2BB855
---brand-500: #15A044    /* primary CTA — locked */
---brand-600: #0E8137
---brand-700: #0A632B
---brand-800: #084A21
---brand-900: #053217
+--brand-50: #e8f8ef --brand-100: #c6efd4 --brand-200: #93dfa9 --brand-300: #5fcd7e
+  --brand-400: #2bb855 --brand-500: #15a044 /* primary CTA — locked */ --brand-600: #0e8137
+  --brand-700: #0a632b --brand-800: #084a21 --brand-900: #053217;
 ```
 
 ### Neutrals (cold, slightly green-tinted black for cohesion)
 
 ```css
---ink-50:  #F6F8F7
---ink-100: #EBEFEC
---ink-200: #D5DCD7
---ink-300: #B0BAB4
---ink-400: #7E8B83
---ink-500: #586660
---ink-600: #3F4944
---ink-700: #2A312E
---ink-800: #1A1F1C
---ink-900: #0E1311
---ink-950: #050807    /* near-pure black, page bg dark */
+--ink-50: #f6f8f7 --ink-100: #ebefec --ink-200: #d5dcd7 --ink-300: #b0bab4 --ink-400: #7e8b83
+  --ink-500: #586660 --ink-600: #3f4944 --ink-700: #2a312e --ink-800: #1a1f1c --ink-900: #0e1311
+  --ink-950: #050807 /* near-pure black, page bg dark */;
 ```
 
 ### Semantic
 
 ```css
---success: #15A044    /* same as brand-500 — green is success */
---warning: #E59500
---danger:  #DC2A2A
---info:    #2563EB
+--success: #15a044 /* same as brand-500 — green is success */ --warning: #e59500 --danger: #dc2a2a
+  --info: #2563eb;
 ```
 
 ---
@@ -61,41 +44,42 @@ Two themes share semantic tokens; raw color vars switch based on `[data-theme]`.
 ```css
 :root,
 [data-theme="light"] {
-  --color-bg:           var(--ink-50);
-  --color-surface:      #FFFFFF;
-  --color-surface-2:    var(--ink-50);
-  --color-border:       var(--ink-200);
+  --color-bg: var(--ink-50);
+  --color-surface: #ffffff;
+  --color-surface-2: var(--ink-50);
+  --color-border: var(--ink-200);
   --color-border-strong: var(--ink-300);
-  --color-text:         var(--ink-900);
-  --color-text-muted:   var(--ink-500);
-  --color-text-subtle:  var(--ink-400);
-  --color-text-on-brand: #FFFFFF;
+  --color-text: var(--ink-900);
+  --color-text-muted: var(--ink-500);
+  --color-text-subtle: var(--ink-400);
+  --color-text-on-brand: #ffffff;
 
-  --brand-primary:       var(--brand-500);
+  --brand-primary: var(--brand-500);
   --brand-primary-hover: var(--brand-600);
-  --brand-primary-bg:    var(--brand-50);
-  --brand-primary-fg:    var(--brand-700);
+  --brand-primary-bg: var(--brand-50);
+  --brand-primary-fg: var(--brand-700);
 }
 
 [data-theme="dark"] {
-  --color-bg:           var(--ink-950);
-  --color-surface:      var(--ink-900);
-  --color-surface-2:    var(--ink-800);
-  --color-border:       var(--ink-700);
+  --color-bg: var(--ink-950);
+  --color-surface: var(--ink-900);
+  --color-surface-2: var(--ink-800);
+  --color-border: var(--ink-700);
   --color-border-strong: var(--ink-600);
-  --color-text:         var(--ink-50);
-  --color-text-muted:   var(--ink-300);
-  --color-text-subtle:  var(--ink-400);
-  --color-text-on-brand: #FFFFFF;
+  --color-text: var(--ink-50);
+  --color-text-muted: var(--ink-300);
+  --color-text-subtle: var(--ink-400);
+  --color-text-on-brand: #ffffff;
 
-  --brand-primary:       var(--brand-400);
+  --brand-primary: var(--brand-400);
   --brand-primary-hover: var(--brand-300);
-  --brand-primary-bg:    color-mix(in oklab, var(--brand-500) 18%, transparent);
-  --brand-primary-fg:    var(--brand-200);
+  --brand-primary-bg: color-mix(in oklab, var(--brand-500) 18%, transparent);
+  --brand-primary-fg: var(--brand-200);
 }
 ```
 
 ### Why brand shifts one shade in dark mode
+
 `brand-500` on `ink-950` doesn't meet WCAG AA contrast for normal text. `brand-400` does. Same pattern as Stripe / Linear.
 
 ### Theme application
@@ -110,11 +94,13 @@ Two themes share semantic tokens; raw color vars switch based on `[data-theme]`.
 ## Typography
 
 **Fonts** (Google Fonts, self-hosted):
+
 - **Display**: `Plus Jakarta Sans` (700, 800)
 - **Body**: `Inter` (400, 500, 600)
 - **Numeric (tabular)**: `Inter` with `font-feature-settings: "tnum"`
 
 **Scale** (mobile · desktop):
+
 ```
 --text-xs:   12px · 12px
 --text-sm:   14px · 14px
@@ -133,6 +119,7 @@ Two themes share semantic tokens; raw color vars switch based on `[data-theme]`.
 ```
 
 **Hard rules:**
+
 - Money always uses tabular numerals.
 - Never center-align body text >2 lines.
 - Never `font-style: italic` on Spanish — Inter italic distorts diacritics.
@@ -149,6 +136,7 @@ Two themes share semantic tokens; raw color vars switch based on `[data-theme]`.
 --space-5: 20px   --space-16: 64px
                   --space-24: 96px
 ```
+
 Multiples of 4 only.
 
 ---
@@ -168,14 +156,16 @@ Multiples of 4 only.
 ## Elevation
 
 **Light** — soft shadows:
+
 ```css
 --shadow-sm: 0 1px 2px rgba(14, 19, 17, 0.04);
 --shadow-md: 0 4px 12px rgba(14, 19, 17, 0.06), 0 1px 2px rgba(14, 19, 17, 0.04);
---shadow-lg: 0 12px 32px rgba(14, 19, 17, 0.10), 0 2px 6px rgba(14, 19, 17, 0.05);
+--shadow-lg: 0 12px 32px rgba(14, 19, 17, 0.1), 0 2px 6px rgba(14, 19, 17, 0.05);
 --shadow-xl: 0 24px 64px rgba(14, 19, 17, 0.14);
 ```
 
 **Dark** — shadows replaced by borders:
+
 ```css
 [data-theme="dark"] {
   --shadow-sm: 0 0 0 1px var(--ink-800);
@@ -201,6 +191,7 @@ Multiples of 4 only.
 ```
 
 **Hard rules:**
+
 - Animate `transform` and `opacity` only.
 - Collapsing panels: `max-height` w/ `overflow: hidden`.
 - `prefers-reduced-motion: reduce` disables all motion except <100ms feedback.
@@ -211,20 +202,22 @@ Multiples of 4 only.
 
 ### Button
 
-| Variant | Bg | Text | Border | Use |
-|---|---|---|---|---|
-| `primary` | `--brand-primary` | `--color-text-on-brand` | none | Main CTA per screen |
-| `secondary` | `--color-surface` | `--color-text` | `--color-border` 1px | Secondary action |
-| `ghost` | transparent | `--color-text` | none | Tertiary, in lists |
-| `danger` | `--danger` | white | none | Destructive |
-| `link` | transparent | `--brand-primary` | underline on hover | Inline |
+| Variant     | Bg                | Text                    | Border               | Use                 |
+| ----------- | ----------------- | ----------------------- | -------------------- | ------------------- |
+| `primary`   | `--brand-primary` | `--color-text-on-brand` | none                 | Main CTA per screen |
+| `secondary` | `--color-surface` | `--color-text`          | `--color-border` 1px | Secondary action    |
+| `ghost`     | transparent       | `--color-text`          | none                 | Tertiary, in lists  |
+| `danger`    | `--danger`        | white                   | none                 | Destructive         |
+| `link`      | transparent       | `--brand-primary`       | underline on hover   | Inline              |
 
 **Sizes:** `sm` (32 px), `md` (40 px — default), `lg` (48 px — hero / mobile primary).
 
 **States:** default · hover (bg → `--brand-primary-hover`) · active (`scale(0.98)`) · disabled (40% opacity) · loading (spinner replaces label).
 
 ```tsx
-<Button variant="primary" size="md" loading={pending}>Publicar artículo</Button>
+<Button variant="primary" size="md" loading={pending}>
+  Publicar artículo
+</Button>
 ```
 
 ---
@@ -241,6 +234,7 @@ Multiples of 4 only.
 ---
 
 ### Select / Combobox
+
 - Native `<select>` on mobile.
 - Radix `Combobox` on desktop with search.
 
@@ -256,22 +250,27 @@ Multiples of 4 only.
   padding: var(--space-5);
   box-shadow: var(--shadow-sm);
 }
-.card--interactive:hover { box-shadow: var(--shadow-md); cursor: pointer; }
-.card--interactive:active { transform: translateY(1px); }
+.card--interactive:hover {
+  box-shadow: var(--shadow-md);
+  cursor: pointer;
+}
+.card--interactive:active {
+  transform: translateY(1px);
+}
 ```
 
 ---
 
 ### Badge
 
-| Variant | Bg | Text |
-|---|---|---|
-| `neutral` | `--color-border` | `--color-text-muted` |
-| `brand` | `--brand-primary-bg` | `--brand-primary-fg` |
-| `success` | rgba(success, 0.12) | `--success` |
-| `warning` | rgba(warning, 0.12) | `--warning` |
-| `danger` | rgba(danger, 0.12) | `--danger` |
-| `info` | rgba(info, 0.12) | `--info` |
+| Variant   | Bg                   | Text                 |
+| --------- | -------------------- | -------------------- |
+| `neutral` | `--color-border`     | `--color-text-muted` |
+| `brand`   | `--brand-primary-bg` | `--brand-primary-fg` |
+| `success` | rgba(success, 0.12)  | `--success`          |
+| `warning` | rgba(warning, 0.12)  | `--warning`          |
+| `danger`  | rgba(danger, 0.12)   | `--danger`           |
+| `info`    | rgba(info, 0.12)     | `--info`             |
 
 Status (`open`, `pending_pickup`, `expired`), categoría tag, verified shield, **featured/boost glow** (brand variant + subtle pulse).
 
@@ -280,6 +279,7 @@ Status (`open`, `pending_pickup`, `expired`), categoría tag, verified shield, *
 ### Featured propuesta visual treatment
 
 For boosted propuestas (Etapa 1 monetization):
+
 - Border `2px solid var(--brand-primary)` instead of 1 px `--color-border`.
 - Small "Destacada" badge top-right (brand variant).
 - Optional subtle glow: `box-shadow: 0 0 0 4px var(--brand-primary-bg)`.
@@ -293,7 +293,7 @@ For boosted propuestas (Etapa 1 monetization):
 function Money({ value }: { value: number }) {
   return (
     <span className="tabular-nums" aria-label={`${value} soles`}>
-      S/ {value.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      S/ {value.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
     </span>
   );
 }
@@ -304,6 +304,7 @@ Never italic. Default `--color-text`. `--success` only for incoming money ("Reci
 ---
 
 ### Photo upload (solicitud-photos)
+
 - Dropzone (desktop) / button + native picker (mobile).
 - Inline 96×96 thumbnails with `×` to remove.
 - Per-file progress bar.
@@ -322,6 +323,7 @@ Never italic. Default `--color-text`. `--success` only for incoming money ("Reci
 ---
 
 ### Toast
+
 - Bottom-center on mobile, top-right on desktop.
 - 4 s auto-dismiss, dismissable.
 - Variants: success / error / info.
@@ -330,6 +332,7 @@ Never italic. Default `--color-text`. `--success` only for incoming money ("Reci
 ---
 
 ### Modal / Bottom-sheet
+
 - Modal on desktop (≥768 px), centered, max-width 480 / 640 / 800 px.
 - Bottom-sheet on mobile, max 90 vh.
 - Backdrop blur, dismiss on Escape + backdrop click.
@@ -352,14 +355,19 @@ Never italic. Default `--color-text`. `--success` only for incoming money ("Reci
   border-radius: var(--radius-sm);
 }
 @keyframes shimmer {
-  from { background-position: 200% 0; }
-  to   { background-position: -200% 0; }
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
 }
 ```
 
 ---
 
 ## Iconography
+
 - **Lucide React** — single icon family.
 - Default stroke 1.5, size 20 px (inline) / 24 px (buttons).
 - Custom brand marks in `src/ui/icons/` as SVG with `currentColor` so they re-theme.
@@ -367,12 +375,14 @@ Never italic. Default `--color-text`. `--success` only for incoming money ("Reci
 ---
 
 ## Illustrations
+
 - One consistent style. Recommended: **Open Doodles** or **unDraw**, recolored to brand green.
 - Hero + empty states from the same family.
 
 ---
 
 ## Component library decision
+
 - **shadcn/ui** primitives are already in `src/ui/primitives/*` — do not modify those files (per `.claude/CLAUDE.md` hard rule).
 - No second component library.
 
@@ -388,6 +398,7 @@ Never italic. Default `--color-text`. `--success` only for incoming money ("Reci
 ---
 
 ## Brand asset checklist
+
 - [ ] Logo wordmark "EMPEÑALO" (SVG)
 - [ ] Isotipo (mark only, narrow contexts)
 - [ ] Light / dark / 1-color variants
@@ -406,21 +417,21 @@ Project uses Tailwind v4 with CSS-first config in `src/styles.css`. Tokens are d
 @import "tailwindcss";
 
 @theme inline {
-  --color-brand-50:  var(--brand-50);
+  --color-brand-50: var(--brand-50);
   --color-brand-100: var(--brand-100);
   /* …all brand shades… */
-  --color-bg:        var(--color-bg);
-  --color-surface:   var(--color-surface);
-  --color-border:    var(--color-border);
-  --color-text:      var(--color-text);
-  --color-muted:     var(--color-text-muted);
-  --color-success:   var(--success);
-  --color-warning:   var(--warning);
-  --color-danger:    var(--danger);
-  --color-info:      var(--info);
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-border: var(--color-border);
+  --color-text: var(--color-text);
+  --color-muted: var(--color-text-muted);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
 
   --font-display: var(--font-jakarta), system-ui, sans-serif;
-  --font-sans:    var(--font-inter), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
 
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -439,6 +450,7 @@ Then in components: `class="bg-brand-500 text-white dark:bg-brand-400"` etc.
 ---
 
 ## Open design decisions
+
 - [ ] Logo (wordmark + isotipo) — designer or DIY Figma
 - [ ] Lock `brand-500` shade after ≥10 user-test impressions
 - [ ] Illustration family — pick before any empty state ships

@@ -1,11 +1,18 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { PhoneFrame } from "@/ui/PhoneFrame";
-import { Plus, Clock, Sparkles, History as HistoryIcon, Bell, Loader2, LogOut } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ClientLayout } from "@/ui/ClientLayout";
+import {
+  Plus,
+  Clock,
+  Sparkles,
+  History as HistoryIcon,
+  Bell,
+  Loader2,
+  ArrowRight,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { listMySolicitudes, type SolicitudListItem } from "@/services/solicitudes";
 import { listMyClientOperations } from "@/services/operations";
-import { getCurrentUser, signOut } from "@/services/auth";
-import { getSupabaseBrowser } from "@/lib/db/browser";
+import { getCurrentUser } from "@/services/auth";
 import { categoryMeta, buildTitle } from "@/lib/categories";
 
 export const Route = createFileRoute("/app/dashboard")({ component: Dashboard });
@@ -19,16 +26,7 @@ function statusBadge(s: SolicitudListItem): { label: string; badge: string } {
 }
 
 function Dashboard() {
-  const router = useRouter();
   const user = useQuery({ queryKey: ["currentUser"], queryFn: () => getCurrentUser() });
-
-  async function handleLogout() {
-    await signOut();
-    await getSupabaseBrowser().auth.signOut();
-    await router.invalidate();
-    await router.navigate({ to: "/app/login" });
-  }
-
   const solicitudes = useQuery({
     queryKey: ["mySolicitudes"],
     queryFn: () => listMySolicitudes(),
@@ -42,180 +40,202 @@ function Dashboard() {
   const activeCount = items.filter((s) => s.status === "active" || s.status === "accepted").length;
   const totalOps = operations.data?.length ?? 0;
   const firstName = user.data?.profile.full_name?.split(" ")[0] ?? "";
-
   const offersCount = items.reduce((acc, s) => acc + (s.propuestas_count ?? 0), 0);
 
+  const today = new Date().toLocaleDateString("es-PE", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+
   return (
-    <PhoneFrame hideHeader>
-      <div className="bg-background">
-        <div className="flex items-center justify-between p-6 pb-4 md:px-8 md:pt-8">
+    <ClientLayout title={`¡Hola, ${firstName || "Cliente"}!`} subtitle={today}>
+      {/* Publish CTA */}
+      <Link
+        to="/app/publish"
+        className="group block overflow-hidden rounded-2xl bg-primary p-6 text-primary-foreground md:p-8"
+      >
+        <div className="flex items-center justify-between gap-4">
           <div>
-            <div className="text-xs text-muted-foreground">¡Hola,</div>
-            <div className="font-display text-2xl font-bold uppercase md:text-3xl">
-              {firstName || "Cliente"}! 👋
+            <div className="font-display text-2xl font-bold uppercase leading-tight md:text-3xl">
+              Empeñar un artículo
+            </div>
+            <div className="mt-1 text-sm opacity-80">
+              Publica y recibe múltiples ofertas de casas de empeño afiliadas.
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Link
-              to="/app/history"
-              className="hidden rounded-xl border border-border bg-surface px-3 py-2 text-xs text-muted-foreground hover:text-foreground md:inline-flex"
-            >
-              Historial
-            </Link>
-            <Link
-              to="/app/notifications"
-              className="rounded-xl border border-border bg-surface p-2.5 text-foreground transition hover:bg-surface-2"
-              title="Notificaciones"
-              aria-label="Notificaciones"
-            >
-              <Bell className="h-5 w-5" />
-            </Link>
-            <button
-              onClick={handleLogout}
-              className="rounded-xl border border-border bg-surface p-2.5 text-muted-foreground hover:text-foreground"
-              title="Cerrar sesión"
-              aria-label="Cerrar sesión"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
+          <div className="rounded-xl bg-primary-foreground/10 p-4 transition group-hover:rotate-90">
+            <Plus className="h-7 w-7" />
           </div>
         </div>
+      </Link>
 
-        <div className="px-6 md:grid md:grid-cols-[1fr_320px] md:gap-6 md:px-8 md:pb-10">
-          <div className="min-w-0">
-            <Link
-              to="/app/publish"
-              className="group block overflow-hidden rounded-2xl bg-primary p-5 text-primary-foreground md:p-7"
-            >
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <div className="font-display text-2xl font-bold uppercase leading-tight md:text-3xl">
-                    Empeñar un artículo
-                  </div>
-                  <div className="mt-1 text-xs opacity-80 md:text-sm">
-                    Publica y recibe múltiples ofertas de casas de empeño afiliadas.
-                  </div>
-                </div>
-                <div className="rounded-xl bg-primary-foreground/10 p-3 transition group-hover:rotate-90">
-                  <Plus className="h-6 w-6" />
-                </div>
-              </div>
-            </Link>
-
-            <div className="mt-6 flex items-center justify-between">
-              <h3 className="font-display text-base font-bold uppercase tracking-wide md:text-lg">
-                Mis publicaciones
-              </h3>
-              <Link to="/app/mis-articulos" className="text-xs text-primary hover:underline">
-                Ver todos
-              </Link>
-            </div>
-
-            <div className="mt-3 grid gap-2.5 md:grid-cols-2">
-              {solicitudes.isLoading ? (
-                <div className="col-span-full flex items-center justify-center py-6 text-xs text-muted-foreground">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
-                </div>
-              ) : items.length === 0 ? (
-                <div className="col-span-full rounded-2xl border border-dashed border-border bg-surface p-8 text-center">
-                  <div className="font-display text-lg font-bold uppercase">
-                    Aún no tienes publicaciones
-                  </div>
-                  <p className="mt-2 text-xs text-muted-foreground md:text-sm">
-                    Publica un artículo y comienza a recibir ofertas de casas de empeño afiliadas.
-                  </p>
-                  <Link to="/app/publish" className="btn-primary mt-5 inline-flex w-auto px-5">
-                    Publicar artículo
-                  </Link>
-                </div>
-              ) : (
-                items.map((s) => {
-                  const { label, badge } = statusBadge(s);
-                  const target =
-                    s.status === "accepted"
-                      ? {
-                          to: "/app/code" as const,
-                          search: { propuesta_id: s.accepted_propuesta_id ?? undefined },
-                        }
-                      : s.propuestas_count > 0
-                        ? { to: "/app/proposals" as const, search: { id: s.id } }
-                        : { to: "/app/published" as const, search: { id: s.id } };
-                  return (
-                    <Link
-                      key={s.id}
-                      to={target.to}
-                      search={target.search as never}
-                      className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 transition hover:border-primary/40"
-                    >
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-2 text-2xl">
-                        {categoryMeta(s.category).emoji}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="truncate text-sm font-semibold">{buildTitle(s)}</div>
-                        <div className="mt-0.5 flex items-center gap-2">
-                          <span className={`badge-dot ${badge}`}>{label}</span>
-                          {s.propuestas_count > 0 && (
-                            <span className="text-[11px] text-muted-foreground">
-                              · {s.propuestas_count}{" "}
-                              {s.propuestas_count === 1 ? "propuesta" : "propuestas"}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </Link>
-                  );
-                })
-              )}
-            </div>
+      {/* Stats row */}
+      <div className="mt-6 grid grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-border bg-surface p-5">
+          <Clock className="h-5 w-5 text-primary" />
+          <div className="mt-3 font-display text-3xl font-extrabold">{activeCount}</div>
+          <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
+            Solicitudes activas
           </div>
-
-          <aside className="mt-6 space-y-4 md:mt-0 md:pb-8">
-            <div className="grid grid-cols-3 gap-3 md:grid-cols-1">
-              <div className="rounded-xl border border-border bg-surface p-4">
-                <Clock className="h-4 w-4 text-primary" />
-                <div className="mt-2 font-display text-2xl font-bold">{activeCount}</div>
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Solicitudes activas
-                </div>
-              </div>
-              <div className="rounded-xl border border-border bg-surface p-4">
-                <Sparkles className="h-4 w-4 text-primary" />
-                <div className="mt-2 font-display text-2xl font-bold">{offersCount}</div>
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Ofertas recibidas
-                </div>
-              </div>
-              <div className="rounded-xl border border-border bg-surface p-4">
-                <HistoryIcon className="h-4 w-4 text-primary" />
-                <div className="mt-2 font-display text-2xl font-bold">{totalOps}</div>
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Operaciones completadas
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-xl border border-border bg-surface p-4">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <Sparkles className="h-3.5 w-3.5 text-primary" /> Tip
-              </div>
-              <p className="mt-1 text-sm">
-                Sube fotos claras y bien iluminadas para recibir mejores ofertas.
-              </p>
-            </div>
-
-            <div className="hidden rounded-xl border border-border bg-surface p-4 md:block">
-              <div className="text-xs uppercase tracking-wide text-muted-foreground">
-                Cómo funciona
-              </div>
-              <ol className="mt-2 space-y-1.5 text-xs text-foreground/80">
-                <li>1. Publica tu artículo con fotos.</li>
-                <li>2. Recibe propuestas de casas afiliadas.</li>
-                <li>3. Acepta la mejor y obtén tu código.</li>
-              </ol>
-            </div>
-          </aside>
+        </div>
+        <div className="rounded-2xl border border-border bg-surface p-5">
+          <Sparkles className="h-5 w-5 text-primary" />
+          <div className="mt-3 font-display text-3xl font-extrabold">{offersCount}</div>
+          <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
+            Ofertas recibidas
+          </div>
+        </div>
+        <div className="rounded-2xl border border-border bg-surface p-5">
+          <HistoryIcon className="h-5 w-5 text-primary" />
+          <div className="mt-3 font-display text-3xl font-extrabold">{totalOps}</div>
+          <div className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">
+            Operaciones completadas
+          </div>
         </div>
       </div>
-    </PhoneFrame>
+
+      {/* Main content grid */}
+      <div className="mt-8 grid gap-8 lg:grid-cols-3">
+        {/* Publications */}
+        <section className="lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-display text-xl font-bold uppercase">Mis publicaciones</h2>
+            <Link to="/app/mis-articulos" className="text-xs text-primary hover:underline">
+              Ver todos →
+            </Link>
+          </div>
+
+          {solicitudes.isLoading ? (
+            <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
+            </div>
+          ) : items.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-surface p-12 text-center">
+              <div className="font-display text-lg font-bold uppercase">
+                Aún no tienes publicaciones
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Publica un artículo y comienza a recibir ofertas de casas de empeño afiliadas.
+              </p>
+              <Link to="/app/publish" className="btn-primary mt-5 inline-flex w-auto px-6">
+                Publicar artículo
+              </Link>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-surface-2 text-left text-[11px] uppercase text-muted-foreground">
+                    <th className="px-5 py-3">Artículo</th>
+                    <th className="px-5 py-3">Estado</th>
+                    <th className="px-5 py-3">Ofertas</th>
+                    <th className="px-5 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((s) => {
+                    const { label, badge } = statusBadge(s);
+                    const target =
+                      s.status === "accepted"
+                        ? {
+                            to: "/app/code" as const,
+                            search: { propuesta_id: s.accepted_propuesta_id ?? undefined },
+                          }
+                        : s.propuestas_count > 0
+                          ? { to: "/app/proposals" as const, search: { id: s.id } }
+                          : { to: "/app/published" as const, search: { id: s.id } };
+                    return (
+                      <tr
+                        key={s.id}
+                        className="border-b border-border last:border-0 hover:bg-surface-2"
+                      >
+                        <td className="px-5 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-2 text-xl">
+                              {categoryMeta(s.category).emoji}
+                            </div>
+                            <span className="font-semibold">{buildTitle(s)}</span>
+                          </div>
+                        </td>
+                        <td className="px-5 py-4">
+                          <span className={`badge-dot ${badge}`}>{label}</span>
+                        </td>
+                        <td className="px-5 py-4 text-muted-foreground">
+                          {s.propuestas_count > 0 ? s.propuestas_count : "—"}
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <Link
+                            to={target.to}
+                            search={target.search as never}
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                          >
+                            Ver <ArrowRight className="h-3 w-3" />
+                          </Link>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+
+        {/* Sidebar */}
+        <aside className="space-y-4">
+          <div className="rounded-2xl border border-primary/40 bg-primary/5 p-5">
+            <div className="flex items-center gap-2 text-xs text-primary font-semibold uppercase tracking-wide">
+              <Sparkles className="h-4 w-4" /> ¿Cómo funciona?
+            </div>
+            <ol className="mt-3 space-y-2 text-sm">
+              <li className="flex gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  1
+                </span>
+                Publica tu artículo con fotos
+              </li>
+              <li className="flex gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  2
+                </span>
+                Recibe propuestas de casas afiliadas
+              </li>
+              <li className="flex gap-2">
+                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                  3
+                </span>
+                Acepta la mejor y obtén tu código
+              </li>
+            </ol>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wide">
+              <Bell className="h-3.5 w-3.5" /> Consejo
+            </div>
+            <p className="mt-2 text-sm">
+              Sube fotos claras y bien iluminadas para recibir mejores ofertas.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-surface p-5">
+            <div className="text-xs uppercase tracking-wide text-muted-foreground">
+              Centro de ayuda
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              ¿Tienes dudas sobre cómo funciona el proceso?
+            </p>
+            <Link
+              to="/app/notifications"
+              className="mt-3 block text-xs text-primary hover:underline"
+            >
+              Ver notificaciones →
+            </Link>
+          </div>
+        </aside>
+      </div>
+    </ClientLayout>
   );
 }

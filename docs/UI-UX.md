@@ -17,6 +17,7 @@
 - No horizontal scroll on core flows. Mobile uses stacked cards; desktop can render tables.
 
 ### Critical fix already in flight
+
 - Auth screens (`/app/login`, `/app/register`, `/negocio/login`, `/negocio/register`, forgot-password) must NOT render inside a phone-frame on desktop. The `feat/ui-ux-improvements` branch fixed this — verify before extending.
 
 ---
@@ -35,6 +36,7 @@ Per `MODIFI-EMPENA.md`:
    - "Soy negocio" → `/negocio/login?redirect=/negocio`
 
 Layout:
+
 - Mobile: stacked sections, hero → value props → CTA pair.
 - Desktop: hero left + brand panel right OR centered hero with two CTA buttons side-by-side.
 
@@ -43,12 +45,14 @@ Layout:
 ## Auth (cliente — `/app/login`, `/app/register`)
 
 ### Layout
+
 - Mobile: full-width form, no card chrome.
 - Tablet: centered card max-width 480 px.
 - Desktop: centered web card max-width 480 px, optional brand panel right (logo + tagline). **No phone-frame.**
 - Back arrow (`ArrowLeft` lucide icon) top-left → returns to `/`.
 
 ### Login (`/app/login`)
+
 - Tab toggle: **Correo** / **DNI** (DNI tab visible but submit disabled — `title="En desarrollo — disponible próximamente"`).
 - Email mode: email + password + "Olvidé mi contraseña" → `/app/forgot-password`.
 - DNI mode: 8-digit numeric input + banner "Verificación con DNI **en desarrollo**. Usa correo por ahora."
@@ -59,6 +63,7 @@ Per `MODIFI-EMPENA.md` ordering:
 
 **Option 1 — OAuth (Google, Apple — planned)**:
 After OAuth, completion view asks:
+
 1. DNI input → auto-completes full name (RENIEC integration — scaffolded as "en desarrollo" in Etapa 1).
 2. Full name (auto-filled, editable).
 3. Phone number with optional verification.
@@ -66,6 +71,7 @@ After OAuth, completion view asks:
 
 **Option 2 — Manual**:
 Reordered fields:
+
 1. DNI input → auto-completes full name.
 2. Full name (auto-filled, editable).
 3. Email (with optional verification).
@@ -76,6 +82,7 @@ Reordered fields:
 **Removed**: take-a-photo-of-DNI option. Use input only.
 
 ### Forgot password (`/app/forgot-password`)
+
 - Email input → `supabase.auth.resetPasswordForEmail(email, { redirectTo: ${origin}/app/reset-password })`.
 - Success state: green banner "Te enviamos un correo con instrucciones."
 - Reset confirmation screen (`/app/reset-password?token=…`) — **planned, not yet built**.
@@ -89,6 +96,7 @@ Same layout pattern as cliente but with B2B badge in header.
 ### Register (`/negocio/register`)
 
 Per `MODIFI-EMPENA.md`:
+
 1. **DNI representante legal** (separate from business RUC).
 2. **RUC verification** — auto-fetches razón social + representante legal (SUNAT scaffold; manual Etapa 1).
 3. Email + optional verification.
@@ -97,6 +105,7 @@ Per `MODIFI-EMPENA.md`:
 6. Plan selection AFTER verification clears — show pending state copy "Tu negocio está en verificación (48h hábiles, 9:00–18:00 hora Lima)."
 
 ### Verification copy (locked)
+
 > "Tu cuenta está pendiente de verificación. Esto toma hasta **48 horas hábiles** (lunes a viernes, 9:00–18:00 hora Lima). Te avisaremos por correo cuando esté lista."
 
 NOT "48 hours" — must read "48 horas hábiles" + working-hours clarification.
@@ -106,6 +115,7 @@ NOT "48 hours" — must read "48 horas hábiles" + working-hours clarification.
 ## Vista Cliente (`/app/dashboard`)
 
 Per `MODIFI-EMPENA.md`:
+
 1. **Web layout** — not centered mobile mockup on desktop.
 2. **Empty state** when no publicaciones:
    - Title: "Aún no tienes publicaciones"
@@ -120,6 +130,7 @@ Bottom navigation on mobile (Dashboard / Publicar / Operaciones / Cuenta). Hidde
 ## Publicar artículo (`/app/publish`)
 
 ### Layout
+
 - Mobile: step-flow with sticky bottom action ("Continuar" / "Publicar").
 - Desktop: rich single-page layout with sticky summary panel right.
 
@@ -128,6 +139,7 @@ Bottom navigation on mobile (Dashboard / Publicar / Operaciones / Cuenta). Hidde
 Each categoría has its own form section. Implement in `src/lib/categories/` as Zod schemas per category.
 
 #### Celular
+
 - Marca
 - Modelo
 - **Año que fue comprado** (NOT "year" — copy must be "año de compra")
@@ -137,6 +149,7 @@ Each categoría has its own form section. Implement in `src/lib/categories/` as 
 - Color
 
 #### Laptop
+
 - Marca
 - Modelo
 - Año de compra
@@ -146,6 +159,7 @@ Each categoría has its own form section. Implement in `src/lib/categories/` as 
 - ¿Fue reparada? (sí / no)
 
 #### Joya
+
 - Tipo de joya (anillo / collar / pulsera / aretes / otro)
 - Material (oro / plata / otro)
 - Kilataje
@@ -155,6 +169,7 @@ Each categoría has its own form section. Implement in `src/lib/categories/` as 
 - Tasación previa (opcional, upload PDF)
 
 #### Reloj
+
 - Marca
 - Modelo
 - Año de compra
@@ -162,6 +177,7 @@ Each categoría has its own form section. Implement in `src/lib/categories/` as 
 - ¿Tiene caja original? (sí / no)
 
 #### Vehículo
+
 - Marca
 - Modelo
 - Año de compra
@@ -173,37 +189,46 @@ Each categoría has its own form section. Implement in `src/lib/categories/` as 
 - **Upload tarjeta de propiedad** (PDF / imagen)
 
 #### Moto
+
 - Marca · Modelo · Año de compra · Kilometraje
 - Motor: eléctrico o combustible
 - Upload tarjeta de propiedad
 
 #### Electrodoméstico
+
 - Tipo (refrigeradora / lavadora / cocina / microondas / horno / otro)
 - Marca · Modelo · Año aproximado de compra
 
 #### Consola de videojuegos
+
 - Marca (PlayStation / Xbox / Nintendo / otro)
 - Modelo · Capacidad
 - ¿Controles incluidos? · Año aproximado · ¿Tiene caja?
 
 #### Cámara / equipo audiovisual
+
 - Marca · Modelo · Año aproximado · ¿Lentes incluidos?
 
 #### Herramientas profesionales
+
 - Tipo · Marca · Modelo · Año aproximado
 
 #### Instrumentos musicales
+
 - Tipo · Marca · Modelo · ¿Incluye accesorios?
 
 #### Artículo de lujo (bolso)
+
 - Marca · Modelo
 - (Authenticity check planned Etapa 2)
 
 ### Opciones avanzadas (all categorías)
+
 1. **Monto esperado** — `expected_amount_pen` (numeric, S/).
 2. **Plazo deseado** — radios: 15d / 30d / 60d / **Otros** (input manual days).
 
 ### Photos
+
 - Mandatory 1–6.
 - 5 MB hard cap per file.
 - Client compression target <500 KB.
@@ -214,6 +239,7 @@ Each categoría has its own form section. Implement in `src/lib/categories/` as 
 ## Publicación activa (`/app/proposals?solicitud=...`)
 
 Per `MODIFI-EMPENA.md`:
+
 1. **Web format** on desktop — table-style or rich card grid.
 2. **Remove** "<30 min" wait copy.
 3. **Filters**: Mayor monto / Menor tasa / Mayor plazo (radio or pill).
@@ -226,6 +252,7 @@ Per `MODIFI-EMPENA.md`:
 ## Código de redención (`/app/code?operation=...`)
 
 After accepting a propuesta:
+
 1. Big tabular-nums display of `EMP-XXXXX` code.
 2. Subtitle: "Presenta este código en {trade_name} para concretar."
 3. Business address + map link (opens Google Maps).
@@ -238,6 +265,7 @@ After accepting a propuesta:
 ## Vista Negocio (`/negocio/*`)
 
 ### Dashboard (`/negocio/dashboard`)
+
 - Plan + quota widget (propuestas usadas / cap).
 - Featured credits remaining (post-0006).
 - Recent solicitudes feed (filtered by district + categorías of interest).
@@ -245,17 +273,20 @@ After accepting a propuesta:
 - Operaciones pendientes de pickup (with code lookup input).
 
 ### Explorar solicitudes (`/negocio/solicitudes`)
+
 - Filters: categoría · distrito · monto rango · plazo.
 - Sort: más reciente / mayor monto esperado.
 - Each card: thumbnail + título + categoría + distrito + monto esperado + propuestas ya enviadas (count).
 
 ### Enviar propuesta (`/negocio/solicitud/[id]`)
+
 - Photos gallery (signed URLs).
 - Form: monto, tasa mensual, plazo, notas (≤500 chars).
 - Below-cap usage banner. Above-cap → CTA "Mejorar plan".
 - Toggle "Destacar esta propuesta" (post-0006).
 
 ### Validar código (`/negocio/operacion/[id]`)
+
 - Input code → on match, "Marcar completada" / "Marcar disputada" CTAs.
 - Build a **clear code-verification screen** per `MODIFI-EMPENA.md`: large input, visible button, success confirmation toast.
 
@@ -273,19 +304,19 @@ Source for autocomplete: maintain in `src/lib/lima-districts.ts`.
 
 ## Copy library — error messages (Spanish-only)
 
-| Scenario | Message |
-|---|---|
-| Auth required | `"No autenticado. Inicia sesión para continuar."` |
-| Rate limit | `"Demasiados intentos. Intenta en una hora."` |
-| Plan limit | `"Has alcanzado el límite de N propuestas de tu plan."` |
-| No subscription | `"Tu negocio no tiene una suscripción activa."` |
-| Generic create error | `"Error al crear la solicitud."` |
-| Generic update error | `"No pudimos actualizar tus datos. Intenta de nuevo."` |
-| Photo upload | `"Error al guardar las fotos."` |
-| Code mismatch | `"Código de redención no coincide."` |
-| Operation completed already | `"Operación ya completada."` |
-| Verification pending | `"Tu cuenta está pendiente de verificación. Te avisaremos por correo."` |
-| Demo mode | `"Modo demo — sin cobro real."` |
+| Scenario                    | Message                                                                 |
+| --------------------------- | ----------------------------------------------------------------------- |
+| Auth required               | `"No autenticado. Inicia sesión para continuar."`                       |
+| Rate limit                  | `"Demasiados intentos. Intenta en una hora."`                           |
+| Plan limit                  | `"Has alcanzado el límite de N propuestas de tu plan."`                 |
+| No subscription             | `"Tu negocio no tiene una suscripción activa."`                         |
+| Generic create error        | `"Error al crear la solicitud."`                                        |
+| Generic update error        | `"No pudimos actualizar tus datos. Intenta de nuevo."`                  |
+| Photo upload                | `"Error al guardar las fotos."`                                         |
+| Code mismatch               | `"Código de redención no coincide."`                                    |
+| Operation completed already | `"Operación ya completada."`                                            |
+| Verification pending        | `"Tu cuenta está pendiente de verificación. Te avisaremos por correo."` |
+| Demo mode                   | `"Modo demo — sin cobro real."`                                         |
 
 Never leak raw DB errors. Use `sanitizeError(err, "Mensaje en español")`.
 
@@ -306,6 +337,7 @@ Never leak raw DB errors. Use `sanitizeError(err, "Mensaje en español")`.
 ## Responsive QA checklist
 
 ### Desktop (≥1024 px)
+
 - [ ] `/app/login` renders as web card (no phone-frame wrapper).
 - [ ] `/negocio/login` same.
 - [ ] Solicitud detail comparison uses rich multi-column layout.
@@ -313,6 +345,7 @@ Never leak raw DB errors. Use `sanitizeError(err, "Mensaje en español")`.
 - [ ] Sticky summary panel on `/app/publish`.
 
 ### Mobile (375–414 px)
+
 - [ ] Bottom navigation visible on authenticated routes.
 - [ ] Forms usable at 375 px.
 - [ ] No horizontal scroll on core flows.
@@ -320,6 +353,7 @@ Never leak raw DB errors. Use `sanitizeError(err, "Mensaje en español")`.
 - [ ] Touch targets ≥ 44 px.
 
 ### Tablet (768–1023 px)
+
 - [ ] Hybrid layout works (centered card with comfortable padding).
 - [ ] Auth card centered, no phone-frame.
 
