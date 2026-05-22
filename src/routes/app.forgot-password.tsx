@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, KeyRound, Loader2, Mail } from "lucide-react";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
 
 export const Route = createFileRoute("/app/forgot-password")({ component: ForgotPassword });
@@ -11,16 +11,53 @@ function ForgotPassword() {
   const [sent, setSent] = useState(false);
   const [resetMode, setResetMode] = useState(false);
   const [resetDone, setResetDone] = useState(false);
+  const [exchangeResolved, setExchangeResolved] = useState(false);
+  const exchangedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
     const marker = `${window.location.search}${window.location.hash}`;
-    setResetMode(
+    const code = params.get("code");
+    const hasMarker =
       marker.includes("reset=1") ||
-        marker.includes("type=recovery") ||
-        marker.includes("access_token") ||
-        marker.includes("code="),
-    );
+      marker.includes("type=recovery") ||
+      marker.includes("access_token") ||
+      !!code;
+
+    if (!code) {
+      setResetMode(hasMarker);
+      setExchangeResolved(true);
+      return;
+    }
+    if (exchangedRef.current) return;
+    exchangedRef.current = true;
+
+    window.history.replaceState({}, "", `${window.location.pathname}?reset=1`);
+
+    let cancelled = false;
+    const supabase = getSupabaseBrowser();
+    supabase.auth
+      .exchangeCodeForSession(code)
+      .then(({ error: exchangeError }: { error: unknown }) => {
+        if (cancelled) return;
+        if (exchangeError) {
+          setError("El enlace de recuperación expiró o ya fue usado. Solicita uno nuevo.");
+          setResetMode(false);
+        } else {
+          setResetMode(true);
+        }
+        setExchangeResolved(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setError("No pudimos validar el enlace de recuperación. Intenta de nuevo.");
+        setResetMode(false);
+        setExchangeResolved(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
@@ -111,6 +148,10 @@ function ForgotPassword() {
               <Link to="/app/login" className="btn-primary w-full">
                 Iniciar sesión
               </Link>
+            </div>
+          ) : !exchangeResolved ? (
+            <div className="mt-6 flex items-center justify-center py-6 text-sm text-muted-foreground">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Validando enlace...
             </div>
           ) : resetMode ? (
             <form onSubmit={onReset} className="mt-6 space-y-5">

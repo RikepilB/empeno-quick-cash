@@ -31,8 +31,34 @@ function Login() {
       const password = String(form.get("password") ?? "");
 
       const supabase = getSupabaseBrowser();
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) throw signInError;
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInError) throw new Error("Correo o contraseña incorrectos.");
+      const userId = signInData.user?.id;
+      if (!userId) throw new Error("No pudimos iniciar tu sesión. Intenta de nuevo.");
+
+      const { data, error: profileError } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userId)
+        .maybeSingle();
+      const profile = data as { role: "client" | "business" } | null;
+      if (profileError) {
+        await supabase.auth.signOut();
+        throw new Error("No pudimos cargar tu perfil. Intenta de nuevo en unos segundos.");
+      }
+      if (!profile) {
+        await supabase.auth.signOut();
+        throw new Error("Tu cuenta aún se está creando. Espera unos segundos e intenta de nuevo.");
+      }
+      if (profile.role !== "client") {
+        await supabase.auth.signOut();
+        throw new Error(
+          "Esta cuenta no pertenece a este portal. Usa el portal de casas de empeño para iniciar sesión.",
+        );
+      }
 
       await navigate({ to: safeRedirect(search.redirect, "/app/dashboard") });
     } catch (err) {

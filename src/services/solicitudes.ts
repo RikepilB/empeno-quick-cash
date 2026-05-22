@@ -25,6 +25,7 @@ export type SolicitudListItem = {
   status: SolicitudStatus;
   created_at: string;
   propuestas_count: number;
+  accepted_propuesta_id: string | null;
 };
 
 export type SolicitudPhoto = {
@@ -118,7 +119,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabase
       .from("solicitudes")
       .select(
-        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, created_at, propuestas(count)",
+        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, created_at, propuestas(count), operations(id, propuesta_id)",
       )
       .eq("client_id", user.id)
       .order("created_at", { ascending: false })
@@ -126,7 +127,23 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
 
     if (error) throw sanitizeError(error, "Error al cargar tus solicitudes.");
 
-    return (data ?? []).map((row: any) => ({
+    type SolicitudRow = {
+      id: string;
+      category: string;
+      brand: string | null;
+      model: string | null;
+      year: number | null;
+      storage: string | null;
+      condition: string | null;
+      description: string | null;
+      expected_amount_pen: number | null;
+      expected_term_days: number | null;
+      district: string | null;
+      status: SolicitudStatus;
+      created_at: string;
+      propuestas: { count: number }[] | null;
+    };
+    return (data ?? []).map((row: SolicitudRow) => ({
       id: row.id,
       category: row.category,
       brand: row.brand,
@@ -141,6 +158,10 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       status: row.status,
       created_at: row.created_at,
       propuestas_count: row.propuestas?.[0]?.count ?? 0,
+      accepted_propuesta_id:
+        row.status === "accepted" && row.operations?.[0]?.propuesta_id
+          ? row.operations[0].propuesta_id
+          : null,
     }));
   },
 );
@@ -184,7 +205,20 @@ export const listActiveSolicitudes = createServerFn({ method: "GET" })
     const { data, error } = await query;
     if (error) throw sanitizeError(error, "Error al cargar solicitudes.");
 
-    return (data ?? []).map((row: any) => ({
+    type ActiveSolicitudRow = {
+      id: string;
+      category: string;
+      brand: string | null;
+      model: string | null;
+      condition: string | null;
+      expected_amount_pen: number | null;
+      expected_term_days: number | null;
+      district: string | null;
+      status: SolicitudStatus;
+      created_at: string;
+      propuestas: { count: number }[] | null;
+    };
+    return (data ?? []).map((row: ActiveSolicitudRow) => ({
       id: row.id,
       category: row.category,
       brand: row.brand,
@@ -223,10 +257,29 @@ export const getSolicitud = createServerFn({ method: "GET" })
     if (error) throw sanitizeError(error, "Error al cargar la solicitud.");
     if (!row) return null;
 
-    const r = row as any;
-    const photosRaw = Array.isArray(r.solicitud_photos) ? r.solicitud_photos : [];
+    type PhotoRow = { id: string; storage_path: string; position: number };
+    type SolicitudDetailRow = {
+      id: string;
+      client_id: string;
+      category: string;
+      brand: string | null;
+      model: string | null;
+      year: number | null;
+      storage: string | null;
+      condition: string | null;
+      description: string | null;
+      expected_amount_pen: number | null;
+      expected_term_days: number | null;
+      district: string | null;
+      status: SolicitudStatus;
+      created_at: string;
+      solicitud_photos: PhotoRow[] | null;
+      propuestas: { count: number }[] | null;
+    };
+    const r = row as SolicitudDetailRow;
+    const photosRaw: PhotoRow[] = Array.isArray(r.solicitud_photos) ? r.solicitud_photos : [];
     const photos: SolicitudPhoto[] = await Promise.all(
-      photosRaw.map(async (p: any) => ({
+      photosRaw.map(async (p: PhotoRow) => ({
         id: p.id,
         storage_path: p.storage_path,
         position: p.position,

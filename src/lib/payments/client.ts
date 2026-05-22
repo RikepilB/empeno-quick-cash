@@ -26,7 +26,8 @@ type CulqiSubscription = {
 const CULQI_BASE = "https://api.culqi.com/v2";
 
 function secretKey(): string | null {
-  const k = (globalThis as any).process?.env?.CULQI_SECRET_KEY;
+  const proc = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
+  const k = proc?.env?.CULQI_SECRET_KEY;
   if (!k || typeof k !== "string" || k.length < 5) return null;
   return k;
 }
@@ -46,12 +47,12 @@ async function culqiPost<T>(path: string, body: unknown): Promise<T> {
     },
     body: JSON.stringify(body),
   });
-  const json = (await res.json()) as any;
+  const json = (await res.json()) as T & { merchant_message?: string; user_message?: string };
   if (!res.ok) {
     const msg = json?.merchant_message || json?.user_message || `Culqi ${res.status}`;
     throw new Error(msg);
   }
-  return json as T;
+  return json;
 }
 
 // ---------------------------------------------------------------------------

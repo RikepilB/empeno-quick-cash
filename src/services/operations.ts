@@ -67,26 +67,58 @@ export const listMyClientOperations = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabase
       .from("operations")
       .select(
-        "id, redemption_code, status, accepted_at, completed_at, " +
-          "propuestas(id, monto_pen, tasa_mensual, plazo_dias, " +
-          "businesses(id, name, district), " +
-          "solicitudes(id, category, brand, model))",
+        `
+        id,
+        redemption_code,
+        status,
+        accepted_at,
+        completed_at,
+        propuestas(
+          id,
+          monto_pen,
+          tasa_mensual,
+          plazo_dias,
+          businesses(id, name, district),
+          solicitudes(id, category, brand, model)
+        )
+      `,
       )
       .order("accepted_at", { ascending: false });
 
     if (error) throw sanitizeError(error, "Error al cargar tus operaciones.");
 
-    return (data ?? []).map((r: any) => ({
+    type ClientOpRow = {
+      id: string;
+      redemption_code: string;
+      status: OperationStatus;
+      accepted_at: string;
+      completed_at: string | null;
+      propuestas: {
+        id: string;
+        monto_pen: number;
+        tasa_mensual: number | string;
+        plazo_dias: number;
+        businesses: { id: string; name: string; district: string | null } | null;
+        solicitudes: {
+          id: string;
+          category: string;
+          brand: string | null;
+          model: string | null;
+        } | null;
+      } | null;
+    };
+    const rows = (data ?? []) as unknown as ClientOpRow[];
+    return rows.map((r) => ({
       id: r.id,
       redemption_code: r.redemption_code,
       status: r.status,
       accepted_at: r.accepted_at,
       completed_at: r.completed_at,
       propuesta: {
-        id: r.propuestas?.id,
-        monto_pen: r.propuestas?.monto_pen,
-        tasa_mensual: Number(r.propuestas?.tasa_mensual),
-        plazo_dias: r.propuestas?.plazo_dias,
+        id: r.propuestas?.id ?? "",
+        monto_pen: r.propuestas?.monto_pen ?? 0,
+        tasa_mensual: Number(r.propuestas?.tasa_mensual ?? 0),
+        plazo_dias: r.propuestas?.plazo_dias ?? 0,
         business: {
           id: r.propuestas?.businesses?.id ?? "",
           name: r.propuestas?.businesses?.name ?? "Negocio",
@@ -94,10 +126,10 @@ export const listMyClientOperations = createServerFn({ method: "GET" }).handler(
         },
       },
       solicitud: {
-        id: r.propuestas?.solicitudes?.id,
-        category: r.propuestas?.solicitudes?.category,
-        brand: r.propuestas?.solicitudes?.brand,
-        model: r.propuestas?.solicitudes?.model,
+        id: r.propuestas?.solicitudes?.id ?? "",
+        category: r.propuestas?.solicitudes?.category ?? "",
+        brand: r.propuestas?.solicitudes?.brand ?? null,
+        model: r.propuestas?.solicitudes?.model ?? null,
       },
     }));
   },
@@ -126,32 +158,66 @@ export const listMyBusinessOperations = createServerFn({ method: "GET" }).handle
     const { data, error } = await supabase
       .from("operations")
       .select(
-        "id, redemption_code, status, accepted_at, completed_at, " +
-          "propuestas(id, monto_pen, tasa_mensual, plazo_dias, business_id, " +
-          "solicitudes(id, category, brand, model, district))",
+        `
+        id,
+        redemption_code,
+        status,
+        accepted_at,
+        completed_at,
+        propuestas(
+          id,
+          monto_pen,
+          tasa_mensual,
+          plazo_dias,
+          business_id,
+          solicitudes(id, category, brand, model, district)
+        )
+      `,
       )
       .order("accepted_at", { ascending: false });
 
     if (error) throw sanitizeError(error, "Error al cargar tus operaciones.");
 
-    return (data ?? []).map((r: any) => ({
+    type BusinessOpRow = {
+      id: string;
+      redemption_code: string;
+      status: OperationStatus;
+      accepted_at: string;
+      completed_at: string | null;
+      propuestas: {
+        id: string;
+        monto_pen: number;
+        tasa_mensual: number | string;
+        plazo_dias: number;
+        business_id: string;
+        solicitudes: {
+          id: string;
+          category: string;
+          brand: string | null;
+          model: string | null;
+          district: string | null;
+        } | null;
+      } | null;
+    };
+    const rows = (data ?? []) as unknown as BusinessOpRow[];
+    return rows.map((r) => ({
       id: r.id,
       redemption_code: r.redemption_code,
       status: r.status,
       accepted_at: r.accepted_at,
       completed_at: r.completed_at,
       propuesta: {
-        id: r.propuestas?.id,
-        monto_pen: r.propuestas?.monto_pen,
-        tasa_mensual: Number(r.propuestas?.tasa_mensual),
-        plazo_dias: r.propuestas?.plazo_dias,
+        id: r.propuestas?.id ?? "",
+        monto_pen: r.propuestas?.monto_pen ?? 0,
+        tasa_mensual: Number(r.propuestas?.tasa_mensual ?? 0),
+        plazo_dias: r.propuestas?.plazo_dias ?? 0,
       },
       solicitud: {
-        id: r.propuestas?.solicitudes?.id,
-        category: r.propuestas?.solicitudes?.category,
-        brand: r.propuestas?.solicitudes?.brand,
-        model: r.propuestas?.solicitudes?.model,
-        district: r.propuestas?.solicitudes?.district,
+        id: r.propuestas?.solicitudes?.id ?? "",
+        category: r.propuestas?.solicitudes?.category ?? "",
+        brand: r.propuestas?.solicitudes?.brand ?? null,
+        model: r.propuestas?.solicitudes?.model ?? null,
+        district: r.propuestas?.solicitudes?.district ?? null,
       },
       client_full_name: null,
     }));
@@ -213,10 +279,21 @@ export const getOperationByPropuesta = createServerFn({ method: "GET" })
     const { data: row, error } = await supabase
       .from("operations")
       .select(
-        "id, redemption_code, status, accepted_at, completed_at, " +
-          "propuestas(id, monto_pen, tasa_mensual, plazo_dias, " +
-          "businesses(id, name, district), " +
-          "solicitudes(id, category, brand, model))",
+        `
+        id,
+        redemption_code,
+        status,
+        accepted_at,
+        completed_at,
+        propuestas(
+          id,
+          monto_pen,
+          tasa_mensual,
+          plazo_dias,
+          businesses(id, name, district),
+          solicitudes(id, category, brand, model)
+        )
+      `,
       )
       .eq("propuesta_id", data.propuesta_id)
       .maybeSingle();
@@ -224,7 +301,27 @@ export const getOperationByPropuesta = createServerFn({ method: "GET" })
     if (error) throw sanitizeError(error, "Error al cargar tus operaciones.");
     if (!row) return null;
 
-    const r = row as any;
+    type SingleClientOpRow = {
+      id: string;
+      redemption_code: string;
+      status: OperationStatus;
+      accepted_at: string;
+      completed_at: string | null;
+      propuestas: {
+        id: string;
+        monto_pen: number;
+        tasa_mensual: number | string;
+        plazo_dias: number;
+        businesses: { id: string; name: string; district: string | null } | null;
+        solicitudes: {
+          id: string;
+          category: string;
+          brand: string | null;
+          model: string | null;
+        } | null;
+      } | null;
+    };
+    const r = row as unknown as SingleClientOpRow;
     return {
       id: r.id,
       redemption_code: r.redemption_code,
@@ -232,10 +329,10 @@ export const getOperationByPropuesta = createServerFn({ method: "GET" })
       accepted_at: r.accepted_at,
       completed_at: r.completed_at,
       propuesta: {
-        id: r.propuestas?.id,
-        monto_pen: r.propuestas?.monto_pen,
-        tasa_mensual: Number(r.propuestas?.tasa_mensual),
-        plazo_dias: r.propuestas?.plazo_dias,
+        id: r.propuestas?.id ?? "",
+        monto_pen: r.propuestas?.monto_pen ?? 0,
+        tasa_mensual: Number(r.propuestas?.tasa_mensual ?? 0),
+        plazo_dias: r.propuestas?.plazo_dias ?? 0,
         business: {
           id: r.propuestas?.businesses?.id ?? "",
           name: r.propuestas?.businesses?.name ?? "Negocio",
@@ -243,10 +340,10 @@ export const getOperationByPropuesta = createServerFn({ method: "GET" })
         },
       },
       solicitud: {
-        id: r.propuestas?.solicitudes?.id,
-        category: r.propuestas?.solicitudes?.category,
-        brand: r.propuestas?.solicitudes?.brand,
-        model: r.propuestas?.solicitudes?.model,
+        id: r.propuestas?.solicitudes?.id ?? "",
+        category: r.propuestas?.solicitudes?.category ?? "",
+        brand: r.propuestas?.solicitudes?.brand ?? null,
+        model: r.propuestas?.solicitudes?.model ?? null,
       },
     };
   });

@@ -21,8 +21,7 @@ function Perfil() {
   const [msg, setMsg] = useState<string | null>(null);
 
   const checkout = useMutation({
-    mutationFn: (args: { plan_id: string; token_id?: string }) =>
-      startCheckout({ data: args }),
+    mutationFn: (args: { plan_id: string; token_id?: string }) => startCheckout({ data: args }),
     onSuccess: async (res) => {
       setMsg(
         res.mode === "demo"
@@ -74,7 +73,10 @@ function Perfil() {
         <div className="mb-4 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4 text-sm">
           <Sparkles className="h-4 w-4 shrink-0 text-primary" />
           <div className="flex-1">{msg}</div>
-          <button onClick={() => setMsg(null)} className="text-xs text-muted-foreground hover:text-foreground">
+          <button
+            onClick={() => setMsg(null)}
+            className="text-xs text-muted-foreground hover:text-foreground"
+          >
             cerrar
           </button>
         </div>
@@ -86,8 +88,9 @@ function Perfil() {
           <div>
             <div className="font-semibold text-status-pending">Modo demo de facturación</div>
             <div className="text-muted-foreground">
-              Aún no se ha configurado <code>CULQI_SECRET_KEY</code>. Los cambios de plan se aplican al instante sin
-              cobrar. Cuando agregues la clave, las suscripciones pasarán por Culqi automáticamente.
+              Aún no se ha configurado <code>CULQI_SECRET_KEY</code>. Los cambios de plan se aplican
+              al instante sin cobrar. Cuando agregues la clave, las suscripciones pasarán por Culqi
+              automáticamente.
             </div>
           </div>
         </div>
@@ -139,7 +142,9 @@ function Perfil() {
                     style={{
                       width: `${Math.min(
                         100,
-                        (sub.propuestas_used_this_period / Math.max(1, sub.plan.monthly_propuestas)) * 100,
+                        (sub.propuestas_used_this_period /
+                          Math.max(1, sub.plan.monthly_propuestas)) *
+                          100,
                       )}%`,
                     }}
                   />
@@ -165,7 +170,10 @@ function Perfil() {
         <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-xl font-bold uppercase">Cambiar plan</h3>
-            <Link to="/negocio/plan" className="text-xs text-muted-foreground hover:text-foreground">
+            <Link
+              to="/negocio/plan"
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
               Ver comparativa →
             </Link>
           </div>
@@ -193,7 +201,9 @@ function Perfil() {
                     )}
                     <div className="font-display text-lg font-bold uppercase">{p.name}</div>
                     <div className="mt-2 flex items-end gap-1">
-                      <span className="font-display text-3xl font-extrabold">{formatPEN(p.price_pen)}</span>
+                      <span className="font-display text-3xl font-extrabold">
+                        {formatPEN(p.price_pen)}
+                      </span>
                       <span className="pb-1 text-xs text-muted-foreground">/mes</span>
                     </div>
                     <div className="mt-1 text-xs text-muted-foreground">
@@ -280,9 +290,13 @@ function Perfil() {
                         })}
                       </td>
                       <td className="px-4 py-3 font-semibold uppercase">{inv.plan_id ?? "—"}</td>
-                      <td className="px-4 py-3 font-display font-bold">{formatPEN(inv.amount_pen)}</td>
+                      <td className="px-4 py-3 font-display font-bold">
+                        {formatPEN(inv.amount_pen)}
+                      </td>
                       <td className="px-4 py-3">
-                        <span className={`badge-dot ${invStatusBadge(inv.status)}`}>{invStatusLabel(inv.status)}</span>
+                        <span className={`badge-dot ${invStatusBadge(inv.status)}`}>
+                          {invStatusLabel(inv.status)}
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-muted-foreground">
                         {inv.period_start && inv.period_end
