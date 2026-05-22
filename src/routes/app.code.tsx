@@ -50,6 +50,22 @@ function Code() {
     );
   }
 
+  if (op.isError) {
+    return (
+      <PhoneFrame title="Trato aceptado" back="/app/dashboard">
+        <div className="p-6 text-sm text-muted-foreground">
+          No pudimos cargar la operación. Verifica tu conexión e intenta de nuevo.
+          <button type="button" onClick={() => op.refetch()} className="btn-primary mt-4 w-full">
+            Reintentar
+          </button>
+          <Link to="/app/dashboard" className="btn-ghost mt-2 w-full">
+            Volver al panel
+          </Link>
+        </div>
+      </PhoneFrame>
+    );
+  }
+
   if (!op.data) {
     return (
       <PhoneFrame title="Trato aceptado" back="/app/dashboard">
