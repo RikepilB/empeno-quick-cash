@@ -9,6 +9,21 @@ function Register() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailVerified, setEmailVerified] = useState(false);
+
+  function handleDniBlur(dni: string) {
+    if (/^\d{8}$/.test(dni)) {
+      const mockNames = [
+        "María Fernanda López",
+        "José Carlos Mendoza",
+        "Ana Patricia Quispe",
+        "Carlos Enrique Rodríguez",
+        "Lucía del Pilar Torres",
+      ];
+      const nameInput = document.querySelector<HTMLInputElement>('input[name="full_name"]');
+      if (nameInput) nameInput.value = mockNames[Math.floor(Math.random() * mockNames.length)];
+    }
+  }
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -16,6 +31,7 @@ function Register() {
     setSubmitting(true);
     try {
       const form = new FormData(e.currentTarget);
+      const dni = String(form.get("dni") ?? "").trim();
       const full_name = String(form.get("full_name") ?? "").trim();
       const email = String(form.get("email") ?? "").trim();
       const password = String(form.get("password") ?? "");
@@ -26,7 +42,7 @@ function Register() {
         email,
         password,
         phone: phone || undefined,
-        options: { data: { role: "client", full_name } },
+        options: { data: { role: "client", full_name, dni, email_verified: emailVerified } },
       });
       if (signUpError) throw signUpError;
 
@@ -96,6 +112,20 @@ function Register() {
 
               <form onSubmit={onSubmit} className="mt-6 space-y-5">
                 <div>
+                  <label className="mb-1.5 block text-sm font-medium">DNI</label>
+                  <input
+                    name="dni"
+                    required
+                    pattern="\d{8}"
+                    maxLength={8}
+                    inputMode="numeric"
+                    className="input-field"
+                    placeholder="87654321"
+                    autoComplete="off"
+                    onBlur={(e) => handleDniBlur(e.target.value)}
+                  />
+                </div>
+                <div>
                   <label className="mb-1.5 block text-sm font-medium">Nombre completo</label>
                   <input
                     name="full_name"
@@ -115,6 +145,19 @@ function Register() {
                     placeholder="maria@correo.com"
                     autoComplete="email"
                   />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    name="email_verified"
+                    type="checkbox"
+                    id="email-verified"
+                    checked={emailVerified}
+                    onChange={(e) => setEmailVerified(e.target.checked)}
+                    className="h-4 w-4 rounded border-border accent-primary"
+                  />
+                  <label htmlFor="email-verified" className="text-sm">
+                    Ya verificaste tu correo
+                  </label>
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium">Contraseña</label>

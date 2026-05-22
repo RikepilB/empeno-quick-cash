@@ -5,6 +5,7 @@ import { useMemo, useRef, useState, type FormEvent, useEffect } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
 import { createSolicitud, updateSolicitud, getSolicitud } from "@/services/solicitudes";
 import { CATEGORIES, categoryMeta, type CategoryKey } from "@/lib/categories";
+import { CategoryFields } from "@/ui/CategoryFields";
 import { z } from "zod";
 
 const editSearchSchema = z.object({ edit: z.string().uuid().optional() });
@@ -14,7 +15,6 @@ export const Route = createFileRoute("/app/publish")({
 });
 
 const CONDITIONS = ["Nuevo", "Bueno", "Regular", "Detalles"] as const;
-const PLAZOS = [15, 30, 45, 60] as const;
 const MIN_PHOTOS = 1;
 const MAX_PHOTOS = 6;
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
@@ -28,7 +28,8 @@ function Publish() {
 
   const [category, setCategory] = useState<CategoryKey>("celular");
   const [condition, setCondition] = useState<(typeof CONDITIONS)[number]>("Bueno");
-  const [plazo, setPlazo] = useState<(typeof PLAZOS)[number]>(30);
+  const [plazo, setPlazo] = useState<number | "custom">(30);
+  const [customPlazoDays, setCustomPlazoDays] = useState<number | undefined>(undefined);
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -147,7 +148,7 @@ function Publish() {
             condition,
             description: String(form.get("description") ?? "").trim() || null,
             expected_amount_pen: amountStr ? Number(amountStr) : null,
-            expected_term_days: plazo,
+            expected_term_days: plazo === "custom" ? (customPlazoDays ?? 30) : plazo,
             district: String(form.get("district") ?? "").trim() || null,
           },
         });
@@ -163,7 +164,7 @@ function Publish() {
             condition,
             description: String(form.get("description") ?? "").trim() || null,
             expected_amount_pen: amountStr ? Number(amountStr) : null,
-            expected_term_days: plazo,
+            expected_term_days: plazo === "custom" ? (customPlazoDays ?? 30) : plazo,
             district: String(form.get("district") ?? "").trim() || null,
             photo_paths: photoPaths,
           },
@@ -213,50 +214,7 @@ function Publish() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="label-field">Marca</label>
-              <input
-                name="brand"
-                value={brand}
-                onChange={(e) => setBrand(e.target.value)}
-                className="input-field"
-                placeholder="Apple"
-              />
-            </div>
-            <div>
-              <label className="label-field">Modelo</label>
-              <input
-                name="model"
-                value={model}
-                onChange={(e) => setModel(e.target.value)}
-                className="input-field"
-                placeholder="iPhone 14 Pro"
-              />
-            </div>
-            <div>
-              <label className="label-field">Año de compra</label>
-              <input
-                name="year"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                type="number"
-                inputMode="numeric"
-                className="input-field"
-                placeholder="2023"
-              />
-            </div>
-            <div>
-              <label className="label-field">Almacenamiento</label>
-              <input
-                name="storage"
-                value={storage}
-                onChange={(e) => setStorage(e.target.value)}
-                className="input-field"
-                placeholder="256 GB"
-              />
-            </div>
-          </div>
+          <CategoryFields category={category} />
 
           <div>
             <label className="label-field">Estado del artículo</label>
@@ -275,7 +233,7 @@ function Publish() {
           </div>
 
           <div>
-            <label className="label-field">Descripción / imperfecciones</label>
+            <label className="label-field">Detalles adicionales (opcional)</label>
             <textarea
               name="description"
               className="input-field min-h-[70px]"
@@ -327,7 +285,7 @@ function Publish() {
 
           <details className="group rounded-xl border border-border bg-surface" open>
             <summary className="flex cursor-pointer items-center justify-between p-4 text-sm font-medium">
-              Opciones avanzadas
+              Condiciones del préstamo
               <Plus className="h-4 w-4 transition group-open:rotate-45" />
             </summary>
             <div className="space-y-4 border-t border-border p-4">
@@ -344,18 +302,37 @@ function Publish() {
               </div>
               <div>
                 <label className="label-field">Plazo deseado</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {PLAZOS.map((d) => (
+                <div className="grid grid-cols-5 gap-2">
+                  {([15, 30, 45, 60, "custom"] as const).map((d) => (
                     <button
                       type="button"
-                      key={d}
+                      key={String(d)}
                       onClick={() => setPlazo(d)}
                       className={`rounded-lg border py-2 text-xs ${plazo === d ? "border-primary bg-primary/10 text-primary" : "border-border bg-background text-muted-foreground"}`}
                     >
-                      {d} días
+                      {d === "custom" ? "Otros…" : `${d} días`}
                     </button>
                   ))}
                 </div>
+                {plazo === "custom" && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      max={365}
+                      value={customPlazoDays ?? ""}
+                      onChange={(e) => setCustomPlazoDays(Number(e.target.value))}
+                      className="input-field"
+                      placeholder="Ingresa los días exactos"
+                    />
+                    <span className="text-sm text-muted-foreground">días</span>
+                  </div>
+                )}
+                {plazo === "custom" && (
+                  <p className="text-xs text-muted-foreground">
+                    Ingresa los días exactos que necesitas.
+                  </p>
+                )}
               </div>
               <div>
                 <label className="label-field">Distrito</label>
@@ -436,6 +413,9 @@ function Publish() {
               {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
               {submitting ? "Publicando..." : "Publicar y esperar propuestas"}
             </button>
+            <p className="text-center text-xs text-muted-foreground">
+              Las ofertas de casa de empieño están sujetas a previa evaluación física.
+            </p>
           </div>
         </aside>
       </form>
