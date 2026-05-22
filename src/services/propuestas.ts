@@ -187,7 +187,19 @@ export const listPropuestasForSolicitud = createServerFn({ method: "GET" })
 
     if (error) throw sanitizeError(error, "Error al cargar las propuestas.");
 
-    return (rows ?? []).map((r: any) => ({
+    type PropuestaListRow = {
+      id: string;
+      solicitud_id: string;
+      monto_pen: number;
+      tasa_mensual: number | string;
+      plazo_dias: number;
+      status: PropuestaStatus;
+      created_at: string;
+      expires_at: string | null;
+      businesses: { id: string; name: string; district: string | null } | null;
+    };
+    const typedRows = (rows ?? []) as unknown as PropuestaListRow[];
+    return typedRows.map((r) => ({
       id: r.id,
       solicitud_id: r.solicitud_id,
       business: {
@@ -223,7 +235,18 @@ export const getPropuestaForClient = createServerFn({ method: "GET" })
       .maybeSingle();
     if (error) throw sanitizeError(error, "Error al cargar las propuestas.");
     if (!row) return null;
-    const r = row as any;
+    type PropuestaSingleRow = {
+      id: string;
+      solicitud_id: string;
+      monto_pen: number;
+      tasa_mensual: number | string;
+      plazo_dias: number;
+      status: PropuestaStatus;
+      created_at: string;
+      expires_at: string | null;
+      businesses: { id: string; name: string; district: string | null } | null;
+    };
+    const r = row as unknown as PropuestaSingleRow;
     return {
       id: r.id,
       solicitud_id: r.solicitud_id,
@@ -257,9 +280,17 @@ export const listMyPropuestas = createServerFn({ method: "GET" }).handler(
     const { data: rows, error } = await supabase
       .from("propuestas")
       .select(
-        "id, solicitud_id, monto_pen, tasa_mensual, plazo_dias, status, created_at, " +
-          "solicitudes(category, brand, model, district), " +
-          "operations(id, redemption_code, status, accepted_at, completed_at)",
+        `
+        id,
+        solicitud_id,
+        monto_pen,
+        tasa_mensual,
+        plazo_dias,
+        status,
+        created_at,
+        solicitudes(category, brand, model, district),
+        operations(id, redemption_code, status, accepted_at, completed_at)
+      `,
       )
       .eq("business_id", business.id)
       .order("created_at", { ascending: false })
@@ -267,7 +298,32 @@ export const listMyPropuestas = createServerFn({ method: "GET" }).handler(
 
     if (error) throw sanitizeError(error, "Error al cargar las propuestas.");
 
-    return (rows ?? []).map((r: any) => {
+    type SolicitudJoin = {
+      category: string;
+      brand: string | null;
+      model: string | null;
+      district: string | null;
+    };
+    type OperationJoin = {
+      id: string;
+      redemption_code: string;
+      status: string;
+      accepted_at: string;
+      completed_at: string | null;
+    };
+    type MyPropuestaRow = {
+      id: string;
+      solicitud_id: string;
+      monto_pen: number;
+      tasa_mensual: number | string;
+      plazo_dias: number;
+      status: PropuestaStatus;
+      created_at: string;
+      solicitudes: SolicitudJoin | SolicitudJoin[] | null;
+      operations: OperationJoin | OperationJoin[] | null;
+    };
+    const typedRows = (rows ?? []) as unknown as MyPropuestaRow[];
+    return typedRows.map((r) => {
       const sol = Array.isArray(r.solicitudes) ? r.solicitudes[0] : r.solicitudes;
       const opRaw = Array.isArray(r.operations) ? r.operations[0] : r.operations;
       return {

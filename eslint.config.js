@@ -17,6 +17,7 @@ export default tseslint.config(
       ".tanstack",
       ".wrangler",
       "node_modules",
+      ".claude",
     ],
   },
   {

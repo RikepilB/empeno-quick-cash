@@ -43,7 +43,8 @@ function loadScript(): Promise<void> {
 }
 
 export function getCulqiPublicKey(): string | null {
-  const k = (import.meta as any).env?.VITE_CULQI_PUBLIC_KEY;
+  const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+  const k = env?.VITE_CULQI_PUBLIC_KEY;
   return typeof k === "string" && k.length > 5 ? k : null;
 }
 

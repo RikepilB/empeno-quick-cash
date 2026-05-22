@@ -52,21 +52,36 @@ export const getBusinessContext = createServerFn({ method: "GET" }).handler(
 
     let subOut: BusinessContext["subscription"] = null;
     if (sub) {
-      const planRow = (sub as any).plans;
+      type PlanJoinRow = {
+        id: string;
+        name: string;
+        price_pen: number;
+        monthly_propuestas: number | null;
+      };
+      type SubRow = {
+        id: string;
+        status: "active" | "trialing" | "past_due" | "canceled";
+        plan_id: string;
+        propuestas_used_this_period: number | null;
+        current_period_end: string | null;
+        plans: PlanJoinRow | null;
+      };
+      const s = sub as unknown as SubRow;
+      const planRow = s.plans;
       const limit = planRow?.monthly_propuestas ?? null;
-      const used = (sub as any).propuestas_used_this_period ?? 0;
+      const used = s.propuestas_used_this_period ?? 0;
       subOut = {
-        id: (sub as any).id,
-        status: (sub as any).status,
+        id: s.id,
+        status: s.status,
         plan: {
-          id: planRow?.id ?? (sub as any).plan_id,
+          id: planRow?.id ?? s.plan_id,
           name: planRow?.name ?? "",
           price_pen: planRow?.price_pen ?? 0,
           monthly_propuestas: limit,
         },
         propuestas_used_this_period: used,
         propuestas_remaining: limit === null ? null : Math.max(0, limit - used),
-        current_period_end: (sub as any).current_period_end,
+        current_period_end: s.current_period_end,
       };
     }
 

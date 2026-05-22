@@ -62,10 +62,14 @@ function Dashboard() {
             >
               Historial
             </Link>
-            <button className="relative rounded-xl border border-border bg-surface p-2.5">
+            <Link
+              to="/app/notifications"
+              className="rounded-xl border border-border bg-surface p-2.5 text-foreground transition hover:bg-surface-2"
+              title="Notificaciones"
+              aria-label="Notificaciones"
+            >
               <Bell className="h-5 w-5" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-            </button>
+            </Link>
             <button
               onClick={handleLogout}
               className="rounded-xl border border-border bg-surface p-2.5 text-muted-foreground hover:text-foreground"

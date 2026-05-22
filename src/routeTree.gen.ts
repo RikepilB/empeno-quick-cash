@@ -21,6 +21,7 @@ import { Route as NegocioPropuestasRouteImport } from './routes/negocio.propuest
 import { Route as NegocioPropuestaRouteImport } from './routes/negocio.propuesta'
 import { Route as NegocioPlanRouteImport } from './routes/negocio.plan'
 import { Route as NegocioPerfilRouteImport } from './routes/negocio.perfil'
+import { Route as NegocioNotificationsRouteImport } from './routes/negocio.notifications'
 import { Route as NegocioLoginRouteImport } from './routes/negocio.login'
 import { Route as NegocioHistorialRouteImport } from './routes/negocio.historial'
 import { Route as NegocioForgotPasswordRouteImport } from './routes/negocio.forgot-password'
@@ -30,6 +31,7 @@ import { Route as AppPublishedRouteImport } from './routes/app.published'
 import { Route as AppPublishRouteImport } from './routes/app.publish'
 import { Route as AppProposalsRouteImport } from './routes/app.proposals'
 import { Route as AppProposalDetailRouteImport } from './routes/app.proposal-detail'
+import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
 import { Route as AppLoginRouteImport } from './routes/app.login'
 import { Route as AppHistoryRouteImport } from './routes/app.history'
 import { Route as AppForgotPasswordRouteImport } from './routes/app.forgot-password'
@@ -97,6 +99,11 @@ const NegocioPerfilRoute = NegocioPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => NegocioRoute,
 } as any)
+const NegocioNotificationsRoute = NegocioNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => NegocioRoute,
+} as any)
 const NegocioLoginRoute = NegocioLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -142,6 +149,11 @@ const AppProposalDetailRoute = AppProposalDetailRouteImport.update({
   path: '/proposal-detail',
   getParentRoute: () => AppRoute,
 } as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppLoginRoute = AppLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -183,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
   '/app/login': typeof AppLoginRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/proposal-detail': typeof AppProposalDetailRoute
   '/app/proposals': typeof AppProposalsRoute
   '/app/publish': typeof AppPublishRoute
@@ -192,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/negocio/forgot-password': typeof NegocioForgotPasswordRoute
   '/negocio/historial': typeof NegocioHistorialRoute
   '/negocio/login': typeof NegocioLoginRoute
+  '/negocio/notifications': typeof NegocioNotificationsRoute
   '/negocio/perfil': typeof NegocioPerfilRoute
   '/negocio/plan': typeof NegocioPlanRoute
   '/negocio/propuesta': typeof NegocioPropuestaRoute
@@ -210,6 +224,7 @@ export interface FileRoutesByTo {
   '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
   '/app/login': typeof AppLoginRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/proposal-detail': typeof AppProposalDetailRoute
   '/app/proposals': typeof AppProposalsRoute
   '/app/publish': typeof AppPublishRoute
@@ -219,6 +234,7 @@ export interface FileRoutesByTo {
   '/negocio/forgot-password': typeof NegocioForgotPasswordRoute
   '/negocio/historial': typeof NegocioHistorialRoute
   '/negocio/login': typeof NegocioLoginRoute
+  '/negocio/notifications': typeof NegocioNotificationsRoute
   '/negocio/perfil': typeof NegocioPerfilRoute
   '/negocio/plan': typeof NegocioPlanRoute
   '/negocio/propuesta': typeof NegocioPropuestaRoute
@@ -240,6 +256,7 @@ export interface FileRoutesById {
   '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
   '/app/login': typeof AppLoginRoute
+  '/app/notifications': typeof AppNotificationsRoute
   '/app/proposal-detail': typeof AppProposalDetailRoute
   '/app/proposals': typeof AppProposalsRoute
   '/app/publish': typeof AppPublishRoute
@@ -249,6 +266,7 @@ export interface FileRoutesById {
   '/negocio/forgot-password': typeof NegocioForgotPasswordRoute
   '/negocio/historial': typeof NegocioHistorialRoute
   '/negocio/login': typeof NegocioLoginRoute
+  '/negocio/notifications': typeof NegocioNotificationsRoute
   '/negocio/perfil': typeof NegocioPerfilRoute
   '/negocio/plan': typeof NegocioPlanRoute
   '/negocio/propuesta': typeof NegocioPropuestaRoute
@@ -271,6 +289,7 @@ export interface FileRouteTypes {
     | '/app/forgot-password'
     | '/app/history'
     | '/app/login'
+    | '/app/notifications'
     | '/app/proposal-detail'
     | '/app/proposals'
     | '/app/publish'
@@ -280,6 +299,7 @@ export interface FileRouteTypes {
     | '/negocio/forgot-password'
     | '/negocio/historial'
     | '/negocio/login'
+    | '/negocio/notifications'
     | '/negocio/perfil'
     | '/negocio/plan'
     | '/negocio/propuesta'
@@ -298,6 +318,7 @@ export interface FileRouteTypes {
     | '/app/forgot-password'
     | '/app/history'
     | '/app/login'
+    | '/app/notifications'
     | '/app/proposal-detail'
     | '/app/proposals'
     | '/app/publish'
@@ -307,6 +328,7 @@ export interface FileRouteTypes {
     | '/negocio/forgot-password'
     | '/negocio/historial'
     | '/negocio/login'
+    | '/negocio/notifications'
     | '/negocio/perfil'
     | '/negocio/plan'
     | '/negocio/propuesta'
@@ -327,6 +349,7 @@ export interface FileRouteTypes {
     | '/app/forgot-password'
     | '/app/history'
     | '/app/login'
+    | '/app/notifications'
     | '/app/proposal-detail'
     | '/app/proposals'
     | '/app/publish'
@@ -336,6 +359,7 @@ export interface FileRouteTypes {
     | '/negocio/forgot-password'
     | '/negocio/historial'
     | '/negocio/login'
+    | '/negocio/notifications'
     | '/negocio/perfil'
     | '/negocio/plan'
     | '/negocio/propuesta'
@@ -440,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NegocioPerfilRouteImport
       parentRoute: typeof NegocioRoute
     }
+    '/negocio/notifications': {
+      id: '/negocio/notifications'
+      path: '/notifications'
+      fullPath: '/negocio/notifications'
+      preLoaderRoute: typeof NegocioNotificationsRouteImport
+      parentRoute: typeof NegocioRoute
+    }
     '/negocio/login': {
       id: '/negocio/login'
       path: '/login'
@@ -503,6 +534,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppProposalDetailRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/notifications': {
+      id: '/app/notifications'
+      path: '/notifications'
+      fullPath: '/app/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/login': {
       id: '/app/login'
       path: '/login'
@@ -554,6 +592,7 @@ interface AppRouteChildren {
   AppForgotPasswordRoute: typeof AppForgotPasswordRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppLoginRoute: typeof AppLoginRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
   AppProposalDetailRoute: typeof AppProposalDetailRoute
   AppProposalsRoute: typeof AppProposalsRoute
   AppPublishRoute: typeof AppPublishRoute
@@ -568,6 +607,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppForgotPasswordRoute: AppForgotPasswordRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppLoginRoute: AppLoginRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
   AppProposalDetailRoute: AppProposalDetailRoute,
   AppProposalsRoute: AppProposalsRoute,
   AppPublishRoute: AppPublishRoute,
@@ -583,6 +623,7 @@ interface NegocioRouteChildren {
   NegocioForgotPasswordRoute: typeof NegocioForgotPasswordRoute
   NegocioHistorialRoute: typeof NegocioHistorialRoute
   NegocioLoginRoute: typeof NegocioLoginRoute
+  NegocioNotificationsRoute: typeof NegocioNotificationsRoute
   NegocioPerfilRoute: typeof NegocioPerfilRoute
   NegocioPlanRoute: typeof NegocioPlanRoute
   NegocioPropuestaRoute: typeof NegocioPropuestaRoute
@@ -598,6 +639,7 @@ const NegocioRouteChildren: NegocioRouteChildren = {
   NegocioForgotPasswordRoute: NegocioForgotPasswordRoute,
   NegocioHistorialRoute: NegocioHistorialRoute,
   NegocioLoginRoute: NegocioLoginRoute,
+  NegocioNotificationsRoute: NegocioNotificationsRoute,
   NegocioPerfilRoute: NegocioPerfilRoute,
   NegocioPlanRoute: NegocioPlanRoute,
   NegocioPropuestaRoute: NegocioPropuestaRoute,
