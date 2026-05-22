@@ -37,12 +37,19 @@ export const listPlans = createServerFn({ method: "GET" }).handler(async (): Pro
     .select("id, name, price_pen, monthly_propuestas, features")
     .order("price_pen", { ascending: true });
   if (error) throw sanitizeError(error, "Error al cargar los planes.");
-  return (data ?? []).map((p: any) => ({
+  type PlanRow = {
+    id: string;
+    name: string;
+    price_pen: number;
+    monthly_propuestas: number | null;
+    features: unknown;
+  };
+  return (data ?? []).map((p: PlanRow) => ({
     id: p.id,
     name: p.name,
     price_pen: p.price_pen,
     monthly_propuestas: p.monthly_propuestas,
-    features: Array.isArray(p.features) ? p.features : [],
+    features: Array.isArray(p.features) ? (p.features as string[]) : [],
   }));
 });
 

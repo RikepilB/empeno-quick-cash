@@ -5,7 +5,8 @@ const STORAGE_BUCKET = "solicitud-photos";
 let _supabaseUrl = "";
 function getSupabaseUrl(): string {
   if (!_supabaseUrl) {
-    _supabaseUrl = process.env.SUPABASE_URL ?? (import.meta as any).env?.VITE_SUPABASE_URL ?? "";
+    const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+    _supabaseUrl = process.env.SUPABASE_URL ?? env?.VITE_SUPABASE_URL ?? "";
   }
   return _supabaseUrl;
 }

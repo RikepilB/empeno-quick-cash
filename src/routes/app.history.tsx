@@ -34,7 +34,8 @@ function History() {
     if (filter === "all") return list;
     if (filter === "active") return list.filter((o) => o.status === "pending_pickup");
     if (filter === "completed") return list.filter((o) => o.status === "completed");
-    if (filter === "expired") return list.filter((o) => o.status === "expired" || o.status === "disputed");
+    if (filter === "expired")
+      return list.filter((o) => o.status === "expired" || o.status === "disputed");
     return list;
   }, [ops.data, filter]);
 
@@ -82,15 +83,21 @@ function History() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold">{buildTitle(it.solicitud)}</div>
-                          <div className="truncate text-[11px] text-muted-foreground">{it.propuesta.business.name}</div>
+                          <div className="truncate text-sm font-semibold">
+                            {buildTitle(it.solicitud)}
+                          </div>
+                          <div className="truncate text-[11px] text-muted-foreground">
+                            {it.propuesta.business.name}
+                          </div>
                         </div>
                         <span className={`badge-dot ${badge} shrink-0`}>{label}</span>
                       </div>
                       <div className="mt-3 flex items-end justify-between">
                         <div>
                           <div className="text-[10px] uppercase text-muted-foreground">Monto</div>
-                          <div className="font-display text-lg font-bold">{formatPEN(it.propuesta.monto_pen)}</div>
+                          <div className="font-display text-lg font-bold">
+                            {formatPEN(it.propuesta.monto_pen)}
+                          </div>
                         </div>
                         <div className="text-right">
                           <div className="text-[10px] uppercase text-muted-foreground">Vence</div>

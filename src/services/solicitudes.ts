@@ -126,7 +126,23 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
 
     if (error) throw sanitizeError(error, "Error al cargar tus solicitudes.");
 
-    return (data ?? []).map((row: any) => ({
+    type SolicitudRow = {
+      id: string;
+      category: string;
+      brand: string | null;
+      model: string | null;
+      year: number | null;
+      storage: string | null;
+      condition: string | null;
+      description: string | null;
+      expected_amount_pen: number | null;
+      expected_term_days: number | null;
+      district: string | null;
+      status: SolicitudStatus;
+      created_at: string;
+      propuestas: { count: number }[] | null;
+    };
+    return (data ?? []).map((row: SolicitudRow) => ({
       id: row.id,
       category: row.category,
       brand: row.brand,
@@ -184,7 +200,20 @@ export const listActiveSolicitudes = createServerFn({ method: "GET" })
     const { data, error } = await query;
     if (error) throw sanitizeError(error, "Error al cargar solicitudes.");
 
-    return (data ?? []).map((row: any) => ({
+    type ActiveSolicitudRow = {
+      id: string;
+      category: string;
+      brand: string | null;
+      model: string | null;
+      condition: string | null;
+      expected_amount_pen: number | null;
+      expected_term_days: number | null;
+      district: string | null;
+      status: SolicitudStatus;
+      created_at: string;
+      propuestas: { count: number }[] | null;
+    };
+    return (data ?? []).map((row: ActiveSolicitudRow) => ({
       id: row.id,
       category: row.category,
       brand: row.brand,
@@ -223,10 +252,29 @@ export const getSolicitud = createServerFn({ method: "GET" })
     if (error) throw sanitizeError(error, "Error al cargar la solicitud.");
     if (!row) return null;
 
-    const r = row as any;
-    const photosRaw = Array.isArray(r.solicitud_photos) ? r.solicitud_photos : [];
+    type PhotoRow = { id: string; storage_path: string; position: number };
+    type SolicitudDetailRow = {
+      id: string;
+      client_id: string;
+      category: string;
+      brand: string | null;
+      model: string | null;
+      year: number | null;
+      storage: string | null;
+      condition: string | null;
+      description: string | null;
+      expected_amount_pen: number | null;
+      expected_term_days: number | null;
+      district: string | null;
+      status: SolicitudStatus;
+      created_at: string;
+      solicitud_photos: PhotoRow[] | null;
+      propuestas: { count: number }[] | null;
+    };
+    const r = row as SolicitudDetailRow;
+    const photosRaw: PhotoRow[] = Array.isArray(r.solicitud_photos) ? r.solicitud_photos : [];
     const photos: SolicitudPhoto[] = await Promise.all(
-      photosRaw.map(async (p: any) => ({
+      photosRaw.map(async (p: PhotoRow) => ({
         id: p.id,
         storage_path: p.storage_path,
         position: p.position,

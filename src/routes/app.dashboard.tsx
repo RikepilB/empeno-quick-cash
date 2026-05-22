@@ -49,13 +49,19 @@ function Dashboard() {
         <div className="flex items-center justify-between p-6 pb-4">
           <div>
             <div className="text-xs text-muted-foreground">¡Hola,</div>
-            <div className="font-display text-2xl font-bold uppercase">{firstName || "Cliente"}! 👋</div>
+            <div className="font-display text-2xl font-bold uppercase">
+              {firstName || "Cliente"}! 👋
+            </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="relative rounded-xl border border-border bg-surface p-2.5">
+            <Link
+              to="/app/notifications"
+              className="rounded-xl border border-border bg-surface p-2.5 text-foreground transition hover:bg-surface-2"
+              title="Notificaciones"
+              aria-label="Notificaciones"
+            >
               <Bell className="h-5 w-5" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-            </button>
+            </Link>
             <button
               onClick={handleLogout}
               className="rounded-xl border border-border bg-surface p-2.5 text-muted-foreground hover:text-foreground"
@@ -68,19 +74,30 @@ function Dashboard() {
         </div>
 
         <div className="px-6">
-          <Link to="/app/publish" className="group block overflow-hidden rounded-2xl bg-primary p-5 text-primary-foreground">
+          <Link
+            to="/app/publish"
+            className="group block overflow-hidden rounded-2xl bg-primary p-5 text-primary-foreground"
+          >
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-display text-2xl font-bold uppercase leading-tight">Empeñar un artículo</div>
+                <div className="font-display text-2xl font-bold uppercase leading-tight">
+                  Empeñar un artículo
+                </div>
                 <div className="text-xs opacity-80">Recibe ofertas en minutos</div>
               </div>
-              <div className="rounded-xl bg-primary-foreground/10 p-3 transition group-hover:rotate-90"><Plus className="h-6 w-6" /></div>
+              <div className="rounded-xl bg-primary-foreground/10 p-3 transition group-hover:rotate-90">
+                <Plus className="h-6 w-6" />
+              </div>
             </div>
           </Link>
 
           <div className="mt-6 flex items-center justify-between">
-            <h3 className="font-display text-base font-bold uppercase tracking-wide">Mis publicaciones</h3>
-            <Link to="/app/history" className="text-xs text-primary hover:underline">Ver historial</Link>
+            <h3 className="font-display text-base font-bold uppercase tracking-wide">
+              Mis publicaciones
+            </h3>
+            <Link to="/app/history" className="text-xs text-primary hover:underline">
+              Ver historial
+            </Link>
           </div>
 
           <div className="mt-3 space-y-2.5">
@@ -95,19 +112,10 @@ function Dashboard() {
             ) : (
               items.map((s) => {
                 const { label, badge } = statusBadge(s);
-                const target =
-                  s.status === "accepted"
-                    ? { to: "/app/code" as const, search: { propuesta_id: undefined as string | undefined } }
-                    : s.propuestas_count > 0
-                      ? { to: "/app/proposals" as const, search: { id: s.id } }
-                      : { to: "/app/published" as const, search: { id: s.id } };
-                return (
-                  <Link
-                    key={s.id}
-                    to={target.to}
-                    search={target.search as any}
-                    className="flex items-center gap-3 rounded-xl border border-border bg-surface p-3 transition hover:border-primary/40"
-                  >
+                const linkClass =
+                  "flex items-center gap-3 rounded-xl border border-border bg-surface p-3 transition hover:border-primary/40";
+                const inner = (
+                  <>
                     <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-surface-2 text-2xl">
                       {categoryMeta(s.category).emoji}
                     </div>
@@ -117,11 +125,50 @@ function Dashboard() {
                         <span className={`badge-dot ${badge}`}>{label}</span>
                         {s.propuestas_count > 0 && (
                           <span className="text-[11px] text-muted-foreground">
-                            · {s.propuestas_count} {s.propuestas_count === 1 ? "propuesta" : "propuestas"}
+                            · {s.propuestas_count}{" "}
+                            {s.propuestas_count === 1 ? "propuesta" : "propuestas"}
                           </span>
                         )}
                       </div>
                     </div>
+                  </>
+                );
+                if (s.status === "accepted") {
+                  const op = operations.data?.find((o) => o.solicitud.id === s.id);
+                  const propuestaId = op?.propuesta.id;
+                  if (propuestaId) {
+                    return (
+                      <Link
+                        key={s.id}
+                        to="/app/code"
+                        search={{ propuesta_id: propuestaId }}
+                        className={linkClass}
+                      >
+                        {inner}
+                      </Link>
+                    );
+                  }
+                  return (
+                    <Link key={s.id} to="/app/code" className={linkClass}>
+                      {inner}
+                    </Link>
+                  );
+                }
+                if (s.propuestas_count > 0) {
+                  return (
+                    <Link
+                      key={s.id}
+                      to="/app/proposals"
+                      search={{ id: s.id }}
+                      className={linkClass}
+                    >
+                      {inner}
+                    </Link>
+                  );
+                }
+                return (
+                  <Link key={s.id} to="/app/published" search={{ id: s.id }} className={linkClass}>
+                    {inner}
                   </Link>
                 );
               })
@@ -132,7 +179,9 @@ function Dashboard() {
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Sparkles className="h-3.5 w-3.5 text-primary" /> Tip
             </div>
-            <p className="mt-1 text-sm">Sube fotos claras y bien iluminadas para recibir mejores ofertas.</p>
+            <p className="mt-1 text-sm">
+              Sube fotos claras y bien iluminadas para recibir mejores ofertas.
+            </p>
           </div>
 
           <div className="mt-6 grid grid-cols-2 gap-3 pb-8">

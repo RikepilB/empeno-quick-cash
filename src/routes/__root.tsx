@@ -73,10 +73,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "EMPEÑALO — Empeña tu artículo y recibe ofertas" },
-      { name: "description", content: "Marketplace fintech que conecta personas con casas de empeño. Publica, compara ofertas y elige la mejor en minutos." },
+      {
+        name: "description",
+        content:
+          "Marketplace fintech que conecta personas con casas de empeño. Publica, compara ofertas y elige la mejor en minutos.",
+      },
       { name: "author", content: "EMPEÑALO" },
       { property: "og:title", content: "EMPEÑALO — Empeña con confianza" },
-      { property: "og:description", content: "Recibe propuestas de múltiples casas de empeño y elige la mejor." },
+      {
+        property: "og:description",
+        content: "Recibe propuestas de múltiples casas de empeño y elige la mejor.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -84,7 +91,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=DM+Sans:wght@400;500;600;700&display=swap",
+      },
       { rel: "stylesheet", href: appCss },
     ],
   }),

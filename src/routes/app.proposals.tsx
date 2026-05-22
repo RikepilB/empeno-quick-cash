@@ -30,7 +30,9 @@ function Proposals() {
   const propuestas = useQuery({
     queryKey: ["propuestas", id],
     queryFn: () =>
-      id ? listPropuestasForSolicitud({ data: { solicitud_id: id } }) : Promise.resolve([] as PropuestaForClient[]),
+      id
+        ? listPropuestasForSolicitud({ data: { solicitud_id: id } })
+        : Promise.resolve([] as PropuestaForClient[]),
     enabled: !!id,
   });
 
@@ -50,7 +52,9 @@ function Proposals() {
         <div className="p-6 text-sm text-muted-foreground">
           Selecciona una publicación en tu panel para ver sus propuestas.
           <div className="mt-4">
-            <Link to="/app/dashboard" className="btn-primary w-full">Volver al panel</Link>
+            <Link to="/app/dashboard" className="btn-primary w-full">
+              Volver al panel
+            </Link>
           </div>
         </div>
       </PhoneFrame>
@@ -66,9 +70,12 @@ function Proposals() {
               {solicitud.data ? categoryMeta(solicitud.data.category).emoji : "—"}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-semibold">{solicitud.data ? buildTitle(solicitud.data) : "Cargando..."}</div>
+              <div className="text-sm font-semibold">
+                {solicitud.data ? buildTitle(solicitud.data) : "Cargando..."}
+              </div>
               <div className="text-[11px] text-muted-foreground">
-                {sorted.length} ofertas activas{propuestas.data && propuestas.data.length !== sorted.length
+                {sorted.length} ofertas activas
+                {propuestas.data && propuestas.data.length !== sorted.length
                   ? ` · ${propuestas.data.length - sorted.length} cerradas`
                   : ""}
               </div>
@@ -77,7 +84,9 @@ function Proposals() {
         </div>
 
         <div className="mt-4 flex items-center justify-between">
-          <h3 className="font-display text-sm font-bold uppercase tracking-wide">Compara y elige</h3>
+          <h3 className="font-display text-sm font-bold uppercase tracking-wide">
+            Compara y elige
+          </h3>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortKey)}
@@ -110,7 +119,9 @@ function Proposals() {
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <div className="font-display text-base font-bold uppercase">{p.business.name}</div>
+                      <div className="font-display text-base font-bold uppercase">
+                        {p.business.name}
+                      </div>
                       <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
                         <MapPin className="h-3 w-3" /> {p.business.district ?? "—"}
                       </div>
@@ -121,17 +132,37 @@ function Proposals() {
                   <div className="mt-3 flex items-end justify-between">
                     <div>
                       <div className="text-[10px] uppercase text-muted-foreground">Te ofrecen</div>
-                      <div className="font-display text-3xl font-extrabold text-primary">{formatPEN(p.monto_pen)}</div>
+                      <div className="font-display text-3xl font-extrabold text-primary">
+                        {formatPEN(p.monto_pen)}
+                      </div>
                     </div>
                     <div className="text-right text-xs text-muted-foreground">
-                      <div>Tasa <span className="font-display text-base text-foreground">{p.tasa_mensual}%</span>/mes</div>
-                      <div>Plazo <span className="font-display text-base text-foreground">{p.plazo_dias}</span> días</div>
+                      <div>
+                        Tasa{" "}
+                        <span className="font-display text-base text-foreground">
+                          {p.tasa_mensual}%
+                        </span>
+                        /mes
+                      </div>
+                      <div>
+                        Plazo{" "}
+                        <span className="font-display text-base text-foreground">
+                          {p.plazo_dias}
+                        </span>{" "}
+                        días
+                      </div>
                     </div>
                   </div>
 
                   <div className="mt-3 flex gap-2">
-                    <span className="flex-1 rounded-lg border border-border bg-background py-2 text-center text-xs">Ver detalle</span>
-                    <span className={`flex-1 rounded-lg py-2 text-center text-xs font-semibold ${isBest ? "bg-primary text-primary-foreground" : "border border-primary/40 text-primary"}`}>Aceptar</span>
+                    <span className="flex-1 rounded-lg border border-border bg-background py-2 text-center text-xs">
+                      Ver detalle
+                    </span>
+                    <span
+                      className={`flex-1 rounded-lg py-2 text-center text-xs font-semibold ${isBest ? "bg-primary text-primary-foreground" : "border border-primary/40 text-primary"}`}
+                    >
+                      Aceptar
+                    </span>
                   </div>
                 </Link>
               );

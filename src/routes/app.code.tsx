@@ -30,8 +30,11 @@ function Code() {
     return (
       <PhoneFrame title="Trato aceptado" back="/app/dashboard">
         <div className="p-6 text-sm text-muted-foreground">
-          Esta página muestra el código de una operación aceptada. Vuelve a tu panel para ver tus tratos cerrados.
-          <Link to="/app/dashboard" className="btn-primary mt-4 w-full">Volver al panel</Link>
+          Esta página muestra el código de una operación aceptada. Vuelve a tu panel para ver tus
+          tratos cerrados.
+          <Link to="/app/dashboard" className="btn-primary mt-4 w-full">
+            Volver al panel
+          </Link>
         </div>
       </PhoneFrame>
     );
@@ -52,7 +55,9 @@ function Code() {
       <PhoneFrame title="Trato aceptado" back="/app/dashboard">
         <div className="p-6 text-sm text-muted-foreground">
           No encontramos la operación. Puede que aún se esté procesando.
-          <Link to="/app/dashboard" className="btn-primary mt-4 w-full">Volver al panel</Link>
+          <Link to="/app/dashboard" className="btn-primary mt-4 w-full">
+            Volver al panel
+          </Link>
         </div>
       </PhoneFrame>
     );
@@ -61,7 +66,9 @@ function Code() {
   const o = op.data;
   const total = o.propuesta.monto_pen + (o.propuesta.monto_pen * o.propuesta.tasa_mensual) / 100;
   const completed = o.status === "completed";
-  const expiresAt = new Date(new Date(o.accepted_at).getTime() + o.propuesta.plazo_dias * 24 * 3600 * 1000);
+  const expiresAt = new Date(
+    new Date(o.accepted_at).getTime() + o.propuesta.plazo_dias * 24 * 3600 * 1000,
+  );
 
   return (
     <PhoneFrame title="Trato aceptado" back="/app/dashboard">
@@ -74,7 +81,8 @@ function Code() {
             {completed ? "Operación cerrada" : "¡Trato aceptado!"}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Tu acuerdo con <span className="font-semibold text-foreground">{o.propuesta.business.name}</span>{" "}
+            Tu acuerdo con{" "}
+            <span className="font-semibold text-foreground">{o.propuesta.business.name}</span>{" "}
             {completed ? "fue concretado." : "está listo."}
           </p>
         </div>
@@ -83,21 +91,30 @@ function Code() {
           <div className="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background" />
           <div className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background" />
 
-          <div className="text-center text-[10px] uppercase tracking-widest text-muted-foreground">Código único de validación</div>
+          <div className="text-center text-[10px] uppercase tracking-widest text-muted-foreground">
+            Código único de validación
+          </div>
           <div className="mt-2 text-center font-display text-5xl font-extrabold tracking-[0.15em] text-primary">
             {o.redemption_code}
           </div>
           <div className="mt-2 text-center text-[11px] text-muted-foreground">
             Vigente hasta:{" "}
             <span className="font-semibold text-foreground">
-              {expiresAt.toLocaleDateString("es-PE", { day: "numeric", month: "long", year: "numeric" })}
+              {expiresAt.toLocaleDateString("es-PE", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
             </span>
           </div>
 
           <div className="my-4 border-t border-dashed border-border" />
 
           <div className="space-y-2 text-xs">
-            <Row k="Artículo" v={`${categoryMeta(o.solicitud.category).emoji} ${buildTitle(o.solicitud)}`} />
+            <Row
+              k="Artículo"
+              v={`${categoryMeta(o.solicitud.category).emoji} ${buildTitle(o.solicitud)}`}
+            />
             <Row k="Monto" v={formatPEN(o.propuesta.monto_pen)} />
             <Row k="Tasa" v={`${o.propuesta.tasa_mensual}%/mes`} />
             <Row k="Plazo" v={`${o.propuesta.plazo_dias} días`} />
@@ -107,7 +124,9 @@ function Code() {
 
         <div className="mt-5 rounded-xl border border-border bg-surface p-4 text-xs">
           <p className="font-semibold">📍 Presenta este código al llegar al local</p>
-          <p className="mt-1 text-muted-foreground">El personal verificará el código y el artículo antes de concretar la operación.</p>
+          <p className="mt-1 text-muted-foreground">
+            El personal verificará el código y el artículo antes de concretar la operación.
+          </p>
         </div>
 
         {o.propuesta.business.district && (
@@ -132,7 +151,9 @@ function Code() {
           >
             <Share2 className="h-4 w-4" /> Copiar código
           </button>
-          <Link to="/app/dashboard" className="btn-primary">Listo</Link>
+          <Link to="/app/dashboard" className="btn-primary">
+            Listo
+          </Link>
         </div>
       </div>
     </PhoneFrame>
@@ -143,7 +164,11 @@ function Row({ k, v, highlight }: { k: string; v: string; highlight?: boolean })
   return (
     <div className="flex items-center justify-between">
       <span className="text-muted-foreground">{k}</span>
-      <span className={highlight ? "font-display text-base font-bold text-primary" : "font-semibold"}>{v}</span>
+      <span
+        className={highlight ? "font-display text-base font-bold text-primary" : "font-semibold"}
+      >
+        {v}
+      </span>
     </div>
   );
 }

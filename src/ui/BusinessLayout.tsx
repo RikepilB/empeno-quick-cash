@@ -137,10 +137,14 @@ export function BusinessLayout({
                 placeholder="Buscar solicitudes..."
               />
             </div>
-            <button className="relative rounded-xl border border-border bg-surface p-2.5">
+            <Link
+              to="/negocio/notifications"
+              className="rounded-xl border border-border bg-surface p-2.5 text-foreground transition hover:bg-surface-2"
+              title="Notificaciones"
+              aria-label="Notificaciones"
+            >
               <Bell className="h-4 w-4" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-            </button>
+            </Link>
             <button
               onClick={handleLogout}
               className="hidden items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-xs text-muted-foreground hover:text-foreground md:flex"
