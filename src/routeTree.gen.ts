@@ -32,6 +32,7 @@ import { Route as AppPublishRouteImport } from './routes/app.publish'
 import { Route as AppProposalsRouteImport } from './routes/app.proposals'
 import { Route as AppProposalDetailRouteImport } from './routes/app.proposal-detail'
 import { Route as AppNotificationsRouteImport } from './routes/app.notifications'
+import { Route as AppMisArticulosRouteImport } from './routes/app.mis-articulos'
 import { Route as AppLoginRouteImport } from './routes/app.login'
 import { Route as AppHistoryRouteImport } from './routes/app.history'
 import { Route as AppForgotPasswordRouteImport } from './routes/app.forgot-password'
@@ -154,6 +155,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMisArticulosRoute = AppMisArticulosRouteImport.update({
+  id: '/mis-articulos',
+  path: '/mis-articulos',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppLoginRoute = AppLoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -195,6 +201,7 @@ export interface FileRoutesByFullPath {
   '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
   '/app/login': typeof AppLoginRoute
+  '/app/mis-articulos': typeof AppMisArticulosRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/proposal-detail': typeof AppProposalDetailRoute
   '/app/proposals': typeof AppProposalsRoute
@@ -224,6 +231,7 @@ export interface FileRoutesByTo {
   '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
   '/app/login': typeof AppLoginRoute
+  '/app/mis-articulos': typeof AppMisArticulosRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/proposal-detail': typeof AppProposalDetailRoute
   '/app/proposals': typeof AppProposalsRoute
@@ -256,6 +264,7 @@ export interface FileRoutesById {
   '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
   '/app/login': typeof AppLoginRoute
+  '/app/mis-articulos': typeof AppMisArticulosRoute
   '/app/notifications': typeof AppNotificationsRoute
   '/app/proposal-detail': typeof AppProposalDetailRoute
   '/app/proposals': typeof AppProposalsRoute
@@ -289,6 +298,7 @@ export interface FileRouteTypes {
     | '/app/forgot-password'
     | '/app/history'
     | '/app/login'
+    | '/app/mis-articulos'
     | '/app/notifications'
     | '/app/proposal-detail'
     | '/app/proposals'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/app/forgot-password'
     | '/app/history'
     | '/app/login'
+    | '/app/mis-articulos'
     | '/app/notifications'
     | '/app/proposal-detail'
     | '/app/proposals'
@@ -349,6 +360,7 @@ export interface FileRouteTypes {
     | '/app/forgot-password'
     | '/app/history'
     | '/app/login'
+    | '/app/mis-articulos'
     | '/app/notifications'
     | '/app/proposal-detail'
     | '/app/proposals'
@@ -541,6 +553,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppNotificationsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/mis-articulos': {
+      id: '/app/mis-articulos'
+      path: '/mis-articulos'
+      fullPath: '/app/mis-articulos'
+      preLoaderRoute: typeof AppMisArticulosRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/login': {
       id: '/app/login'
       path: '/login'
@@ -592,6 +611,7 @@ interface AppRouteChildren {
   AppForgotPasswordRoute: typeof AppForgotPasswordRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppLoginRoute: typeof AppLoginRoute
+  AppMisArticulosRoute: typeof AppMisArticulosRoute
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppProposalDetailRoute: typeof AppProposalDetailRoute
   AppProposalsRoute: typeof AppProposalsRoute
@@ -607,6 +627,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppForgotPasswordRoute: AppForgotPasswordRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppLoginRoute: AppLoginRoute,
+  AppMisArticulosRoute: AppMisArticulosRoute,
   AppNotificationsRoute: AppNotificationsRoute,
   AppProposalDetailRoute: AppProposalDetailRoute,
   AppProposalsRoute: AppProposalsRoute,

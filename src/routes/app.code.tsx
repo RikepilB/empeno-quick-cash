@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { PhoneFrame } from "@/ui/PhoneFrame";
-import { Share2, MapPin, Clock, CheckCircle2, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Share2, MapPin, Clock, CheckCircle2, Loader2, Copy } from "lucide-react";
 import { z } from "zod";
 import { useQuery } from "@tanstack/react-query";
 import { getOperationByPropuesta } from "@/services/operations";
@@ -18,6 +19,7 @@ export const Route = createFileRoute("/app/code")({
 
 function Code() {
   const { propuesta_id } = useSearch({ from: "/app/code" });
+  const [copied, setCopied] = useState(false);
 
   const op = useQuery({
     queryKey: ["operation-by-propuesta", propuesta_id],
@@ -174,10 +176,15 @@ function Code() {
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={() => navigator.clipboard?.writeText(o.redemption_code)}
+                onClick={() => {
+                  navigator.clipboard?.writeText(o.redemption_code).then(() => {
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  });
+                }}
                 className="btn-ghost"
               >
-                <Share2 className="h-4 w-4" /> Copiar código
+                <Copy className="h-4 w-4" /> {copied ? "¡Copiado!" : "Copiar código"}
               </button>
               <Link to="/app/dashboard" className="btn-primary">
                 Listo

@@ -1,12 +1,17 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { PhoneFrame } from "@/ui/PhoneFrame";
 import { Camera, Plus, Loader2, X, Sparkles } from "lucide-react";
-import { useMemo, useRef, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState, type FormEvent, useEffect } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
-import { createSolicitud } from "@/services/solicitudes";
+import { createSolicitud, updateSolicitud, getSolicitud } from "@/services/solicitudes";
 import { CATEGORIES, categoryMeta, type CategoryKey } from "@/lib/categories";
+import { z } from "zod";
 
-export const Route = createFileRoute("/app/publish")({ component: Publish });
+const editSearchSchema = z.object({ edit: z.string().uuid().optional() });
+export const Route = createFileRoute("/app/publish")({
+  component: Publish,
+  validateSearch: editSearchSchema,
+});
 
 const CONDITIONS = ["Nuevo", "Bueno", "Regular", "Detalles"] as const;
 const PLAZOS = [15, 30, 45, 60] as const;
@@ -33,6 +38,32 @@ function Publish() {
   const [storage, setStorage] = useState("");
   const [expectedAmount, setExpectedAmount] = useState("");
   const [district, setDistrict] = useState("");
+  const [description, setDescription] = useState("");
+
+  const search = useSearch({ from: "/app/publish" });
+  const editId = search.edit;
+  const isEditing = !!editId;
+
+  useEffect(() => {
+    if (!editId) return;
+    setSubmitting(true);
+    getSolicitud({ data: { id: editId } })
+      .then((s) => {
+        if (!s) return;
+        setCategory(s.category as CategoryKey);
+        setBrand(s.brand ?? "");
+        setModel(s.model ?? "");
+        setYear(s.year ? String(s.year) : "");
+        setStorage(s.storage ?? "");
+        setCondition((s.condition as (typeof CONDITIONS)[number]) ?? "Bueno");
+        setDescription(s.description ?? "");
+        setExpectedAmount(s.expected_amount_pen ? String(s.expected_amount_pen) : "");
+        setPlazo((s.expected_term_days as (typeof PLAZOS)[number]) ?? 30);
+        setDistrict(s.district ?? "");
+      })
+      .catch(() => setError("No se pudo cargar la publicación."))
+      .finally(() => setSubmitting(false));
+  }, [editId]);
 
   function handleFiles(filesList: FileList | null) {
     if (!filesList || filesList.length === 0) return;
@@ -77,9 +108,16 @@ function Publish() {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
-    if (photos.length < MIN_PHOTOS) {
-      setError(`Sube al menos ${MIN_PHOTOS} fotos.`);
-      return;
+    if (isEditing) {
+      if (photos.length < MIN_PHOTOS) {
+        setError(`Sube al menos ${MIN_PHOTOS} foto para editar.`);
+        return;
+      }
+    } else {
+      if (photos.length < MIN_PHOTOS) {
+        setError(`Sube al menos ${MIN_PHOTOS} foto.`);
+        return;
+      }
     }
     setSubmitting(true);
     try {
@@ -90,26 +128,48 @@ function Publish() {
       } = await supabase.auth.getUser();
       if (!user) throw new Error("Inicia sesión nuevamente.");
 
-      const photoPaths = await uploadAllPhotos(user.id);
+      let photoPaths: string[] = [];
+      if (!isEditing) {
+        photoPaths = await uploadAllPhotos(user.id);
+      }
 
       const amountStr = String(form.get("expected_amount_pen") ?? "").replace(/[^\d]/g, "");
       const yearStr = String(form.get("year") ?? "").trim();
-      const result = await createSolicitud({
-        data: {
-          category,
-          brand: String(form.get("brand") ?? "").trim() || null,
-          model: String(form.get("model") ?? "").trim() || null,
-          year: yearStr ? Number(yearStr) : null,
-          storage: String(form.get("storage") ?? "").trim() || null,
-          condition,
-          description: String(form.get("description") ?? "").trim() || null,
-          expected_amount_pen: amountStr ? Number(amountStr) : null,
-          expected_term_days: plazo,
-          district: String(form.get("district") ?? "").trim() || null,
-          photo_paths: photoPaths,
-        },
-      });
-      await navigate({ to: "/app/published", search: { id: result.id } });
+
+      if (isEditing && editId) {
+        await updateSolicitud({
+          data: {
+            id: editId,
+            brand: String(form.get("brand") ?? "").trim() || null,
+            model: String(form.get("model") ?? "").trim() || null,
+            year: yearStr ? Number(yearStr) : null,
+            storage: String(form.get("storage") ?? "").trim() || null,
+            condition,
+            description: String(form.get("description") ?? "").trim() || null,
+            expected_amount_pen: amountStr ? Number(amountStr) : null,
+            expected_term_days: plazo,
+            district: String(form.get("district") ?? "").trim() || null,
+          },
+        });
+        await navigate({ to: "/app/mis-articulos" });
+      } else {
+        const result = await createSolicitud({
+          data: {
+            category,
+            brand: String(form.get("brand") ?? "").trim() || null,
+            model: String(form.get("model") ?? "").trim() || null,
+            year: yearStr ? Number(yearStr) : null,
+            storage: String(form.get("storage") ?? "").trim() || null,
+            condition,
+            description: String(form.get("description") ?? "").trim() || null,
+            expected_amount_pen: amountStr ? Number(amountStr) : null,
+            expected_term_days: plazo,
+            district: String(form.get("district") ?? "").trim() || null,
+            photo_paths: photoPaths,
+          },
+        });
+        await navigate({ to: "/app/published", search: { id: result.id } });
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al publicar");
     } finally {
