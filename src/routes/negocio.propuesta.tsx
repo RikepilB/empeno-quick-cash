@@ -57,7 +57,10 @@ function PropuestaDetalle() {
         <div className="rounded-2xl border border-border bg-surface p-6 text-sm">
           Esta propuesta aún no fue aceptada por el cliente o no tiene operación asociada.
         </div>
-        <Link to="/negocio/propuestas" className="mt-4 inline-block text-xs text-primary hover:underline">
+        <Link
+          to="/negocio/propuestas"
+          className="mt-4 inline-block text-xs text-primary hover:underline"
+        >
           ← Volver a mis propuestas
         </Link>
       </BusinessLayout>
@@ -67,18 +70,26 @@ function PropuestaDetalle() {
   const op = propuesta.operation;
   const completed = op.status === "completed";
   const total = propuesta.monto_pen + (propuesta.monto_pen * propuesta.tasa_mensual) / 100;
-  const expiresAt = new Date(new Date(op.accepted_at).getTime() + propuesta.plazo_dias * 24 * 3600 * 1000);
+  const expiresAt = new Date(
+    new Date(op.accepted_at).getTime() + propuesta.plazo_dias * 24 * 3600 * 1000,
+  );
 
   return (
     <BusinessLayout
       title={buildTitle({ ...propuesta.solicitud_summary })}
-      subtitle={completed ? "Operación concretada" : "Aceptada por el cliente · pendiente de concretar"}
+      subtitle={
+        completed ? "Operación concretada" : "Aceptada por el cliente · pendiente de concretar"
+      }
     >
       <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
         <div className="space-y-5">
-          <div className={`rounded-2xl border p-5 ${completed ? "border-status-inactive/40 bg-surface" : "border-status-accepted/40 bg-status-accepted/10"}`}>
+          <div
+            className={`rounded-2xl border p-5 ${completed ? "border-status-inactive/40 bg-surface" : "border-status-accepted/40 bg-status-accepted/10"}`}
+          >
             <div className="flex items-center gap-2">
-              <CheckCircle2 className={`h-5 w-5 ${completed ? "text-muted-foreground" : "text-status-accepted"}`} />
+              <CheckCircle2
+                className={`h-5 w-5 ${completed ? "text-muted-foreground" : "text-status-accepted"}`}
+              />
               <span className={`badge-dot ${completed ? "badge-inactive" : "badge-accepted"}`}>
                 {completed ? "Concretada" : "Propuesta aceptada"}
               </span>
@@ -99,9 +110,12 @@ function PropuestaDetalle() {
                 {categoryMeta(propuesta.solicitud_summary.category).emoji}
               </div>
               <div>
-                <h3 className="font-display text-xl font-bold">{buildTitle({ ...propuesta.solicitud_summary })}</h3>
+                <h3 className="font-display text-xl font-bold">
+                  {buildTitle({ ...propuesta.solicitud_summary })}
+                </h3>
                 <div className="text-xs text-muted-foreground">
-                  {categoryMeta(propuesta.solicitud_summary.category).label} · {propuesta.solicitud_summary.district ?? "—"}
+                  {categoryMeta(propuesta.solicitud_summary.category).label} ·{" "}
+                  {propuesta.solicitud_summary.district ?? "—"}
                 </div>
               </div>
             </div>
@@ -115,15 +129,27 @@ function PropuestaDetalle() {
           </div>
 
           <div className="rounded-2xl border border-border bg-surface p-5">
-            <h3 className="font-display text-base font-bold uppercase">Instrucciones para el personal</h3>
+            <h3 className="font-display text-base font-bold uppercase">
+              Instrucciones para el personal
+            </h3>
             <ol className="mt-3 space-y-2 text-sm text-muted-foreground">
               <li>
-                <span className="font-semibold text-foreground">1.</span> Cuando el cliente llegue, pide el código{" "}
+                <span className="font-semibold text-foreground">1.</span> Cuando el cliente llegue,
+                pide el código{" "}
                 <span className="font-mono font-bold text-primary">{op.redemption_code}</span>.
               </li>
-              <li><span className="font-semibold text-foreground">2.</span> Inspecciona el artículo y compáralo con las fotos publicadas.</li>
-              <li><span className="font-semibold text-foreground">3.</span> Si todo está conforme, escribe el código abajo y marca como concretada.</li>
-              <li><span className="font-semibold text-foreground">4.</span> Si hay inconformidad, contacta soporte (próximamente).</li>
+              <li>
+                <span className="font-semibold text-foreground">2.</span> Inspecciona el artículo y
+                compáralo con las fotos publicadas.
+              </li>
+              <li>
+                <span className="font-semibold text-foreground">3.</span> Si todo está conforme,
+                escribe el código abajo y marca como concretada.
+              </li>
+              <li>
+                <span className="font-semibold text-foreground">4.</span> Si hay inconformidad,
+                contacta soporte (próximamente).
+              </li>
             </ol>
           </div>
 
@@ -153,11 +179,23 @@ function PropuestaDetalle() {
                 </div>
               )}
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <button type="button" disabled className="btn-ghost text-status-reported opacity-50">
+                <button
+                  type="button"
+                  disabled
+                  className="btn-ghost text-status-reported opacity-50"
+                >
                   <AlertTriangle className="h-4 w-4" /> Reportar inconformidad
                 </button>
-                <button type="submit" disabled={complete.isPending} className="btn-primary disabled:opacity-60">
-                  {complete.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                <button
+                  type="submit"
+                  disabled={complete.isPending}
+                  className="btn-primary disabled:opacity-60"
+                >
+                  {complete.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="h-4 w-4" />
+                  )}
                   {complete.isPending ? "Marcando..." : "Marcar como concretada"}
                 </button>
               </div>
@@ -170,7 +208,9 @@ function PropuestaDetalle() {
             <div className="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background" />
             <div className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background" />
 
-            <div className="text-center text-[10px] uppercase tracking-widest text-muted-foreground">Código a verificar</div>
+            <div className="text-center text-[10px] uppercase tracking-widest text-muted-foreground">
+              Código a verificar
+            </div>
             <div className="mt-3 text-center font-display text-5xl font-extrabold tracking-[0.15em] text-primary">
               {op.redemption_code}
             </div>
@@ -191,7 +231,10 @@ function PropuestaDetalle() {
             </div>
           </div>
 
-          <Link to="/negocio/propuestas" className="mt-3 block text-center text-xs text-primary hover:underline">
+          <Link
+            to="/negocio/propuestas"
+            className="mt-3 block text-center text-xs text-primary hover:underline"
+          >
             ← Volver a mis propuestas
           </Link>
         </aside>
@@ -204,7 +247,13 @@ function Spec({ k, v, big }: { k: string; v: string; big?: boolean }) {
   return (
     <div className="rounded-lg bg-background p-3">
       <div className="text-[10px] uppercase text-muted-foreground">{k}</div>
-      <div className={big ? "mt-0.5 font-display text-lg font-bold text-primary" : "mt-0.5 font-semibold"}>{v}</div>
+      <div
+        className={
+          big ? "mt-0.5 font-display text-lg font-bold text-primary" : "mt-0.5 font-semibold"
+        }
+      >
+        {v}
+      </div>
     </div>
   );
 }
