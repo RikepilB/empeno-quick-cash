@@ -38,11 +38,18 @@ export function PhoneFrame({ children, title, back, hideHeader }: PhoneFrameProp
           {!hideHeader && (title || back) && (
             <div className="flex items-center gap-3 border-b border-border bg-surface px-5 py-4 md:px-8 md:py-5">
               {back && (
-                <Link to={back} className="rounded-full p-1.5 text-muted-foreground hover:bg-surface-2 hover:text-foreground">
+                <Link
+                  to={back}
+                  className="rounded-full p-1.5 text-muted-foreground hover:bg-surface-2 hover:text-foreground"
+                >
                   <ChevronLeft className="h-5 w-5" />
                 </Link>
               )}
-              {title && <h2 className="font-display text-xl font-bold uppercase tracking-wide md:text-2xl">{title}</h2>}
+              {title && (
+                <h2 className="font-display text-xl font-bold uppercase tracking-wide md:text-2xl">
+                  {title}
+                </h2>
+              )}
             </div>
           )}
 
@@ -53,7 +60,9 @@ export function PhoneFrame({ children, title, back, hideHeader }: PhoneFrameProp
           <span className="md:hidden">Vista cliente · mobile</span>
           <span className="hidden md:inline">Vista cliente · web</span>
           <span>·</span>
-          <Link to="/negocio" className="text-primary hover:underline">Ver panel del negocio</Link>
+          <Link to="/negocio" className="text-primary hover:underline">
+            Ver panel del negocio
+          </Link>
           <span>·</span>
           <button
             onClick={handleLogout}

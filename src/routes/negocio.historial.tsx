@@ -99,9 +99,15 @@ function Historial() {
                   new Date(o.accepted_at).getTime() + o.propuesta.plazo_dias * 24 * 3600 * 1000,
                 ).toLocaleDateString("es-PE", { day: "numeric", month: "short" });
                 return (
-                  <tr key={o.id} className="border-b border-border last:border-0 hover:bg-surface-2">
+                  <tr
+                    key={o.id}
+                    className="border-b border-border last:border-0 hover:bg-surface-2"
+                  >
                     <td className="px-5 py-4 text-muted-foreground">
-                      {new Date(o.accepted_at).toLocaleDateString("es-PE", { day: "numeric", month: "short" })}
+                      {new Date(o.accepted_at).toLocaleDateString("es-PE", {
+                        day: "numeric",
+                        month: "short",
+                      })}
                     </td>
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
@@ -111,10 +117,16 @@ function Historial() {
                         <span className="font-semibold">{buildTitle(o.solicitud)}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-4 font-display font-bold">{formatPEN(o.propuesta.monto_pen)}</td>
-                    <td className="px-5 py-4">{o.propuesta.tasa_mensual}% · {o.propuesta.plazo_dias}d</td>
+                    <td className="px-5 py-4 font-display font-bold">
+                      {formatPEN(o.propuesta.monto_pen)}
+                    </td>
+                    <td className="px-5 py-4">
+                      {o.propuesta.tasa_mensual}% · {o.propuesta.plazo_dias}d
+                    </td>
                     <td className="px-5 py-4 text-muted-foreground">{due}</td>
-                    <td className="px-5 py-4"><span className={`badge-dot ${badge}`}>{label}</span></td>
+                    <td className="px-5 py-4">
+                      <span className={`badge-dot ${badge}`}>{label}</span>
+                    </td>
                   </tr>
                 );
               })}
@@ -128,7 +140,9 @@ function Historial() {
 
 function Stat({ label, value, tone }: { label: string; value: string; tone?: "primary" }) {
   return (
-    <div className={`rounded-2xl border p-4 ${tone === "primary" ? "border-primary/40 bg-primary/5" : "border-border bg-surface"}`}>
+    <div
+      className={`rounded-2xl border p-4 ${tone === "primary" ? "border-primary/40 bg-primary/5" : "border-border bg-surface"}`}
+    >
       <div className="text-xs text-muted-foreground">{label}</div>
       <div className="mt-2 font-display text-3xl font-extrabold">{value}</div>
     </div>

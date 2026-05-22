@@ -34,13 +34,14 @@ function History() {
     if (filter === "all") return list;
     if (filter === "active") return list.filter((o) => o.status === "pending_pickup");
     if (filter === "completed") return list.filter((o) => o.status === "completed");
-    if (filter === "expired") return list.filter((o) => o.status === "expired" || o.status === "disputed");
+    if (filter === "expired")
+      return list.filter((o) => o.status === "expired" || o.status === "disputed");
     return list;
   }, [ops.data, filter]);
 
   return (
     <PhoneFrame title="Historial" back="/app/dashboard">
-      <div className="p-6">
+      <div className="p-6 md:p-8">
         <div className="flex gap-2 overflow-x-auto pb-3">
           {FILTERS.map((f) => (
             <button
@@ -53,13 +54,13 @@ function History() {
           ))}
         </div>
 
-        <div className="space-y-3">
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
           {ops.isLoading ? (
-            <div className="flex items-center justify-center py-8 text-xs text-muted-foreground">
+            <div className="col-span-full flex items-center justify-center py-8 text-xs text-muted-foreground">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando historial...
             </div>
           ) : filtered.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-surface p-6 text-center text-xs text-muted-foreground">
+            <div className="col-span-full rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-xs text-muted-foreground">
               No tienes operaciones {filter === "all" ? "aún" : "en este estado"}.
             </div>
           ) : (
@@ -82,15 +83,21 @@ function History() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                          <div className="truncate text-sm font-semibold">{buildTitle(it.solicitud)}</div>
-                          <div className="truncate text-[11px] text-muted-foreground">{it.propuesta.business.name}</div>
+                          <div className="truncate text-sm font-semibold">
+                            {buildTitle(it.solicitud)}
+                          </div>
+                          <div className="truncate text-[11px] text-muted-foreground">
+                            {it.propuesta.business.name}
+                          </div>
                         </div>
                         <span className={`badge-dot ${badge} shrink-0`}>{label}</span>
                       </div>
                       <div className="mt-3 flex items-end justify-between">
                         <div>
                           <div className="text-[10px] uppercase text-muted-foreground">Monto</div>
-                          <div className="font-display text-lg font-bold">{formatPEN(it.propuesta.monto_pen)}</div>
+                          <div className="font-display text-lg font-bold">
+                            {formatPEN(it.propuesta.monto_pen)}
+                          </div>
                         </div>
                         <div className="text-right">
                           <div className="text-[10px] uppercase text-muted-foreground">Vence</div>
