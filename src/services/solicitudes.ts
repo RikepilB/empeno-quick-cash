@@ -120,13 +120,29 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabase
       .from("solicitudes")
       .select(
-        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, deleted_at, created_at, propuestas(count), operations(id, propuesta_id)",
+        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, deleted_at, created_at, propuestas(count, id, accepted_at)",
       )
       .eq("client_id", user.id)
       .order("created_at", { ascending: false })
       .limit(50);
 
     if (error) throw sanitizeError(error, "Error al cargar tus solicitudes.");
+
+    type PropuestaRow = { id: string; accepted_at: string } | null;
+    const solicitudIds = (data ?? []).map((r) => r.id);
+    let acceptedMap: Record<string, string> = {};
+
+    if (solicitudIds.length > 0) {
+      const { data: acceptedRows } = await supabase
+        .from("propuestas")
+        .select("id, solicitud_id")
+        .in("solicitud_id", solicitudIds)
+        .eq("status", "accepted");
+
+      acceptedMap = Object.fromEntries(
+        (acceptedRows ?? []).map((r: { id: string; solicitud_id: string }) => [r.solicitud_id, r.id]),
+      );
+    }
 
     type SolicitudRow = {
       id: string;
@@ -144,7 +160,6 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       created_at: string;
       deleted_at: string | null;
       propuestas: { count: number }[] | null;
-      operations: { id: string; propuesta_id: string }[] | null;
     };
     return (data ?? []).map((row: SolicitudRow) => ({
       id: row.id,
@@ -162,10 +177,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       deleted_at: row.deleted_at,
       created_at: row.created_at,
       propuestas_count: row.propuestas?.[0]?.count ?? 0,
-      accepted_propuesta_id:
-        row.status === "accepted" && row.operations?.[0]?.propuesta_id
-          ? row.operations[0].propuesta_id
-          : null,
+      accepted_propuesta_id: row.status === "accepted" ? (acceptedMap[row.id] ?? null) : null,
     }));
   },
 );
