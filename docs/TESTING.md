@@ -8,11 +8,11 @@
 
 ## Development accounts
 
-| Rol | Email | Contraseña |
-|---|---|---|
+| Rol     | Email                         | Contraseña         |
+| ------- | ----------------------------- | ------------------ |
 | Cliente | `cliente.test@empenalo.local` | `TestCliente2026!` |
 | Negocio | `negocio.test@empenalo.local` | `TestNegocio2026!` |
-| Admin | `admin.test@empenalo.local` | `TestAdmin2026!` |
+| Admin   | `admin.test@empenalo.local`   | `TestAdmin2026!`   |
 
 > Demo passwords live here for QA-only convenience. **Real passwords must come from `.dev.vars` `SEED_DEMO_PASSWORD`** — see `DEVELOPMENT.md`. CI must not echo any password.
 
@@ -20,31 +20,32 @@
 
 ## Demo cliente accounts
 
-| Email | Contraseña | Nombre |
-|---|---|---|
+| Email                          | Contraseña  | Nombre         |
+| ------------------------------ | ----------- | -------------- |
 | `demo.cliente1@empenalo.local` | `Demo2026!` | María González |
 | `demo.cliente2@empenalo.local` | `Demo2026!` | Carlos Mendoza |
-| `demo.cliente3@empenalo.local` | `Demo2026!` | Lucía Torres |
-| `demo.cliente4@empenalo.local` | `Demo2026!` | Javier Ruiz |
-| `demo.cliente5@empenalo.local` | `Demo2026!` | Ana Castillo |
+| `demo.cliente3@empenalo.local` | `Demo2026!` | Lucía Torres   |
+| `demo.cliente4@empenalo.local` | `Demo2026!` | Javier Ruiz    |
+| `demo.cliente5@empenalo.local` | `Demo2026!` | Ana Castillo   |
 
 ---
 
 ## Demo negocio accounts
 
-| Email | Contraseña | Negocio | Distrito |
-|---|---|---|---|
-| `demo.negocio1@empenalo.local` | `Demo2026!` | Joyería Miraflores | Miraflores |
-| `demo.negocio2@empenalo.local` | `Demo2026!` | Empeños Lima Centro | Cercado de Lima |
-| `demo.negocio3@empenalo.local` | `Demo2026!` | Casa Oro Surco | Santiago de Surco |
-| `demo.negocio4@empenalo.local` | `Demo2026!` | Préstamos San Isidro | San Isidro |
-| `demo.negocio5@empenalo.local` | `Demo2026!` | Oro Express San Borja | San Borja |
+| Email                          | Contraseña  | Negocio               | Distrito          |
+| ------------------------------ | ----------- | --------------------- | ----------------- |
+| `demo.negocio1@empenalo.local` | `Demo2026!` | Joyería Miraflores    | Miraflores        |
+| `demo.negocio2@empenalo.local` | `Demo2026!` | Empeños Lima Centro   | Cercado de Lima   |
+| `demo.negocio3@empenalo.local` | `Demo2026!` | Casa Oro Surco        | Santiago de Surco |
+| `demo.negocio4@empenalo.local` | `Demo2026!` | Préstamos San Isidro  | San Isidro        |
+| `demo.negocio5@empenalo.local` | `Demo2026!` | Oro Express San Borja | San Borja         |
 
 ---
 
 ## Seeder baseline
 
 Current seeder (`scripts/seed.ts`):
+
 - Dev cliente + dev negocio.
 - 5 demo clientes + 5 demo negocios.
 - 20 solicitudes.
@@ -58,27 +59,35 @@ Current seeder (`scripts/seed.ts`):
 ## Core QA flows
 
 ### 1. Cliente registers + publishes
+
 Expected:
+
 - Registers manually (DNI + name + email + password + phone) or via OAuth (Google planned).
 - Lands in proper web layout — **never** mobile-frame on desktop.
 - Publishes artículo with category-specific fields rendered correctly.
 - Sees empty state first if no publicaciones exist (copy: "Aún no tienes publicaciones").
 
 ### 2. Negocio registers + gets verified
+
 Expected:
+
 - Inputs RUC + DNI representante.
 - Sees pending-verification copy with **business-hours context** (48h hábiles, 9:00–18:00 hora Lima).
 - After admin approval: sees plan selection at `/negocio/plan`.
 
 ### 3. Negocio sends propuesta
+
 Expected:
+
 - Browses open solicitudes filtered by distrito + categorías.
 - Creates propuesta with monto + tasa mensual + plazo + notas.
 - Sees quota usage banner.
 - (Post-0006) Can optionally feature the propuesta.
 
 ### 4. Cliente compares + accepts
+
 Expected:
+
 - Sees multiple ofertas.
 - Sorts by mayor monto / menor tasa / mayor plazo.
 - Accepts ONE propuesta. Others auto-expire.
@@ -86,26 +95,34 @@ Expected:
 - Sees business address + map link + phone.
 
 ### 5. Operation closes
+
 Expected:
+
 - Negocio inputs code → matches → "Marcar completada" / "Marcar disputada".
 - Operation status updates.
 - Audit log row written (`audit_logs` — service_role only — verify via SQL).
 
 ### 6. Plan enforcement
+
 Expected:
+
 - Negocio sees current plan + usage.
 - Hitting propuesta cap shows: "Has alcanzado el límite de N propuestas de tu plan."
 - Below-cap inserts succeed; usage counter increments atomically (RPC).
 - (Post-0006) Featured offers: credit path deducts from `featured_credits_used_this_period`; purchase path creates `payments` row.
 
 ### 7. Auth back-arrow + DNI tab
+
 Expected:
+
 - All 4 auth screens (`/app/login`, `/app/register`, `/negocio/login`, `/negocio/register`) show back arrow top-left → `/`.
 - DNI tab visible but disabled with tooltip "En desarrollo — disponible próximamente".
 - Forgot-password flow sends email + shows success state.
 
 ### 8. Demo billing mode
+
 Expected:
+
 - Without `CULQI_SECRET_KEY`: plan upgrade records `invoices.status='demo'` + flips plan immediately. UI shows demo banner.
 - With key: real Culqi charge required; webhook updates invoice status.
 
@@ -114,6 +131,7 @@ Expected:
 ## Responsive QA checklist
 
 ### Desktop (≥1024 px)
+
 - [ ] `/app/login` renders web card. **NO phone-frame.**
 - [ ] `/negocio/login` same.
 - [ ] Propuesta comparison uses richer multi-column layout.
@@ -122,6 +140,7 @@ Expected:
 - [ ] All counters start at 0 when account is empty.
 
 ### Mobile (375–414 px)
+
 - [ ] Bottom nav visible on authenticated routes.
 - [ ] Forms usable at 375 px width.
 - [ ] No horizontal scroll on core flows.
@@ -129,6 +148,7 @@ Expected:
 - [ ] Touch targets ≥ 44×44 px; inputs ≥ 48 px tall.
 
 ### Tablet (768–1023 px)
+
 - [ ] Hybrid layout — centered card with comfortable padding.
 - [ ] Auth card centered, no phone-frame.
 
@@ -137,6 +157,7 @@ Expected:
 ## Seed verification checklist
 
 After `bun run seed`, verify:
+
 - [ ] Auth users created (sign-in works for every demo account).
 - [ ] Cliente profiles exist (`profiles.role='client'`).
 - [ ] Negocio profiles exist (`profiles.role='business'`).
@@ -158,6 +179,7 @@ Run `bun run scripts/seed-verify.ts` (planned in `SEEDER.md`) — should output 
 ## Demo session scenarios
 
 ### Fast product demo (60 s)
+
 Accounts: `demo.cliente1@empenalo.local` + `demo.negocio1@empenalo.local`.
 
 1. Cliente login → ver una solicitud activa con propuestas.
@@ -166,6 +188,7 @@ Accounts: `demo.cliente1@empenalo.local` + `demo.negocio1@empenalo.local`.
 4. Negocio marca completada.
 
 ### Sales / investor demo (3 min)
+
 Use seeded businesses in the same distrito as a cliente to guarantee visible competition (≥3 propuestas). The success criterion is ≥3 propuestas per request — seed must show that.
 
 ---
@@ -192,11 +215,11 @@ Also run `bash scripts/security-scan.sh` before any commit. Fails on supabase JW
 
 ## Test infrastructure status
 
-| Test type | Status |
-|---|---|
-| **Unit tests** | ❌ Not present. Plan: add Vitest for `src/services/*` and `src/lib/*`. |
-| **Integration tests** | ❌ Not present. Plan: spin up Supabase locally via `supabase start`, test RPCs + RLS directly. |
-| **E2E tests** | Playwright is wired (per `ARCHITECTURE.md`) but **no test files exist yet**. Plan: cover the 8 core QA flows above. |
+| Test type             | Status                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Unit tests**        | ❌ Not present. Plan: add Vitest for `src/services/*` and `src/lib/*`.                                              |
+| **Integration tests** | ❌ Not present. Plan: spin up Supabase locally via `supabase start`, test RPCs + RLS directly.                      |
+| **E2E tests**         | Playwright is wired (per `ARCHITECTURE.md`) but **no test files exist yet**. Plan: cover the 8 core QA flows above. |
 
 > Coverage target per `.claude/rules/common/testing.md` is 80%. Current is 0%. Closing this is a separate phase — see `REDESIGN-ROADMAP.md`.
 
@@ -205,6 +228,7 @@ Also run `bash scripts/security-scan.sh` before any commit. Fails on supabase JW
 ## Verification before claiming "done"
 
 Per `.claude/CLAUDE.md`:
+
 1. `bun run lint` passes.
 2. `bun run build` succeeds.
 3. For DB changes: `npx supabase@latest db push` succeeds.

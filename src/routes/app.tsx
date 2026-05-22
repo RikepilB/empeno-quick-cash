@@ -5,9 +5,15 @@ const PUBLIC_APP_PATHS = new Set(["/app/login", "/app/register", "/app/forgot-pa
 
 export const Route = createFileRoute("/app")({
   beforeLoad: async ({ location }) => {
-    if (PUBLIC_APP_PATHS.has(location.pathname)) return;
-
     const session = await getCurrentUser();
+
+    if (PUBLIC_APP_PATHS.has(location.pathname)) {
+      if (session && session.profile.role === "client") {
+        throw redirect({ to: "/negocio/dashboard" });
+      }
+      return;
+    }
+
     if (!session) {
       throw redirect({ to: "/app/login", search: { redirect: location.href } });
     }

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
-import { PhoneFrame } from "@/ui/PhoneFrame";
+import { ClientLayout } from "@/ui/ClientLayout";
 import { useState } from "react";
 import { Share2, MapPin, Clock, CheckCircle2, Loader2, Copy } from "lucide-react";
 import { z } from "zod";
@@ -23,61 +23,63 @@ function Code() {
 
   const op = useQuery({
     queryKey: ["operation-by-propuesta", propuesta_id],
-    queryFn: () =>
+    fn: () =>
       propuesta_id ? getOperationByPropuesta({ data: { propuesta_id } }) : Promise.resolve(null),
     enabled: !!propuesta_id,
   });
 
   if (!propuesta_id) {
     return (
-      <PhoneFrame title="Trato aceptado" back="/app/dashboard">
-        <div className="p-6 text-sm text-muted-foreground">
-          Esta página muestra el código de una operación aceptada. Vuelve a tu panel para ver tus
-          tratos cerrados.
-          <Link to="/app/dashboard" className="btn-primary mt-4 w-full">
-            Volver al panel
-          </Link>
+      <ClientLayout title="Código de validación" subtitle="Trato aceptado">
+        <div className="flex items-center justify-center py-16 text-center">
+          <div>
+            <div className="font-display text-xl font-bold uppercase">Código no especificado</div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Esta página muestra el código de una operación aceptada.
+            </p>
+            <Link to="/app/dashboard" className="btn-primary mt-5 inline-flex">
+              Volver al panel
+            </Link>
+          </div>
         </div>
-      </PhoneFrame>
+      </ClientLayout>
     );
   }
 
   if (op.isLoading) {
     return (
-      <PhoneFrame title="Trato aceptado" back="/app/dashboard">
-        <div className="flex items-center justify-center p-12 text-xs text-muted-foreground">
+      <ClientLayout title="Código de validación" subtitle="Trato aceptado">
+        <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
           <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando código...
         </div>
-      </PhoneFrame>
+      </ClientLayout>
     );
   }
 
-  if (op.isError) {
+  if (op.isError || !op.data) {
     return (
-      <PhoneFrame title="Trato aceptado" back="/app/dashboard">
-        <div className="p-6 text-sm text-muted-foreground">
-          No pudimos cargar la operación. Verifica tu conexión e intenta de nuevo.
-          <button type="button" onClick={() => op.refetch()} className="btn-primary mt-4 w-full">
-            Reintentar
-          </button>
-          <Link to="/app/dashboard" className="btn-ghost mt-2 w-full">
-            Volver al panel
-          </Link>
+      <ClientLayout title="Código de validación" subtitle="Trato aceptado">
+        <div className="flex items-center justify-center py-16 text-center">
+          <div>
+            <div className="font-display text-xl font-bold uppercase">
+              No se encontró la operación
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              No pudimos cargar la operación. Verifica tu conexión e intenta de nuevo.
+            </p>
+            <button
+              type="button"
+              onClick={() => op.refetch()}
+              className="btn-primary mt-4 inline-flex"
+            >
+              Reintentar
+            </button>
+            <Link to="/app/dashboard" className="btn-ghost mt-2 inline-flex ml-2">
+              Volver al panel
+            </Link>
+          </div>
         </div>
-      </PhoneFrame>
-    );
-  }
-
-  if (!op.data) {
-    return (
-      <PhoneFrame title="Trato aceptado" back="/app/dashboard">
-        <div className="p-6 text-sm text-muted-foreground">
-          No encontramos la operación. Puede que aún se esté procesando.
-          <Link to="/app/dashboard" className="btn-primary mt-4 w-full">
-            Volver al panel
-          </Link>
-        </div>
-      </PhoneFrame>
+      </ClientLayout>
     );
   }
 
@@ -89,74 +91,85 @@ function Code() {
   );
 
   return (
-    <PhoneFrame title="Trato aceptado" back="/app/dashboard">
-      <div className="p-6 md:p-8">
-        <div className="text-center md:text-left">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-status-accepted/15 text-status-accepted md:mx-0">
-            <CheckCircle2 className="h-8 w-8" />
+    <ClientLayout
+      title={completed ? "Operación cerrada" : "¡Trato aceptado!"}
+      subtitle={`Acuerdo con ${o.propuesta.business.name}`}
+    >
+      <div className="mx-auto max-w-3xl space-y-6">
+        {/* Status banner */}
+        <div className="flex items-center gap-4 rounded-2xl border border-status-accepted/30 bg-status-accepted/10 p-5">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-status-accepted/15 text-status-accepted">
+            <CheckCircle2 className="h-6 w-6" />
           </div>
-          <h2 className="mt-3 font-display text-2xl font-bold uppercase md:text-3xl">
-            {completed ? "Operación cerrada" : "¡Trato aceptado!"}
-          </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Tu acuerdo con{" "}
-            <span className="font-semibold text-foreground">{o.propuesta.business.name}</span>{" "}
-            {completed ? "fue concretado." : "está listo."}
-          </p>
+          <div>
+            <div className="font-display text-lg font-bold uppercase text-status-accepted">
+              {completed ? "Operación concretada" : "Acuerdo listo"}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {completed
+                ? "El trato con la casa de empeño fue concretado."
+                : "Tu código de validación está listo. Preséntalo al llegar al local."}
+            </div>
+          </div>
         </div>
 
-        <div className="mt-6 md:grid md:grid-cols-[1.1fr_1fr] md:gap-6">
-          <div className="relative overflow-hidden rounded-2xl border-2 border-primary bg-gradient-to-br from-primary/15 via-surface to-surface p-6 md:p-8">
-            <div className="absolute -left-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background" />
-            <div className="absolute -right-3 top-1/2 h-6 w-6 -translate-y-1/2 rounded-full bg-background" />
+        {/* Redemption code card */}
+        <div className="relative overflow-hidden rounded-2xl border-2 border-primary bg-gradient-to-br from-primary/10 via-surface to-surface p-8 text-center">
+          <div className="absolute -left-4 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-background" />
+          <div className="absolute -right-4 top-1/2 h-8 w-8 -translate-y-1/2 rounded-full bg-background" />
 
-            <div className="text-center text-[10px] uppercase tracking-widest text-muted-foreground">
-              Código único de validación
-            </div>
-            <div className="mt-2 text-center font-display text-5xl font-extrabold tracking-[0.15em] tabular-nums text-primary md:text-6xl">
-              {o.redemption_code}
-            </div>
-            <div className="mt-2 text-center text-[11px] text-muted-foreground">
-              Vigente hasta:{" "}
-              <span className="font-semibold text-foreground">
-                {expiresAt.toLocaleDateString("es-PE", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </span>
-            </div>
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground">
+            Código único de validación
+          </div>
+          <div className="mt-3 text-center font-display text-6xl font-extrabold tracking-[0.15em] tabular-nums text-primary">
+            {o.redemption_code}
+          </div>
+          <div className="mt-3 text-sm text-muted-foreground">
+            Vigente hasta el{" "}
+            <span className="font-semibold text-foreground">
+              {expiresAt.toLocaleDateString("es-PE", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+        </div>
 
-            <div className="my-4 border-t border-dashed border-border" />
-
-            <div className="space-y-2 text-xs">
+        {/* Details grid */}
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-2xl border border-border bg-surface p-6">
+            <div className="font-display text-lg font-bold uppercase mb-4">Detalles del trato</div>
+            <div className="space-y-3 text-sm">
               <Row
                 k="Artículo"
                 v={`${categoryMeta(o.solicitud.category).emoji} ${buildTitle(o.solicitud)}`}
               />
-              <Row k="Monto" v={formatPEN(o.propuesta.monto_pen)} />
+              <Row k="Monto prestado" v={formatPEN(o.propuesta.monto_pen)} />
               <Row k="Tasa" v={`${o.propuesta.tasa_mensual}%/mes`} />
               <Row k="Plazo" v={`${o.propuesta.plazo_dias} días`} />
-              <Row k="Total a devolver" v={formatPEN(Math.round(total))} highlight />
+              <div className="border-t border-dashed border-border pt-3">
+                <Row k="Total a devolver" v={formatPEN(Math.round(total))} highlight />
+              </div>
             </div>
           </div>
 
-          <div className="mt-5 space-y-4 md:mt-0">
-            <div className="rounded-xl border border-border bg-surface p-4 text-xs">
-              <p className="font-semibold">📍 Presenta este código al llegar al local</p>
-              <p className="mt-1 text-muted-foreground">
-                El personal verificará el código y el artículo antes de concretar la operación.
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-border bg-surface p-5">
+              <p className="font-semibold text-sm">📍 Presenta este código al llegar al local</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                El personal verificará el código y el artículo antes de concreta la operación.
               </p>
             </div>
 
             {o.propuesta.business.district && (
-              <div className="rounded-xl border border-border bg-surface p-4">
-                <div className="flex items-start gap-2 text-sm">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+              <div className="rounded-2xl border border-border bg-surface p-5">
+                <div className="flex items-start gap-3">
+                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold">{o.propuesta.business.name}</div>
-                    <div className="mt-0.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <Clock className="h-3 w-3" /> {o.propuesta.business.district}
+                    <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" /> {o.propuesta.business.district}
                     </div>
                     <a
                       href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
@@ -164,16 +177,16 @@ function Code() {
                       )}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-2 inline-block text-xs text-primary hover:underline"
+                      className="mt-2 inline-block text-sm text-primary hover:underline"
                     >
-                      Abrir en Google Maps
+                      Abrir en Google Maps →
                     </a>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => {
@@ -182,18 +195,18 @@ function Code() {
                     setTimeout(() => setCopied(false), 2000);
                   });
                 }}
-                className="btn-ghost"
+                className="btn-ghost flex-1"
               >
-                <Copy className="h-4 w-4" /> {copied ? "¡Copiado!" : "Copiar código"}
+                <Copy className="mr-2 h-4 w-4" /> {copied ? "¡Copiado!" : "Copiar código"}
               </button>
-              <Link to="/app/dashboard" className="btn-primary">
-                Listo
+              <Link to="/app/dashboard" className="btn-primary flex-1 text-center">
+                Volver al inicio
               </Link>
             </div>
           </div>
         </div>
       </div>
-    </PhoneFrame>
+    </ClientLayout>
   );
 }
 
