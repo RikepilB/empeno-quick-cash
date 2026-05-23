@@ -103,6 +103,7 @@ function BusinessForgotPassword() {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
 
+      await supabase.auth.signOut();
       setResetDone(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos actualizar la contraseña");

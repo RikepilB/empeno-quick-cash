@@ -8,9 +8,6 @@ export const Route = createFileRoute("/app")({
     const session = await getCurrentUser();
 
     if (PUBLIC_APP_PATHS.has(location.pathname)) {
-      if (session && session.profile.role === "client") {
-        throw redirect({ to: "/negocio/dashboard" });
-      }
       return;
     }
 

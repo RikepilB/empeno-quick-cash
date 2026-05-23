@@ -45,7 +45,18 @@ function Login() {
         .select("role")
         .eq("id", userId)
         .maybeSingle();
-      const profile = data as { role: "client" | "business" } | null;
+      let profile = data as { role: "client" | "business" } | null;
+
+      if (!profile && !profileError) {
+        await new Promise((r) => setTimeout(r, 500));
+        const { data: retryData, error: retryError } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", userId)
+          .maybeSingle();
+        if (!retryError) profile = retryData as { role: "client" | "business" } | null;
+      }
+
       if (profileError) {
         await supabase.auth.signOut();
         throw new Error("No pudimos cargar tu perfil. Intenta de nuevo en unos segundos.");

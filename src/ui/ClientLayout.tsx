@@ -13,8 +13,8 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/db/browser";
-import { getClientContext } from "@/services/client";
 import { signOut } from "@/services/auth";
+import { getCurrentUser } from "@/services/auth";
 import { Logo, LogoText } from "@/ui/Logo";
 import { getCurrentUser } from "@/services/auth";
 
@@ -22,6 +22,7 @@ const nav = [
   { to: "/app/dashboard", label: "Inicio", icon: LayoutDashboard },
   { to: "/app/mis-articulos", label: "Mis publicaciones", icon: Inbox },
   { to: "/app/history", label: "Historial", icon: FileText },
+  { to: "/app/cuenta", label: "Cuenta", icon: User },
 ];
 
 export function ClientLayout({

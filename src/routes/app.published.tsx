@@ -18,7 +18,7 @@ function Published() {
 
   const { data, isLoading } = useQuery({
     queryKey: ["solicitud", id],
-    fn: () => (id ? getSolicitud({ data: { id } }) : Promise.resolve(null)),
+    queryFn: () => (id ? getSolicitud({ data: { id } }) : Promise.resolve(null)),
     enabled: !!id,
   });
 
