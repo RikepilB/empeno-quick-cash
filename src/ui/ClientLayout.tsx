@@ -1,6 +1,15 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Inbox, Send, Bell, CreditCard, LogOut, User } from "lucide-react";
+import {
+  LayoutDashboard,
+  FileText,
+  Inbox,
+  Send,
+  Bell,
+  CreditCard,
+  LogOut,
+  User,
+} from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/db/browser";
 import { getClientContext } from "@/services/client";
@@ -10,8 +19,8 @@ import { getCurrentUser } from "@/services/auth";
 
 const nav = [
   { to: "/app/dashboard", label: "Inicio", icon: LayoutDashboard },
-  { to: "/app/mis-articulos", label: "Mis publicaciones", icon: FileText },
-  { to: "/app/history", label: "Historial", icon: User },
+  { to: "/app/mis-articulos", label: "Mis publicaciones", icon: Inbox },
+  { to: "/app/history", label: "Historial", icon: FileText },
 ];
 
 export function ClientLayout({
