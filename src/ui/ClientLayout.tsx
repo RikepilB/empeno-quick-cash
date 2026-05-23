@@ -9,6 +9,7 @@ import {
   CreditCard,
   LogOut,
   User,
+  Plus,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/db/browser";
