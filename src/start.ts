@@ -2,7 +2,7 @@ import { createStart, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/errors";
 
-const errorMiddleware = createMiddleware().server(async ({ next }) => {
+const errorMiddleware = createMiddleware().server(async ({ next, request }) => {
   try {
     return await next();
   } catch (error) {
@@ -10,6 +10,14 @@ const errorMiddleware = createMiddleware().server(async ({ next }) => {
       throw error;
     }
     console.error(error);
+
+    const message = error instanceof Error ? error.message : "Error interno del servidor";
+    const isRpc = request?.headers.get("accept")?.includes("application/json");
+
+    if (isRpc) {
+      return Response.json({ error: message }, { status: 500 });
+    }
+
     return new Response(renderErrorPage(), {
       status: 500,
       headers: { "content-type": "text/html; charset=utf-8" },

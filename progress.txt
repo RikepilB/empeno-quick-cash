@@ -1,0 +1,75 @@
+======================================================================
+EMPEÑALO Session #2 — 2026-05-23
+Task: Fix client login failures + session optimization for Prototype 2
+Branch: develop (working copy, not yet committed)
+Environment: Netlify SSR + Supabase (raoprigiowskqnylapqs)
+======================================================================
+
+PHASE 1: DIAGNOSIS — Completed
+  [x] Identified app.tsx redirect bug (line 12) — clients sent to /negocio/dashboard
+  [x] Found error middleware returns HTML for RPC failures — masks errors as NetworkError
+  [x] Found getSupabaseBrowser() missing cookie handlers — stale sessions under concurrency
+  [x] Found login profile query fragile to trigger timing under db pressure
+  [x] Found React Query retry:1 amplifies server load on failure
+  [x] Found fn: → queryFn: bug in app.published.tsx (line 21)
+  [x] Found dead import of getClientContext from non-existent services/client.ts in ClientLayout
+  [x] Found class2 → className typo in app.mis-articulos.tsx (line 241)
+  [x] Found no client settings/account page exists
+
+PHASE 2: CRITICAL/HARDENING FIXES — Completed
+  [x] P1: Fixed app.tsx redirect bug — removed /negocio/dashboard redirect for public paths
+  [x] P2: Added cookie handlers to getSupabaseBrowser() with parseCookies + setAll
+  [x] P3: Made error middleware JSON-aware — checks Accept: application/json header
+  [x] P4: Changed React Query retry: 2 with exponential backoff: 1s * 2^attempt, max 10s
+  [x] P5: Fixed password reset auto-login — signOut after password update
+  [x] P6: Added 500ms retry for profile query in login flow
+
+PHASE 3: MISSING FEATURES — Completed
+  [x] Created client settings page /app/cuenta with profile edit + password change
+  [x] Added updateProfile and changePassword server functions to services/auth.ts
+  [x] Added "Cuenta" nav link to ClientLayout sidebar
+  [x] Fixed class2 → className typo in app.mis-articulos.tsx
+  [x] Fixed fn: → queryFn: bug in app.published.tsx
+  [x] Removed dead getClientContext import from ClientLayout
+  [x] Fixed same password reset bug in negocio.forgot-password.tsx
+
+FILES CHANGED
+  Modified:
+    src/routes/app.tsx                     — redirect bug fix
+    src/routes/app.login.tsx              — profile retry
+    src/routes/app.forgot-password.tsx    — signOut after reset
+    src/routes/negocio.forgot-password.tsx — signOut after reset
+    src/routes/app.mis-articulos.tsx      — class2 typo fix
+    src/routes/app.published.tsx          — fn: → queryFn: fix
+    src/lib/db/browser.ts                — cookie handlers
+    src/lib/db/server.ts                 — (unmodified)
+    src/start.ts                         — RPC JSON error response
+    src/router.tsx                        — retry config
+    src/services/auth.ts                  — updateProfile + changePassword
+    src/ui/ClientLayout.tsx              — Cuenta nav + dead import removed
+  Created:
+    src/routes/app.cuenta.tsx            — NEW client settings page
+
+TEST/BUILD STATUS
+  Build: PASS | Lint: PASS (0 errors, 13 pre-existing warnings)
+  Typecheck: PASS (implicit via build)
+
+REDIRECT FLOW (FIXED)
+  Before: client on /app/login → redirected to /negocio/dashboard (BUG)
+  After:  client on /app/login → stays on login (correct behavior)
+          client on /app/dashboard → stays on dashboard
+          client on /app/* → requires auth, redirects to /app/login if not authed
+          non-client on /app/* → redirected to /negocio/dashboard
+
+NEXT STEPS
+  1. Commit all changes to develop branch
+  2. Push to GitHub
+  3. Create PR develop → main
+  4. Deploy to Netlify
+  5. Smoke test all flows
+
+PENDING (future waves)
+  - Dark mode toggle (Tailwind variant ready, no toggle component)
+  - Real-time proposal updates (polling/websocket)
+  - Client payment plans page
+  - Phone number edit in cuenta page (currently just input, needs save button)

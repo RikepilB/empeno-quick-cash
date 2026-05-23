@@ -238,7 +238,7 @@ function MisArticulos() {
 
             {borrados.length > 0 && (
               <section>
-                <div class2="mb-3 flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
+                <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
                   <Trash2 className="h-3.5 w-3.5" /> Papelera ({borrados.length}) · Se elimina en
                   24h
                 </div>

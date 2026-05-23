@@ -37,6 +37,7 @@ import { Route as AppLoginRouteImport } from './routes/app.login'
 import { Route as AppHistoryRouteImport } from './routes/app.history'
 import { Route as AppForgotPasswordRouteImport } from './routes/app.forgot-password'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AppCuentaRouteImport } from './routes/app.cuenta'
 import { Route as AppCodeRouteImport } from './routes/app.code'
 import { Route as ApiCulqiWebhookRouteImport } from './routes/api.culqi-webhook'
 
@@ -180,6 +181,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCuentaRoute = AppCuentaRouteImport.update({
+  id: '/cuenta',
+  path: '/cuenta',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCodeRoute = AppCodeRouteImport.update({
   id: '/code',
   path: '/code',
@@ -197,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/negocio': typeof NegocioRouteWithChildren
   '/api/culqi-webhook': typeof ApiCulqiWebhookRoute
   '/app/code': typeof AppCodeRoute
+  '/app/cuenta': typeof AppCuentaRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
@@ -227,6 +234,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/culqi-webhook': typeof ApiCulqiWebhookRoute
   '/app/code': typeof AppCodeRoute
+  '/app/cuenta': typeof AppCuentaRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/negocio': typeof NegocioRouteWithChildren
   '/api/culqi-webhook': typeof ApiCulqiWebhookRoute
   '/app/code': typeof AppCodeRoute
+  '/app/cuenta': typeof AppCuentaRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/forgot-password': typeof AppForgotPasswordRoute
   '/app/history': typeof AppHistoryRoute
@@ -294,6 +303,7 @@ export interface FileRouteTypes {
     | '/negocio'
     | '/api/culqi-webhook'
     | '/app/code'
+    | '/app/cuenta'
     | '/app/dashboard'
     | '/app/forgot-password'
     | '/app/history'
@@ -324,6 +334,7 @@ export interface FileRouteTypes {
     | '/'
     | '/api/culqi-webhook'
     | '/app/code'
+    | '/app/cuenta'
     | '/app/dashboard'
     | '/app/forgot-password'
     | '/app/history'
@@ -356,6 +367,7 @@ export interface FileRouteTypes {
     | '/negocio'
     | '/api/culqi-webhook'
     | '/app/code'
+    | '/app/cuenta'
     | '/app/dashboard'
     | '/app/forgot-password'
     | '/app/history'
@@ -588,6 +600,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/cuenta': {
+      id: '/app/cuenta'
+      path: '/cuenta'
+      fullPath: '/app/cuenta'
+      preLoaderRoute: typeof AppCuentaRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/code': {
       id: '/app/code'
       path: '/code'
@@ -607,6 +626,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppCodeRoute: typeof AppCodeRoute
+  AppCuentaRoute: typeof AppCuentaRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppForgotPasswordRoute: typeof AppForgotPasswordRoute
   AppHistoryRoute: typeof AppHistoryRoute
@@ -623,6 +643,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppCodeRoute: AppCodeRoute,
+  AppCuentaRoute: AppCuentaRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppForgotPasswordRoute: AppForgotPasswordRoute,
   AppHistoryRoute: AppHistoryRoute,
