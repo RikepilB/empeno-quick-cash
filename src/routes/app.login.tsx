@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { z } from "zod";
-import { getSupabaseBrowser } from "@/lib/db/browser";
 import { safeRedirect } from "@/lib/safe-redirect";
+import { loginWithPassword, getCurrentUser, signOut } from "@/services/auth";
 import { Logo } from "@/ui/Logo";
+import { CookieBanner } from "@/ui/CookieBanner";
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
@@ -22,6 +24,12 @@ function Login() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const currentUser = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: () => getCurrentUser(),
+    staleTime: 30_000,
+  });
+
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -31,42 +39,24 @@ function Login() {
       const email = String(form.get("email") ?? "").trim();
       const password = String(form.get("password") ?? "");
 
-      const supabase = getSupabaseBrowser();
-      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInError) throw new Error("Correo o contraseña incorrectos.");
-      const userId = signInData.user?.id;
-      if (!userId) throw new Error("No pudimos iniciar tu sesión. Intenta de nuevo.");
+      await loginWithPassword({ data: { email, password } });
 
-      const { data, error: profileError } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", userId)
-        .maybeSingle();
-      let profile = data as { role: "client" | "business" } | null;
-
-      if (!profile && !profileError) {
-        await new Promise((r) => setTimeout(r, 500));
-        const { data: retryData, error: retryError } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", userId)
-          .maybeSingle();
-        if (!retryError) profile = retryData as { role: "client" | "business" } | null;
+      let profile = null;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        if (attempt > 0) await new Promise((r) => setTimeout(r, 500));
+        const user = await getCurrentUser();
+        if (user) {
+          profile = user.profile;
+          break;
+        }
       }
 
-      if (profileError) {
-        await supabase.auth.signOut();
-        throw new Error("No pudimos cargar tu perfil. Intenta de nuevo en unos segundos.");
-      }
       if (!profile) {
-        await supabase.auth.signOut();
+        await signOut();
         throw new Error("Tu cuenta aún se está creando. Espera unos segundos e intenta de nuevo.");
       }
       if (profile.role !== "client") {
-        await supabase.auth.signOut();
+        await signOut();
         throw new Error(
           "Esta cuenta no pertenece a este portal. Usa el portal de casas de empeño para iniciar sesión.",
         );
@@ -124,6 +114,17 @@ function Login() {
                 EMPEÑALO
               </h2>
             </div>
+
+            {currentUser.data?.profile && currentUser.data.profile.role === "business" && (
+              <div className="mb-4 rounded-lg border border-status-pending/30 bg-status-pending/10 px-4 py-3 text-sm">
+                <p className="font-semibold text-status-pending">
+                  Ya iniciaste sesión como casa de empeño.
+                </p>
+                <Link to="/negocio/dashboard" className="text-xs text-primary hover:underline">
+                  Ir a tu panel B2B →
+                </Link>
+              </div>
+            )}
 
             <div className="rounded-2xl border border-border bg-surface p-6 md:p-8">
               <h1 className="font-display text-2xl font-bold">Iniciar sesión</h1>
@@ -199,6 +200,7 @@ function Login() {
           </div>
         </div>
       </main>
+      <CookieBanner />
     </div>
   );
 }

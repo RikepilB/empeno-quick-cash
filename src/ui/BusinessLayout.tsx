@@ -84,28 +84,39 @@ export function BusinessLayout({
           </nav>
 
           <div className="m-3 rounded-xl border border-border bg-surface p-4">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <CreditCard className="h-3.5 w-3.5" /> Plan {planName}
-            </div>
-            <div className="mt-2 flex items-end justify-between">
-              <span className="font-display text-2xl font-bold">
-                {limit === null ? `${used}` : `${used}/${limit}`}
-              </span>
-              <span className="text-[10px] uppercase text-muted-foreground">
-                {limit === null ? "ofertas (ilimitadas)" : "propuestas"}
-              </span>
-            </div>
-            {limit !== null && (
-              <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
-                <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+            {context.data?.business?.verified_at ? (
+              <>
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <CreditCard className="h-3.5 w-3.5" /> Plan {planName}
+                </div>
+                <div className="mt-2 flex items-end justify-between">
+                  <span className="font-display text-2xl font-bold">
+                    {limit === null ? `${used}` : `${used}/${limit}`}
+                  </span>
+                  <span className="text-[10px] uppercase text-muted-foreground">
+                    {limit === null ? "ofertas (ilimitadas)" : "propuestas"}
+                  </span>
+                </div>
+                {limit !== null && (
+                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                  </div>
+                )}
+                <Link
+                  to="/negocio/perfil"
+                  className="mt-3 block text-center text-xs text-primary hover:underline"
+                >
+                  Ver cuenta
+                </Link>
+              </>
+            ) : (
+              <div className="text-center text-xs text-muted-foreground">
+                <p className="font-semibold">Pendiente de verificación</p>
+                <Link to="/negocio/perfil" className="mt-2 block text-primary hover:underline">
+                  Ver cuenta →
+                </Link>
               </div>
             )}
-            <Link
-              to="/negocio/perfil"
-              className="mt-3 block text-center text-xs text-primary hover:underline"
-            >
-              Ver cuenta
-            </Link>
           </div>
         </aside>
 
