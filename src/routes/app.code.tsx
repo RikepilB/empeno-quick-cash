@@ -23,7 +23,7 @@ function Code() {
 
   const op = useQuery({
     queryKey: ["operation-by-propuesta", propuesta_id],
-    fn: () =>
+    queryFn: () =>
       propuesta_id ? getOperationByPropuesta({ data: { propuesta_id } }) : Promise.resolve(null),
     enabled: !!propuesta_id,
   });
