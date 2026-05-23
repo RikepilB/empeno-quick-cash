@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, KeyRound, Loader2, Mail } from "lucide-react";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
+import { Logo } from "@/ui/Logo";
 
 export const Route = createFileRoute("/app/forgot-password")({ component: ForgotPassword });
 
@@ -119,9 +120,7 @@ function ForgotPassword() {
           <ArrowLeft className="h-4 w-4" />
         </Link>
         <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-display text-base font-bold text-primary-foreground">
-            E
-          </div>
+          <Logo size={32} className="rounded-lg" />
           <span className="font-display text-sm font-bold tracking-widest md:text-base">
             EMPEÑALO
           </span>

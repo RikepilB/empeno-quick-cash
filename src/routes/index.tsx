@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Smartphone, Building2, Sparkles, Shield, Zap } from "lucide-react";
+import { Logo, LogoText } from "@/ui/Logo";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -10,17 +11,12 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary font-display text-xl font-bold text-primary-foreground">
-            E
-          </div>
-          <span className="font-display text-xl font-bold tracking-widest">EMPEÑALO</span>
+          <Logo size={36} className="rounded-lg" />
+          <LogoText />
         </div>
         <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
           <a href="#como-funciona" className="hover:text-foreground">
             Cómo funciona
-          </a>
-          <a href="#planes" className="hover:text-foreground">
-            Planes negocio
           </a>
           <Link to="/app" className="btn-ghost py-2 text-sm">
             Iniciar sesión
@@ -137,49 +133,54 @@ function Landing() {
       </section>
 
       <section id="planes" className="mx-auto max-w-7xl px-6 py-16">
-        <div className="flex items-end justify-between">
-          <div>
-            <h2 className="font-display text-3xl font-bold uppercase md:text-4xl">
-              ¿Tienes una casa de empeño?
-            </h2>
-            <p className="mt-2 max-w-xl text-muted-foreground">
-              Recibe solicitudes calificadas y haz ofertas sin esperar a que el cliente venga al
-              local.
-            </p>
-          </div>
-          <Link to="/negocio" className="btn-primary hidden md:inline-flex">
-            Ver panel <ArrowRight className="h-4 w-4" />
-          </Link>
+        <div>
+          <h2 className="font-display text-3xl font-bold uppercase md:text-4xl">
+            ¿Tienes una casa de empeño?
+          </h2>
+          <p className="mt-2 max-w-xl text-muted-foreground">
+            Recibe solicitudes calificadas y haz ofertas sin esperar a que el cliente venga al
+            local.
+          </p>
         </div>
 
-        <div className="mt-8 grid gap-4 md:grid-cols-3">
-          <PlanCard
-            name="Básico"
-            price="10"
-            features={["Hasta 5 ofertas/mes", "Acceso al marketplace", "Soporte por correo"]}
-          />
-          <PlanCard
-            name="Intermedio"
-            price="20"
-            popular
-            features={[
-              "Hasta 30 ofertas/mes",
-              "Herramientas de gestión",
-              "Reportes mensuales",
-              "Soporte prioritario",
-            ]}
-          />
-          <PlanCard
-            name="Avanzado"
-            price="30"
-            features={[
-              "Ofertas ilimitadas",
-              "Prioridad en solicitudes",
-              "Alertas por categoría",
-              "Múltiples usuarios",
-            ]}
-          />
-        </div>
+        {process.env.NODE_ENV === "development" && (
+          <>
+            <div className="mt-8 flex gap-4 md:justify-end">
+              <Link to="/negocio" className="btn-primary">
+                Ver panel <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <div className="mt-8 grid gap-4 md:grid-cols-3">
+              <PlanCard
+                name="Básico"
+                price="10"
+                features={["Hasta 5 ofertas/mes", "Acceso al marketplace", "Soporte por correo"]}
+              />
+              <PlanCard
+                name="Intermedio"
+                price="20"
+                popular
+                features={[
+                  "Hasta 30 ofertas/mes",
+                  "Herramientas de gestión",
+                  "Reportes mensuales",
+                  "Soporte prioritario",
+                ]}
+              />
+              <PlanCard
+                name="Avanzado"
+                price="30"
+                features={[
+                  "Ofertas ilimitadas",
+                  "Prioridad en solicitudes",
+                  "Alertas por categoría",
+                  "Múltiples usuarios",
+                ]}
+              />
+            </div>
+          </>
+        )}
       </section>
 
       <section className="border-t border-border bg-surface">

@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Building2, CheckCircle, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
+import { Logo } from "@/ui/Logo";
 
 export const Route = createFileRoute("/negocio/register")({ component: BusinessRegister });
 
@@ -103,8 +104,8 @@ function BusinessRegister() {
     <div className="grid min-h-dvh grid-cols-1 lg:grid-cols-2">
       <aside className="hidden items-center justify-center border-r border-border bg-surface lg:flex">
         <div className="text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-primary font-display text-4xl font-bold text-primary-foreground shadow-glow">
-            E
+          <div className="mx-auto rounded-2xl shadow-glow">
+            <Logo size={80} className="rounded-2xl" />
           </div>
           <div className="mt-6 font-display text-3xl font-bold uppercase tracking-widest">
             EMPEÑALO
@@ -128,9 +129,7 @@ function BusinessRegister() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
           <div className="flex items-center gap-2 lg:hidden">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary font-display text-sm font-bold text-primary-foreground">
-              E
-            </div>
+            <Logo size={28} className="rounded-lg" />
             <span className="font-display text-sm font-bold tracking-widest">EMPEÑALO</span>
             <span className="ml-1 rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
               B2B

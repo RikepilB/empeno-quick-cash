@@ -1,6 +1,15 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { ClientLayout } from "@/ui/ClientLayout";
-import { Camera, Plus, Loader2, X, Sparkles } from "lucide-react";
+import {
+  Camera,
+  Loader2,
+  X,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  ImagePlus,
+  Info,
+} from "lucide-react";
 import { useMemo, useRef, useState, type FormEvent, useEffect } from "react";
 import { getSupabaseBrowser } from "@/lib/db/browser";
 import { createSolicitud, updateSolicitud, getSolicitud } from "@/services/solicitudes";
@@ -33,13 +42,10 @@ function Publish() {
   const [photos, setPhotos] = useState<LocalPhoto[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [brand, setBrand] = useState("");
-  const [model, setModel] = useState("");
-  const [year, setYear] = useState("");
-  const [storage, setStorage] = useState("");
   const [expectedAmount, setExpectedAmount] = useState("");
   const [district, setDistrict] = useState("");
   const [description, setDescription] = useState("");
+  const [conditionsOpen, setConditionsOpen] = useState(true);
 
   const search = useSearch({ from: "/app/publish" });
   const editId = search.edit;
@@ -52,10 +58,6 @@ function Publish() {
       .then((s) => {
         if (!s) return;
         setCategory(s.category as CategoryKey);
-        setBrand(s.brand ?? "");
-        setModel(s.model ?? "");
-        setYear(s.year ? String(s.year) : "");
-        setStorage(s.storage ?? "");
         setCondition((s.condition as (typeof CONDITIONS)[number]) ?? "Bueno");
         setDescription(s.description ?? "");
         setExpectedAmount(s.expected_amount_pen ? String(s.expected_amount_pen) : "");
@@ -179,12 +181,11 @@ function Publish() {
   }
 
   const summary = useMemo(() => {
-    const parts: string[] = [];
-    if (brand) parts.push(brand);
-    if (model) parts.push(model);
-    if (year) parts.push(year);
-    return parts.join(" · ");
-  }, [brand, model, year]);
+    const brandEl = document.getElementsByName("brand")[0] as HTMLInputElement | undefined;
+    const modelEl = document.getElementsByName("model")[0] as HTMLInputElement | undefined;
+    const parts = [brandEl?.value, modelEl?.value].filter(Boolean);
+    return parts.length > 0 ? parts.join(" · ") : "Sin datos aun";
+  }, [category]);
 
   const meta = categoryMeta(category);
   const amountNum = expectedAmount.replace(/[^\d]/g, "");

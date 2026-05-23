@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Building2, Upload, Clock, ArrowRight } from "lucide-react";
+import { Logo } from "@/ui/Logo";
 
 export const Route = createFileRoute("/negocio/")({ component: NegocioLanding });
 
@@ -8,9 +9,7 @@ function NegocioLanding() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-5">
         <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-display text-lg font-bold text-primary-foreground">
-            E
-          </div>
+          <Logo size={32} className="rounded-lg" />
           <span className="font-display text-lg font-bold tracking-widest">EMPEÑALO</span>
           <span className="ml-1 rounded-md border border-border bg-surface px-2 py-0.5 text-[10px] uppercase text-muted-foreground">
             B2B
