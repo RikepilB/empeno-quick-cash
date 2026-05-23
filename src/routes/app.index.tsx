@@ -2,6 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { PhoneFrame } from "@/ui/PhoneFrame";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 import { getCurrentUser } from "@/services/auth";
+import { Logo, LogoText } from "@/ui/Logo";
 
 export const Route = createFileRoute("/app/")({
   component: AppLanding,
@@ -17,10 +18,8 @@ async function AppLanding() {
     <PhoneFrame hideHeader>
       <div className="flex min-h-[680px] flex-col bg-gradient-to-b from-surface to-background p-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary font-display text-xl font-bold text-primary-foreground">
-            E
-          </div>
-          <span className="font-display text-lg font-bold tracking-widest">EMPEÑALO</span>
+          <Logo size={36} className="rounded-lg" />
+          <LogoText />
         </div>
 
         <div className="mt-12 flex-1">

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/db/browser";
 import { getBusinessContext } from "@/services/business";
 import { signOut } from "@/services/auth";
+import { Logo, LogoText } from "@/ui/Logo";
 
 const nav = [
   { to: "/negocio/dashboard", label: "Panel", icon: LayoutDashboard },
@@ -54,10 +55,8 @@ export function BusinessLayout({
             to="/negocio/dashboard"
             className="flex items-center gap-2 border-b border-sidebar-border px-6 py-5"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-display text-lg font-bold text-primary-foreground">
-              E
-            </div>
-            <span className="font-display text-lg font-bold tracking-wider">EMPEÑALO</span>
+            <Logo size={32} className="rounded-lg" />
+            <LogoText />
             <span className="ml-auto rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
               B2B
             </span>

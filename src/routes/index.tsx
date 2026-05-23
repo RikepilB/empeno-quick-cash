@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Smartphone, Building2, Sparkles, Shield, Zap } from "lucide-react";
+import { Logo, LogoText } from "@/ui/Logo";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -10,10 +11,8 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary font-display text-xl font-bold text-primary-foreground">
-            E
-          </div>
-          <span className="font-display text-xl font-bold tracking-widest">EMPEÑALO</span>
+          <Logo size={36} className="rounded-lg" />
+          <LogoText />
         </div>
         <div className="hidden items-center gap-6 text-sm text-muted-foreground md:flex">
           <a href="#como-funciona" className="hover:text-foreground">

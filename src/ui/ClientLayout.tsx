@@ -1,9 +1,11 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Plus, FileText, Bell, LogOut, User } from "lucide-react";
+import { LayoutDashboard, Inbox, Send, Bell, CreditCard, LogOut, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/db/browser";
+import { getClientContext } from "@/services/client";
 import { signOut } from "@/services/auth";
+import { Logo, LogoText } from "@/ui/Logo";
 import { getCurrentUser } from "@/services/auth";
 
 const nav = [
@@ -44,10 +46,8 @@ export function ClientLayout({
             to="/app/dashboard"
             className="flex items-center gap-2 border-b border-sidebar-border px-6 py-5"
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-display text-lg font-bold text-primary-foreground">
-              E
-            </div>
-            <span className="font-display text-lg font-bold tracking-wider">EMPEÑALO</span>
+            <Logo size={32} className="rounded-lg" />
+            <LogoText />
             <span className="ml-auto rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
               B2C
             </span>
