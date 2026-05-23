@@ -29,13 +29,13 @@ function Proposals() {
 
   const solicitud = useQuery({
     queryKey: ["solicitud", id],
-    fn: () => (id ? getSolicitud({ data: { id } }) : Promise.resolve(null)),
+    queryFn: () => (id ? getSolicitud({ data: { id } }) : Promise.resolve(null)),
     enabled: !!id,
   });
 
   const propuestas = useQuery({
     queryKey: ["propuestas", id],
-    fn: () =>
+    queryFn: () =>
       id
         ? listPropuestasForSolicitud({ data: { solicitud_id: id } })
         : Promise.resolve([] as PropuestaForClient[]),
