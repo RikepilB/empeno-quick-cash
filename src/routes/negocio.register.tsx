@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Building2, CheckCircle, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { registerBusiness } from "@/services/auth";
+import { registerBusiness, sendVerificationOtp } from "@/services/auth";
 import { Logo } from "@/ui/Logo";
 import { CookieBanner } from "@/ui/CookieBanner";
 
@@ -25,7 +25,6 @@ function BusinessRegister() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [emailVerified, setEmailVerified] = useState(false);
   const [rucVerified, setRucVerified] = useState(false);
   const [rucLoading, setRucLoading] = useState(false);
   const [horario, setHorario] = useState<
@@ -78,12 +77,16 @@ function BusinessRegister() {
           district: district || undefined,
           ruc: ruc || undefined,
           dni_rep_legal: dni_rep_legal || undefined,
-          email_verified: emailVerified,
           horario,
         },
       });
       if (sessionCreated) {
-        await navigate({ to: "/negocio/dashboard" });
+        try {
+          await sendVerificationOtp({ data: { email } });
+        } catch {
+          // OTP send may fail silently
+        }
+        await navigate({ to: "/negocio/verify" });
       } else {
         await navigate({ to: "/negocio/login" });
       }
@@ -241,19 +244,6 @@ function BusinessRegister() {
                       placeholder="contacto@tunegocio.pe"
                       autoComplete="email"
                     />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      name="email_verified"
-                      type="checkbox"
-                      id="email-verified-negocio"
-                      checked={emailVerified}
-                      onChange={(e) => setEmailVerified(e.target.checked)}
-                      className="h-4 w-4 rounded border-border accent-primary"
-                    />
-                    <label htmlFor="email-verified-negocio" className="text-sm">
-                      Ya verificaste tu correo
-                    </label>
                   </div>
                   <div>
                     <label className="mb-1.5 block text-sm font-medium">Contraseña</label>

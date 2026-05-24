@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ClientLayout } from "@/ui/ClientLayout";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   User,
   Mail,
@@ -10,9 +10,16 @@ import {
   Loader2,
   CheckCircle2,
   ChevronRight,
+  AlertTriangle,
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCurrentUser, updateProfile, changePassword } from "@/services/auth";
+import {
+  getCurrentUser,
+  updateProfile,
+  changePassword,
+  sendVerificationOtp,
+  verifyEmailOtp,
+} from "@/services/auth";
 
 export const Route = createFileRoute("/app/cuenta")({ component: Cuenta });
 
@@ -28,6 +35,10 @@ function Cuenta() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [passwordSuccess, setPasswordSuccess] = useState(false);
+
+  const [showVerifyForm, setShowVerifyForm] = useState(false);
+  const [verifyCode, setVerifyCode] = useState(["", "", "", "", "", ""]);
+  const [verifySent, setVerifySent] = useState(false);
 
   const profileMut = useMutation({
     mutationFn: updateProfile,
@@ -48,8 +59,28 @@ function Cuenta() {
     },
   });
 
+  const sendOtpMut = useMutation({
+    mutationFn: () => sendVerificationOtp({ data: { email } }),
+    onSuccess: () => setVerifySent(true),
+  });
+
+  const verifyOtpMut = useMutation({
+    mutationFn: (token: string) => verifyEmailOtp({ data: { email, token } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      setShowVerifyForm(false);
+      setVerifyCode(["", "", "", "", "", ""]);
+      setVerifySent(false);
+    },
+  });
+
   const profile = user.data?.profile;
   const email = user.data?.user.email ?? "";
+  const emailVerified = !!user.data?.user.email_confirmed_at;
+
+  useEffect(() => {
+    if (profile?.phone) setPhoneDraft(profile.phone);
+  }, [profile?.phone]);
 
   return (
     <ClientLayout title="Mi cuenta" subtitle="Gestiona tu perfil y seguridad">
@@ -120,12 +151,96 @@ function Cuenta() {
                   <label className="text-xs uppercase tracking-wide text-muted-foreground">
                     Correo electrónico
                   </label>
-                  <div className="mt-1 flex items-center gap-2 text-sm">
-                    <Mail className="h-3.5 w-3.5 text-muted-foreground" />
-                    {email}
-                    <span className="rounded-full bg-status-accepted/15 px-1.5 py-0.5 text-[10px] text-status-accepted">
-                      Verificado
-                    </span>
+                  <div className="mt-1 flex flex-col gap-2 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                      {email}
+                      {emailVerified ? (
+                        <span className="rounded-full bg-status-accepted/15 px-1.5 py-0.5 text-[10px] text-status-accepted">
+                          Verificado
+                        </span>
+                      ) : (
+                        <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] text-amber-400">
+                          Sin verificar
+                        </span>
+                      )}
+                    </div>
+
+                    {!emailVerified && !showVerifyForm && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowVerifyForm(true);
+                          sendOtpMut.mutate();
+                        }}
+                        disabled={sendOtpMut.isPending}
+                        className="flex items-center gap-1.5 text-xs text-primary hover:underline"
+                      >
+                        {sendOtpMut.isPending ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          <AlertTriangle className="h-3 w-3" />
+                        )}
+                        Verificar correo
+                      </button>
+                    )}
+
+                    {showVerifyForm && (
+                      <div className="mt-2 rounded-lg border border-border bg-surface-2 p-4">
+                        <p className="text-xs text-muted-foreground">
+                          {verifySent
+                            ? "Código enviado. Revisa tu bandeja de entrada."
+                            : "Enviamos un código de 6 dígitos a tu correo."}
+                        </p>
+                        <div className="mt-3 flex gap-1.5">
+                          {verifyCode.map((digit, i) => (
+                            <input
+                              key={i}
+                              type="text"
+                              inputMode="numeric"
+                              maxLength={1}
+                              value={digit}
+                              onChange={(e) => {
+                                if (!/^\d*$/.test(e.target.value)) return;
+                                const next = [...verifyCode];
+                                next[i] = e.target.value.slice(0, 1);
+                                setVerifyCode(next);
+                              }}
+                              className="h-10 w-10 rounded-lg border border-border bg-surface text-center font-display text-lg font-bold focus:border-primary focus:outline-none"
+                            />
+                          ))}
+                        </div>
+                        <div className="mt-3 flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => verifyOtpMut.mutate(verifyCode.join(""))}
+                            disabled={verifyOtpMut.isPending || verifyCode.join("").length !== 6}
+                            className="btn-primary px-3 py-1 text-xs"
+                          >
+                            {verifyOtpMut.isPending ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : null}
+                            Verificar
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowVerifyForm(false);
+                              setVerifyCode(["", "", "", "", "", ""]);
+                              setVerifySent(false);
+                            }}
+                            className="btn-ghost px-2 py-1 text-xs"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                        {verifyOtpMut.isError && (
+                          <div className="mt-2 rounded bg-red-500/10 px-3 py-1.5 text-[11px] text-red-400">
+                            {verifyOtpMut.error.message}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -139,7 +254,7 @@ function Cuenta() {
                       value={phoneDraft}
                       onChange={(e) => setPhoneDraft(e.target.value)}
                       className="input-field flex-1 text-sm"
-                      placeholder="+51 987 654 321"
+                      placeholder={profile?.phone ?? "+51 987 654 321"}
                       onBlur={() => {
                         if (phoneDraft) {
                           profileMut.mutate({
@@ -273,7 +388,11 @@ function Cuenta() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-muted-foreground">Miembro desde</span>
-                  <span>—</span>
+                  <span>
+                    {profile?.created_at
+                      ? new Date(profile.created_at).toLocaleDateString("es-PE")
+                      : "—"}
+                  </span>
                 </div>
               </div>
             </section>

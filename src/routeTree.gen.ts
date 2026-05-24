@@ -17,6 +17,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NegocioIndexRouteImport } from './routes/negocio.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as NegocioVerifyRouteImport } from './routes/negocio.verify'
 import { Route as NegocioSolicitudesRouteImport } from './routes/negocio.solicitudes'
 import { Route as NegocioSolicitudRouteImport } from './routes/negocio.solicitud'
 import { Route as NegocioRegisterRouteImport } from './routes/negocio.register'
@@ -29,6 +30,7 @@ import { Route as NegocioLoginRouteImport } from './routes/negocio.login'
 import { Route as NegocioHistorialRouteImport } from './routes/negocio.historial'
 import { Route as NegocioForgotPasswordRouteImport } from './routes/negocio.forgot-password'
 import { Route as NegocioDashboardRouteImport } from './routes/negocio.dashboard'
+import { Route as AppVerifyRouteImport } from './routes/app.verify'
 import { Route as AppRegisterRouteImport } from './routes/app.register'
 import { Route as AppPublishedRouteImport } from './routes/app.published'
 import { Route as AppPublishRouteImport } from './routes/app.publish'
@@ -83,6 +85,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const NegocioVerifyRoute = NegocioVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => NegocioRoute,
 } as any)
 const NegocioSolicitudesRoute = NegocioSolicitudesRouteImport.update({
   id: '/solicitudes',
@@ -143,6 +150,11 @@ const NegocioDashboardRoute = NegocioDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => NegocioRoute,
+} as any)
+const AppVerifyRoute = AppVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppRegisterRoute = AppRegisterRouteImport.update({
   id: '/register',
@@ -236,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/app/publish': typeof AppPublishRoute
   '/app/published': typeof AppPublishedRoute
   '/app/register': typeof AppRegisterRoute
+  '/app/verify': typeof AppVerifyRoute
   '/negocio/dashboard': typeof NegocioDashboardRoute
   '/negocio/forgot-password': typeof NegocioForgotPasswordRoute
   '/negocio/historial': typeof NegocioHistorialRoute
@@ -248,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/negocio/register': typeof NegocioRegisterRoute
   '/negocio/solicitud': typeof NegocioSolicitudRoute
   '/negocio/solicitudes': typeof NegocioSolicitudesRoute
+  '/negocio/verify': typeof NegocioVerifyRoute
   '/app/': typeof AppIndexRoute
   '/negocio/': typeof NegocioIndexRoute
 }
@@ -270,6 +284,7 @@ export interface FileRoutesByTo {
   '/app/publish': typeof AppPublishRoute
   '/app/published': typeof AppPublishedRoute
   '/app/register': typeof AppRegisterRoute
+  '/app/verify': typeof AppVerifyRoute
   '/negocio/dashboard': typeof NegocioDashboardRoute
   '/negocio/forgot-password': typeof NegocioForgotPasswordRoute
   '/negocio/historial': typeof NegocioHistorialRoute
@@ -282,6 +297,7 @@ export interface FileRoutesByTo {
   '/negocio/register': typeof NegocioRegisterRoute
   '/negocio/solicitud': typeof NegocioSolicitudRoute
   '/negocio/solicitudes': typeof NegocioSolicitudesRoute
+  '/negocio/verify': typeof NegocioVerifyRoute
   '/app': typeof AppIndexRoute
   '/negocio': typeof NegocioIndexRoute
 }
@@ -307,6 +323,7 @@ export interface FileRoutesById {
   '/app/publish': typeof AppPublishRoute
   '/app/published': typeof AppPublishedRoute
   '/app/register': typeof AppRegisterRoute
+  '/app/verify': typeof AppVerifyRoute
   '/negocio/dashboard': typeof NegocioDashboardRoute
   '/negocio/forgot-password': typeof NegocioForgotPasswordRoute
   '/negocio/historial': typeof NegocioHistorialRoute
@@ -319,6 +336,7 @@ export interface FileRoutesById {
   '/negocio/register': typeof NegocioRegisterRoute
   '/negocio/solicitud': typeof NegocioSolicitudRoute
   '/negocio/solicitudes': typeof NegocioSolicitudesRoute
+  '/negocio/verify': typeof NegocioVerifyRoute
   '/app/': typeof AppIndexRoute
   '/negocio/': typeof NegocioIndexRoute
 }
@@ -345,6 +363,7 @@ export interface FileRouteTypes {
     | '/app/publish'
     | '/app/published'
     | '/app/register'
+    | '/app/verify'
     | '/negocio/dashboard'
     | '/negocio/forgot-password'
     | '/negocio/historial'
@@ -357,6 +376,7 @@ export interface FileRouteTypes {
     | '/negocio/register'
     | '/negocio/solicitud'
     | '/negocio/solicitudes'
+    | '/negocio/verify'
     | '/app/'
     | '/negocio/'
   fileRoutesByTo: FileRoutesByTo
@@ -379,6 +399,7 @@ export interface FileRouteTypes {
     | '/app/publish'
     | '/app/published'
     | '/app/register'
+    | '/app/verify'
     | '/negocio/dashboard'
     | '/negocio/forgot-password'
     | '/negocio/historial'
@@ -391,6 +412,7 @@ export interface FileRouteTypes {
     | '/negocio/register'
     | '/negocio/solicitud'
     | '/negocio/solicitudes'
+    | '/negocio/verify'
     | '/app'
     | '/negocio'
   id:
@@ -415,6 +437,7 @@ export interface FileRouteTypes {
     | '/app/publish'
     | '/app/published'
     | '/app/register'
+    | '/app/verify'
     | '/negocio/dashboard'
     | '/negocio/forgot-password'
     | '/negocio/historial'
@@ -427,6 +450,7 @@ export interface FileRouteTypes {
     | '/negocio/register'
     | '/negocio/solicitud'
     | '/negocio/solicitudes'
+    | '/negocio/verify'
     | '/app/'
     | '/negocio/'
   fileRoutesById: FileRoutesById
@@ -498,6 +522,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/app/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/negocio/verify': {
+      id: '/negocio/verify'
+      path: '/verify'
+      fullPath: '/negocio/verify'
+      preLoaderRoute: typeof NegocioVerifyRouteImport
+      parentRoute: typeof NegocioRoute
     }
     '/negocio/solicitudes': {
       id: '/negocio/solicitudes'
@@ -582,6 +613,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/negocio/dashboard'
       preLoaderRoute: typeof NegocioDashboardRouteImport
       parentRoute: typeof NegocioRoute
+    }
+    '/app/verify': {
+      id: '/app/verify'
+      path: '/verify'
+      fullPath: '/app/verify'
+      preLoaderRoute: typeof AppVerifyRouteImport
+      parentRoute: typeof AppRoute
     }
     '/app/register': {
       id: '/app/register'
@@ -698,6 +736,7 @@ interface AppRouteChildren {
   AppPublishRoute: typeof AppPublishRoute
   AppPublishedRoute: typeof AppPublishedRoute
   AppRegisterRoute: typeof AppRegisterRoute
+  AppVerifyRoute: typeof AppVerifyRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -715,6 +754,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppPublishRoute: AppPublishRoute,
   AppPublishedRoute: AppPublishedRoute,
   AppRegisterRoute: AppRegisterRoute,
+  AppVerifyRoute: AppVerifyRoute,
   AppIndexRoute: AppIndexRoute,
 }
 
@@ -733,6 +773,7 @@ interface NegocioRouteChildren {
   NegocioRegisterRoute: typeof NegocioRegisterRoute
   NegocioSolicitudRoute: typeof NegocioSolicitudRoute
   NegocioSolicitudesRoute: typeof NegocioSolicitudesRoute
+  NegocioVerifyRoute: typeof NegocioVerifyRoute
   NegocioIndexRoute: typeof NegocioIndexRoute
 }
 
@@ -749,6 +790,7 @@ const NegocioRouteChildren: NegocioRouteChildren = {
   NegocioRegisterRoute: NegocioRegisterRoute,
   NegocioSolicitudRoute: NegocioSolicitudRoute,
   NegocioSolicitudesRoute: NegocioSolicitudesRoute,
+  NegocioVerifyRoute: NegocioVerifyRoute,
   NegocioIndexRoute: NegocioIndexRoute,
 }
 

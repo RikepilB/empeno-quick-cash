@@ -10,7 +10,6 @@ import { CookieBanner } from "@/ui/CookieBanner";
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
-  confirm: z.coerce.number().optional(),
 });
 
 export const Route = createFileRoute("/app/login")({
@@ -141,12 +140,6 @@ function Login() {
             <div className="rounded-2xl border border-border bg-surface p-6 md:p-8">
               <h1 className="font-display text-2xl font-bold">Iniciar sesión</h1>
               <p className="mt-1 text-sm text-muted-foreground">Accede a tu cuenta de cliente.</p>
-
-              {search.confirm && (
-                <div className="mt-4 rounded-lg bg-primary-dim px-3 py-2 text-xs text-primary">
-                  Revisa tu correo para confirmar la cuenta, luego inicia sesión.
-                </div>
-              )}
 
               <form onSubmit={onSubmit} className="mt-6 space-y-5">
                 <div>

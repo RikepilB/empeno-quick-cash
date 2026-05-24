@@ -6,8 +6,19 @@ import { sanitizeError, log } from "@/lib/logger";
 export type AuthRole = "client" | "business";
 
 export type CurrentUser = {
-  user: { id: string; email: string | null };
-  profile: { id: string; role: AuthRole; full_name: string | null };
+  user: {
+    id: string;
+    email: string | null;
+    email_confirmed_at: string | null;
+  };
+  profile: {
+    id: string;
+    role: AuthRole;
+    full_name: string | null;
+    phone: string | null;
+    document_number: string | null;
+    created_at: string;
+  };
 };
 
 // Returns the logged-in user + their profile, or null. Called from route beforeLoad guards.
@@ -21,14 +32,25 @@ export const getCurrentUser = createServerFn({ method: "GET" }).handler(
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("id, role, full_name")
+      .select("id, role, full_name, phone, document_number, created_at")
       .eq("id", user.id)
-      .single<{ id: string; role: AuthRole; full_name: string | null }>();
+      .single<{
+        id: string;
+        role: AuthRole;
+        full_name: string | null;
+        phone: string | null;
+        document_number: string | null;
+        created_at: string;
+      }>();
 
     if (!profile) return null;
 
     return {
-      user: { id: user.id, email: user.email ?? null },
+      user: {
+        id: user.id,
+        email: user.email ?? null,
+        email_confirmed_at: user.email_confirmed_at ?? null,
+      },
       profile,
     };
   },
@@ -221,6 +243,39 @@ export const updatePasswordServer = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<{ ok: true }> => {
     const supabase = getSupabaseServer();
     const { error } = await supabase.auth.updateUser({ password: data.password });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+// ============================================================================
+// Email OTP verification — sends a 6-digit code to the user's email
+// ============================================================================
+
+const sendOtpSchema = z.object({ email: z.string().email() });
+
+export const sendVerificationOtp = createServerFn({ method: "POST" })
+  .inputValidator(sendOtpSchema)
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    const supabase = getSupabaseServer();
+    const { error } = await supabase.auth.signInWithOtp({
+      email: data.email,
+      options: { shouldCreateUser: false },
+    });
+    if (error) throw error;
+    return { ok: true };
+  });
+
+const verifyOtpSchema = z.object({ email: z.string().email(), token: z.string().min(6) });
+
+export const verifyEmailOtp = createServerFn({ method: "POST" })
+  .inputValidator(verifyOtpSchema)
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    const supabase = getSupabaseServer();
+    const { error } = await supabase.auth.verifyOtp({
+      email: data.email,
+      token: data.token,
+      type: "email",
+    });
     if (error) throw error;
     return { ok: true };
   });
