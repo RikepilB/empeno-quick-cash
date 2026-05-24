@@ -57,6 +57,19 @@ docs/*
 !docs/REDESIGN-ROADMAP.md
 !docs/CLERK-MIGRATION.md
 
+# Build artifacts
+.next
+
+# Screenshots and temp images
+*.png
+*.jpg
+*.jpeg
+*.webp
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.jpeg
+!public/**/*.webp
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

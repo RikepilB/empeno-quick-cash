@@ -9,8 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as NegocioRouteImport } from './routes/negocio'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as AppRouteImport } from './routes/app'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as NegocioIndexRouteImport } from './routes/negocio.index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
@@ -41,14 +44,29 @@ import { Route as AppCuentaRouteImport } from './routes/app.cuenta'
 import { Route as AppCodeRouteImport } from './routes/app.code'
 import { Route as ApiCulqiWebhookRouteImport } from './routes/api.culqi-webhook'
 
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const NegocioRoute = NegocioRouteImport.update({
   id: '/negocio',
   path: '/negocio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/app',
   path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -199,8 +217,11 @@ const ApiCulqiWebhookRoute = ApiCulqiWebhookRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/app': typeof AppRouteWithChildren
+  '/faq': typeof FaqRoute
   '/negocio': typeof NegocioRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/api/culqi-webhook': typeof ApiCulqiWebhookRoute
   '/app/code': typeof AppCodeRoute
   '/app/cuenta': typeof AppCuentaRoute
@@ -232,6 +253,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/faq': typeof FaqRoute
+  '/privacy': typeof PrivacyRoute
   '/api/culqi-webhook': typeof ApiCulqiWebhookRoute
   '/app/code': typeof AppCodeRoute
   '/app/cuenta': typeof AppCuentaRoute
@@ -264,8 +288,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/app': typeof AppRouteWithChildren
+  '/faq': typeof FaqRoute
   '/negocio': typeof NegocioRouteWithChildren
+  '/privacy': typeof PrivacyRoute
   '/api/culqi-webhook': typeof ApiCulqiWebhookRoute
   '/app/code': typeof AppCodeRoute
   '/app/cuenta': typeof AppCuentaRoute
@@ -299,8 +326,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/app'
+    | '/faq'
     | '/negocio'
+    | '/privacy'
     | '/api/culqi-webhook'
     | '/app/code'
     | '/app/cuenta'
@@ -332,6 +362,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
+    | '/faq'
+    | '/privacy'
     | '/api/culqi-webhook'
     | '/app/code'
     | '/app/cuenta'
@@ -363,8 +396,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/app'
+    | '/faq'
     | '/negocio'
+    | '/privacy'
     | '/api/culqi-webhook'
     | '/app/code'
     | '/app/cuenta'
@@ -397,13 +433,23 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AppRoute: typeof AppRouteWithChildren
+  FaqRoute: typeof FaqRoute
   NegocioRoute: typeof NegocioRouteWithChildren
+  PrivacyRoute: typeof PrivacyRoute
   ApiCulqiWebhookRoute: typeof ApiCulqiWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/negocio': {
       id: '/negocio'
       path: '/negocio'
@@ -411,11 +457,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NegocioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app': {
       id: '/app'
       path: '/app'
       fullPath: '/app'
       preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -697,8 +757,11 @@ const NegocioRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AppRoute: AppRouteWithChildren,
+  FaqRoute: FaqRoute,
   NegocioRoute: NegocioRouteWithChildren,
+  PrivacyRoute: PrivacyRoute,
   ApiCulqiWebhookRoute: ApiCulqiWebhookRoute,
 }
 export const routeTree = rootRouteImport

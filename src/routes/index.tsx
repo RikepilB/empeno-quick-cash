@@ -28,17 +28,34 @@ function Landing() {
           <a href="#como-funciona" className="hover:text-foreground">
             Cómo funciona
           </a>
+          <Link to="/about" className="hover:text-foreground">
+            About
+          </Link>
+          <Link to="/privacy" className="hover:text-foreground">
+            Privacidad
+          </Link>
+          <Link to="/faq" className="hover:text-foreground">
+            Ayuda
+          </Link>
           {role ? (
-            <button
-              type="button"
-              onClick={async () => {
-                await signOut();
-                session.refetch();
-              }}
-              className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Cerrar sesión
-            </button>
+            <>
+              <Link
+                to={role === "business" ? "/negocio/dashboard" : "/app/dashboard"}
+                className="btn-primary rounded-lg px-3 py-1.5 text-xs"
+              >
+                Ir al panel
+              </Link>
+              <button
+                type="button"
+                onClick={async () => {
+                  await signOut();
+                  session.refetch();
+                }}
+                className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="h-3.5 w-3.5" /> Cerrar sesión
+              </button>
+            </>
           ) : (
             <Link to="/app" className="btn-ghost py-2 text-sm">
               Iniciar sesión
