@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Smartphone, Building2, Sparkles, Shield, Zap } from "lucide-react";
+import { ArrowRight, Smartphone, Building2, Sparkles, Shield, Zap, LogOut } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { getCurrentUser } from "@/services/auth";
+import { getCurrentUser, signOut } from "@/services/auth";
 import { Logo, LogoText } from "@/ui/Logo";
 
 export const Route = createFileRoute("/")({
@@ -28,9 +28,39 @@ function Landing() {
           <a href="#como-funciona" className="hover:text-foreground">
             Cómo funciona
           </a>
-          <Link to="/app" className="btn-ghost py-2 text-sm">
-            Iniciar sesión
+          <Link to="/about" className="hover:text-foreground">
+            About
           </Link>
+          <Link to="/privacy" className="hover:text-foreground">
+            Privacidad
+          </Link>
+          <Link to="/faq" className="hover:text-foreground">
+            Ayuda
+          </Link>
+          {role ? (
+            <>
+              <Link
+                to={role === "business" ? "/negocio/dashboard" : "/app/dashboard"}
+                className="btn-primary rounded-lg px-3 py-1.5 text-xs"
+              >
+                Ir al panel
+              </Link>
+              <button
+                type="button"
+                onClick={async () => {
+                  await signOut();
+                  session.refetch();
+                }}
+                className="flex items-center gap-1 text-muted-foreground hover:text-foreground"
+              >
+                <LogOut className="h-3.5 w-3.5" /> Cerrar sesión
+              </button>
+            </>
+          ) : (
+            <Link to="/app" className="btn-ghost py-2 text-sm">
+              Iniciar sesión
+            </Link>
+          )}
         </div>
       </header>
 
@@ -50,13 +80,37 @@ function Landing() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               {role === "client" ? (
-                <Link to="/app/dashboard" className="btn-primary text-base">
-                  <Smartphone className="h-4 w-4" /> Ir a mi panel
-                </Link>
+                <>
+                  <Link to="/app/dashboard" className="btn-primary text-base">
+                    <Smartphone className="h-4 w-4" /> Ir a mi panel
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await signOut();
+                      session.refetch();
+                    }}
+                    className="btn-ghost text-base"
+                  >
+                    <LogOut className="h-4 w-4" /> Cerrar sesión
+                  </button>
+                </>
               ) : role === "business" ? (
-                <Link to="/negocio/dashboard" className="btn-primary text-base">
-                  <Building2 className="h-4 w-4" /> Ir a mi panel B2B
-                </Link>
+                <>
+                  <Link to="/negocio/dashboard" className="btn-primary text-base">
+                    <Building2 className="h-4 w-4" /> Ir a mi panel B2B
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await signOut();
+                      session.refetch();
+                    }}
+                    className="btn-ghost text-base"
+                  >
+                    <LogOut className="h-4 w-4" /> Cerrar sesión
+                  </button>
+                </>
               ) : (
                 <>
                   <Link to="/app" className="btn-primary text-base">
