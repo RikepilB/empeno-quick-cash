@@ -55,6 +55,7 @@ docs/*
 !docs/TESTING.md
 !docs/SEEDER.md
 !docs/REDESIGN-ROADMAP.md
+!docs/CLERK-MIGRATION.md
 
 # Editor directories and files
 .vscode/*

@@ -98,7 +98,8 @@ function BizDashboard() {
         limit !== undefined &&
         remaining !== null &&
         remaining !== undefined &&
-        remaining <= 5 && (
+        remaining <= 5 &&
+        business?.verified_at && (
           <div className="mt-4 flex items-start gap-3 rounded-xl border border-status-pending/30 bg-status-pending/10 p-4 text-sm">
             <AlertTriangle className="h-4 w-4 shrink-0 text-status-pending" />
             <div>

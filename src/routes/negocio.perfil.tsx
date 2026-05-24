@@ -43,26 +43,9 @@ function Perfil() {
 
   if (context.isLoading) {
     return (
-      <BusinessLayout title="Negocio" subtitle="Datos del negocio, plan y facturación">
+      <BusinessLayout title="Cuenta" subtitle="Configuración, planes y facturación">
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-        </div>
-      </BusinessLayout>
-    );
-  }
-
-  if (!business?.verified_at) {
-    return (
-      <BusinessLayout title="Negocio" subtitle="Datos del negocio, plan y facturación">
-        <div className="flex items-center justify-center px-4 py-16">
-          <div className="max-w-md space-y-4 rounded-2xl border border-status-pending/30 bg-status-pending/10 p-8 text-center">
-            <AlertTriangle className="mx-auto h-10 w-10 text-status-pending" />
-            <h2 className="font-display text-2xl font-bold uppercase">Negocio no verificado</h2>
-            <p className="text-sm text-muted-foreground">
-              Tu negocio aún no ha sido aprobado. Completa el proceso de verificación para acceder a
-              los datos de tu cuenta y cambiar de plan.
-            </p>
-          </div>
         </div>
       </BusinessLayout>
     );
@@ -96,7 +79,22 @@ function Perfil() {
   }
 
   return (
-    <BusinessLayout title="Negocio" subtitle="Datos del negocio, plan y facturación">
+    <BusinessLayout title="Cuenta" subtitle="Configuración, planes y facturación">
+      {!business?.verified_at && (
+        <div className="mb-4 flex items-start gap-3 rounded-xl border border-status-pending/30 bg-status-pending/10 p-4 text-sm">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-status-pending" />
+          <div>
+            <span className="font-semibold text-status-pending">
+              Negocio pendiente de verificación.
+            </span>
+            <span className="text-muted-foreground">
+              {" "}
+              Completa el proceso para acceder a planes y facturación.
+            </span>
+          </div>
+        </div>
+      )}
+
       {msg && (
         <div className="mb-4 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4 text-sm">
           <Sparkles className="h-4 w-4 shrink-0 text-primary" />
@@ -138,220 +136,243 @@ function Perfil() {
       )}
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Current plan */}
-        <div className="rounded-2xl border border-primary/40 bg-primary/5 p-6 lg:col-span-1">
-          <div className="text-xs uppercase text-muted-foreground">Plan activo</div>
-          {context.isLoading ? (
-            <div className="mt-2 flex items-center text-sm text-muted-foreground">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
-            </div>
-          ) : !sub ? (
-            <div className="mt-2 text-sm text-muted-foreground">Sin suscripción activa.</div>
-          ) : (
-            <>
-              <div className="mt-1 flex items-center gap-2">
-                <span className="font-display text-3xl font-extrabold">{sub.plan.name}</span>
-                <span className="badge-dot badge-accepted">{sub.status}</span>
-              </div>
-              <div className="mt-4 flex items-end justify-between">
-                <span className="font-display text-2xl font-bold">
-                  {sub.plan.monthly_propuestas === null
-                    ? `${sub.propuestas_used_this_period}`
-                    : `${sub.propuestas_used_this_period}/${sub.plan.monthly_propuestas}`}
-                </span>
-                <span className="text-[11px] text-muted-foreground">
-                  {sub.plan.monthly_propuestas === null ? "ilimitadas" : "propuestas usadas"}
-                </span>
-              </div>
-              {sub.plan.monthly_propuestas !== null && (
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
-                  <div
-                    className="h-full rounded-full bg-primary"
-                    style={{
-                      width: `${Math.min(
-                        100,
-                        (sub.propuestas_used_this_period /
-                          Math.max(1, sub.plan.monthly_propuestas)) *
-                          100,
-                      )}%`,
-                    }}
-                  />
-                </div>
-              )}
-              {sub.current_period_end && (
-                <div className="mt-4 text-xs text-muted-foreground">
-                  Próxima renovación:{" "}
-                  <span className="font-semibold text-foreground">
-                    {new Date(sub.current_period_end).toLocaleDateString("es-PE", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {/* Plan picker */}
-        <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
-          <div className="flex items-center justify-between">
-            <h3 className="font-display text-xl font-bold uppercase">Cambiar plan</h3>
-            <Link
-              to="/negocio/plan"
-              className="text-xs text-muted-foreground hover:text-foreground"
-            >
-              Ver comparativa →
-            </Link>
-          </div>
-
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            {plans.isLoading ? (
-              <div className="col-span-3 flex items-center justify-center py-10 text-sm text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando planes...
-              </div>
-            ) : (
-              (plans.data ?? []).map((p) => {
-                const isCurrent = currentPlanId === p.id;
-                const submitting = pendingPlan === p.id && checkout.isPending;
-                return (
-                  <div
-                    key={p.id}
-                    className={`relative flex flex-col rounded-xl border p-5 ${
-                      isCurrent ? "border-primary bg-primary/5" : "border-border bg-background"
-                    }`}
-                  >
-                    {isCurrent && (
-                      <span className="absolute -top-2 left-4 rounded-full bg-primary px-2 py-0.5 text-[10px] uppercase text-primary-foreground">
-                        Tu plan
-                      </span>
-                    )}
-                    <div className="font-display text-lg font-bold uppercase">{p.name}</div>
-                    <div className="mt-2 flex items-end gap-1">
-                      <span className="font-display text-3xl font-extrabold">
-                        {formatPEN(p.price_pen)}
-                      </span>
-                      <span className="pb-1 text-xs text-muted-foreground">/mes</span>
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {p.monthly_propuestas === null
-                        ? "Propuestas ilimitadas"
-                        : `${p.monthly_propuestas} propuestas/mes`}
-                    </div>
-                    <ul className="mt-4 flex-1 space-y-1.5 text-xs">
-                      {p.features.map((f) => (
-                        <li key={f} className="flex items-start gap-1.5">
-                          <Check className="mt-0.5 h-3 w-3 text-primary" />
-                          <span>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <button
-                      disabled={isCurrent || submitting || missingPublicKey}
-                      onClick={() => {
-                        handlePlanClick({ id: p.id, price_pen: p.price_pen });
-                      }}
-                      className={`mt-5 rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-60 ${
-                        isCurrent
-                          ? "border border-border bg-surface text-muted-foreground"
-                          : "bg-primary text-primary-foreground hover:bg-primary/90"
-                      }`}
-                    >
-                      {submitting ? (
-                        <span className="inline-flex items-center gap-1">
-                          <Loader2 className="h-3 w-3 animate-spin" /> Procesando...
-                        </span>
-                      ) : isCurrent ? (
-                        "Plan actual"
-                      ) : isDemo ? (
-                        "Cambiar (demo)"
-                      ) : (
-                        "Pagar y cambiar"
-                      )}
-                    </button>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-
-        {/* Invoices */}
-        <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-display text-xl font-bold uppercase">Historial de facturas</h3>
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <ReceiptText className="h-3.5 w-3.5" />
-              {(invoices.data ?? []).length} facturas
-            </span>
-          </div>
-          <div className="mt-4 overflow-hidden rounded-xl border border-border">
-            {invoices.isLoading ? (
-              <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
-              </div>
-            ) : (invoices.data ?? []).length === 0 ? (
-              <div className="py-10 text-center text-sm text-muted-foreground">
-                Aún no tienes facturas. Cambia de plan para generar la primera.
-              </div>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-background text-left text-[11px] uppercase text-muted-foreground">
-                    <th className="px-4 py-3">Fecha</th>
-                    <th className="px-4 py-3">Plan</th>
-                    <th className="px-4 py-3">Monto</th>
-                    <th className="px-4 py-3">Estado</th>
-                    <th className="px-4 py-3">Periodo</th>
-                    <th className="px-4 py-3">Charge</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(invoices.data ?? []).map((inv) => (
-                    <tr key={inv.id} className="border-b border-border last:border-0">
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {new Date(inv.created_at).toLocaleDateString("es-PE", {
-                          day: "numeric",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </td>
-                      <td className="px-4 py-3 font-semibold uppercase">{inv.plan_id ?? "—"}</td>
-                      <td className="px-4 py-3 font-display font-bold">
-                        {formatPEN(inv.amount_pen)}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className={`badge-dot ${invStatusBadge(inv.status)}`}>
-                          {invStatusLabel(inv.status)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {inv.period_start && inv.period_end
-                          ? `${new Date(inv.period_start).toLocaleDateString("es-PE", { day: "numeric", month: "short" })} – ${new Date(inv.period_end).toLocaleDateString("es-PE", { day: "numeric", month: "short" })}`
-                          : "—"}
-                      </td>
-                      <td className="px-4 py-3 text-[11px] font-mono text-muted-foreground">
-                        {inv.culqi_charge_id ?? "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        </div>
-
-        {/* Business identity (kept as static for now — out of Phase 4 scope) */}
+        {/* Business identity */}
         <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-3">
           <h3 className="font-display text-xl font-bold uppercase">Datos del negocio</h3>
-          <div className="mt-3 text-sm text-muted-foreground">
+          <div className="mt-3 text-sm">
             {business?.name ?? "—"} · {business?.district ?? "Sin distrito"}
           </div>
-          <div className="mt-2 text-xs text-muted-foreground">
-            Próximamente: edición de datos comerciales y equipo.
+          <div className="mt-1 text-xs text-muted-foreground">
+            {business?.verified_at ? (
+              <span className="text-status-accepted">Verificado</span>
+            ) : (
+              <span className="text-status-pending">Pendiente de verificación</span>
+            )}
           </div>
         </div>
+
+        {business?.verified_at ? (
+          <>
+            {/* Current plan */}
+            <div className="rounded-2xl border border-primary/40 bg-primary/5 p-6 lg:col-span-1">
+              <div className="text-xs uppercase text-muted-foreground">Plan activo</div>
+              {context.isLoading ? (
+                <div className="mt-2 flex items-center text-sm text-muted-foreground">
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
+                </div>
+              ) : !sub ? (
+                <div className="mt-2 text-sm text-muted-foreground">Sin suscripción activa.</div>
+              ) : (
+                <>
+                  <div className="mt-1 flex items-center gap-2">
+                    <span className="font-display text-3xl font-extrabold">{sub.plan.name}</span>
+                    <span className="badge-dot badge-accepted">{sub.status}</span>
+                  </div>
+                  <div className="mt-4 flex items-end justify-between">
+                    <span className="font-display text-2xl font-bold">
+                      {sub.plan.monthly_propuestas === null
+                        ? `${sub.propuestas_used_this_period}`
+                        : `${sub.propuestas_used_this_period}/${sub.plan.monthly_propuestas}`}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">
+                      {sub.plan.monthly_propuestas === null ? "ilimitadas" : "propuestas usadas"}
+                    </span>
+                  </div>
+                  {sub.plan.monthly_propuestas !== null && (
+                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{
+                          width: `${Math.min(
+                            100,
+                            (sub.propuestas_used_this_period /
+                              Math.max(1, sub.plan.monthly_propuestas)) *
+                              100,
+                          )}%`,
+                        }}
+                      />
+                    </div>
+                  )}
+                  {sub.current_period_end && (
+                    <div className="mt-4 text-xs text-muted-foreground">
+                      Próxima renovación:{" "}
+                      <span className="font-semibold text-foreground">
+                        {new Date(sub.current_period_end).toLocaleDateString("es-PE", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Plan picker */}
+            <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-xl font-bold uppercase">Cambiar plan</h3>
+                <Link
+                  to="/negocio/plan"
+                  className="text-xs text-muted-foreground hover:text-foreground"
+                >
+                  Ver comparativa →
+                </Link>
+              </div>
+
+              <div className="mt-5 grid gap-4 md:grid-cols-3">
+                {plans.isLoading ? (
+                  <div className="col-span-3 flex items-center justify-center py-10 text-sm text-muted-foreground">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando planes...
+                  </div>
+                ) : (
+                  (plans.data ?? []).map((p) => {
+                    const isCurrent = currentPlanId === p.id;
+                    const submitting = pendingPlan === p.id && checkout.isPending;
+                    return (
+                      <div
+                        key={p.id}
+                        className={`relative flex flex-col rounded-xl border p-5 ${
+                          isCurrent ? "border-primary bg-primary/5" : "border-border bg-background"
+                        }`}
+                      >
+                        {isCurrent && (
+                          <span className="absolute -top-2 left-4 rounded-full bg-primary px-2 py-0.5 text-[10px] uppercase text-primary-foreground">
+                            Tu plan
+                          </span>
+                        )}
+                        <div className="font-display text-lg font-bold uppercase">{p.name}</div>
+                        <div className="mt-2 flex items-end gap-1">
+                          <span className="font-display text-3xl font-extrabold">
+                            {formatPEN(p.price_pen)}
+                          </span>
+                          <span className="pb-1 text-xs text-muted-foreground">/mes</span>
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground">
+                          {p.monthly_propuestas === null
+                            ? "Propuestas ilimitadas"
+                            : `${p.monthly_propuestas} propuestas/mes`}
+                        </div>
+                        <ul className="mt-4 flex-1 space-y-1.5 text-xs">
+                          {p.features.map((f) => (
+                            <li key={f} className="flex items-start gap-1.5">
+                              <Check className="mt-0.5 h-3 w-3 text-primary" />
+                              <span>{f}</span>
+                            </li>
+                          ))}
+                        </ul>
+                        <button
+                          disabled={isCurrent || submitting || missingPublicKey}
+                          onClick={() => {
+                            handlePlanClick({ id: p.id, price_pen: p.price_pen });
+                          }}
+                          className={`mt-5 rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-60 ${
+                            isCurrent
+                              ? "border border-border bg-surface text-muted-foreground"
+                              : "bg-primary text-primary-foreground hover:bg-primary/90"
+                          }`}
+                        >
+                          {submitting ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Loader2 className="h-3 w-3 animate-spin" /> Procesando...
+                            </span>
+                          ) : isCurrent ? (
+                            "Plan actual"
+                          ) : isDemo ? (
+                            "Cambiar (demo)"
+                          ) : (
+                            "Pagar y cambiar"
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Invoices */}
+            <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-xl font-bold uppercase">Historial de facturas</h3>
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <ReceiptText className="h-3.5 w-3.5" />
+                  {(invoices.data ?? []).length} facturas
+                </span>
+              </div>
+              <div className="mt-4 overflow-hidden rounded-xl border border-border">
+                {invoices.isLoading ? (
+                  <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
+                  </div>
+                ) : (invoices.data ?? []).length === 0 ? (
+                  <div className="py-10 text-center text-sm text-muted-foreground">
+                    Aún no tienes facturas. Cambia de plan para generar la primera.
+                  </div>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-background text-left text-[11px] uppercase text-muted-foreground">
+                        <th className="px-4 py-3">Fecha</th>
+                        <th className="px-4 py-3">Plan</th>
+                        <th className="px-4 py-3">Monto</th>
+                        <th className="px-4 py-3">Estado</th>
+                        <th className="px-4 py-3">Periodo</th>
+                        <th className="px-4 py-3">Charge</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(invoices.data ?? []).map((inv) => (
+                        <tr key={inv.id} className="border-b border-border last:border-0">
+                          <td className="px-4 py-3 text-muted-foreground">
+                            {new Date(inv.created_at).toLocaleDateString("es-PE", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </td>
+                          <td className="px-4 py-3 font-semibold uppercase">
+                            {inv.plan_id ?? "—"}
+                          </td>
+                          <td className="px-4 py-3 font-display font-bold">
+                            {formatPEN(inv.amount_pen)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`badge-dot ${invStatusBadge(inv.status)}`}>
+                              {invStatusLabel(inv.status)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-xs text-muted-foreground">
+                            {inv.period_start && inv.period_end
+                              ? `${new Date(inv.period_start).toLocaleDateString("es-PE", { day: "numeric", month: "short" })} – ${new Date(inv.period_end).toLocaleDateString("es-PE", { day: "numeric", month: "short" })}`
+                              : "—"}
+                          </td>
+                          <td className="px-4 py-3 text-[11px] font-mono text-muted-foreground">
+                            {inv.culqi_charge_id ?? "—"}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
+            <div className="text-center text-sm text-muted-foreground py-8">
+              <p className="font-semibold">Planes y facturación no disponibles</p>
+              <p className="mt-1">Completa la verificación de tu negocio para acceder.</p>
+              <Link
+                to="/negocio/plan"
+                className="mt-3 inline-block text-xs text-primary hover:underline"
+              >
+                Ver planes disponibles →
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </BusinessLayout>
   );

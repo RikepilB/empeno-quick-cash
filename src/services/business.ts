@@ -7,6 +7,7 @@ export type BusinessContext = {
     id: string;
     name: string;
     district: string | null;
+    verified_at: string | null;
   };
   subscription: {
     id: string;
@@ -35,7 +36,7 @@ export const getBusinessContext = createServerFn({ method: "GET" }).handler(
 
     const { data: business } = await supabase
       .from("businesses")
-      .select("id, name, district")
+      .select("id, name, district, verified_at")
       .eq("owner_id", user.id)
       .maybeSingle<{ id: string; name: string; district: string | null }>();
 

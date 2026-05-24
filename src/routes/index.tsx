@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Smartphone, Building2, Sparkles, Shield, Zap } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { getCurrentUser } from "@/services/auth";
 import { Logo, LogoText } from "@/ui/Logo";
 
 export const Route = createFileRoute("/")({
@@ -7,6 +9,14 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const session = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: () => getCurrentUser(),
+    staleTime: 30_000,
+  });
+
+  const role = session.data?.profile.role;
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
@@ -39,12 +49,24 @@ function Landing() {
               mejor y obtienes un código único para concretar el trato presencialmente.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/app" className="btn-primary text-base">
-                <Smartphone className="h-4 w-4" /> Soy cliente
-              </Link>
-              <Link to="/negocio" className="btn-ghost text-base">
-                <Building2 className="h-4 w-4" /> Soy casa de empeño
-              </Link>
+              {role === "client" ? (
+                <Link to="/app/dashboard" className="btn-primary text-base">
+                  <Smartphone className="h-4 w-4" /> Ir a mi panel
+                </Link>
+              ) : role === "business" ? (
+                <Link to="/negocio/dashboard" className="btn-primary text-base">
+                  <Building2 className="h-4 w-4" /> Ir a mi panel B2B
+                </Link>
+              ) : (
+                <>
+                  <Link to="/app" className="btn-primary text-base">
+                    <Smartphone className="h-4 w-4" /> Soy cliente
+                  </Link>
+                  <Link to="/negocio" className="btn-ghost text-base">
+                    <Building2 className="h-4 w-4" /> Soy casa de empeño
+                  </Link>
+                </>
+              )}
             </div>
 
             <div className="mt-10 grid grid-cols-3 gap-4 border-t border-border pt-6">
