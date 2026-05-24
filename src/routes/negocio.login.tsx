@@ -134,9 +134,21 @@ function BusinessLogin() {
                     <p className="font-semibold text-status-pending">
                       Ya iniciaste sesión como cliente.
                     </p>
-                    <Link to="/app/dashboard" className="text-xs text-primary hover:underline">
-                      Ir a tu panel B2C →
-                    </Link>
+                    <div className="mt-2 flex gap-2">
+                      <Link to="/app/dashboard" className="text-xs text-primary hover:underline">
+                        Ir a tu panel B2C →
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          await signOut();
+                          currentUser.refetch();
+                        }}
+                        className="text-xs text-muted-foreground hover:text-foreground"
+                      >
+                        Cerrar sesión
+                      </button>
+                    </div>
                   </div>
                 )}
 
