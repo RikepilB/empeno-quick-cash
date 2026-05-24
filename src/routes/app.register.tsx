@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { registerClient } from "@/services/auth";
+import { registerClient, sendVerificationOtp } from "@/services/auth";
 import { Logo } from "@/ui/Logo";
 import { CookieBanner } from "@/ui/CookieBanner";
 
@@ -11,8 +11,6 @@ function Register() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [emailVerified, setEmailVerified] = useState(false);
-
   function handleDniBlur(dni: string) {
     if (/^\d{8}$/.test(dni)) {
       const mockNames = [
@@ -46,13 +44,17 @@ function Register() {
           full_name,
           dni: dni || undefined,
           phone: phone || undefined,
-          email_verified: emailVerified,
         },
       });
       if (sessionCreated) {
-        await navigate({ to: "/app/dashboard" });
+        try {
+          await sendVerificationOtp({ data: { email } });
+        } catch {
+          // OTP send may fail silently — user can resend from verify page
+        }
+        await navigate({ to: "/app/verify" });
       } else {
-        await navigate({ to: "/app/login", search: { confirm: 1 } });
+        await navigate({ to: "/app/login" });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error al registrar");
@@ -146,19 +148,6 @@ function Register() {
                       placeholder="maria@correo.com"
                       autoComplete="email"
                     />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <input
-                      name="email_verified"
-                      type="checkbox"
-                      id="email-verified"
-                      checked={emailVerified}
-                      onChange={(e) => setEmailVerified(e.target.checked)}
-                      className="h-4 w-4 rounded border-border accent-primary"
-                    />
-                    <label htmlFor="email-verified" className="text-sm">
-                      Ya verificaste tu correo
-                    </label>
                   </div>
                   <div>
                     <label className="mb-1.5 block text-sm font-medium">Contraseña</label>

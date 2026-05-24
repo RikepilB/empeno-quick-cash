@@ -8,6 +8,7 @@ import {
   Bell,
   Loader2,
   ArrowRight,
+  Mail,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { listMySolicitudes, type SolicitudListItem } from "@/services/solicitudes";
@@ -41,6 +42,7 @@ function Dashboard() {
   const totalOps = operations.data?.length ?? 0;
   const firstName = user.data?.profile.full_name?.split(" ")[0] ?? "";
   const offersCount = items.reduce((acc, s) => acc + (s.propuestas_count ?? 0), 0);
+  const emailUnverified = user.data && !user.data.user.email_confirmed_at;
 
   const today = new Date().toLocaleDateString("es-PE", {
     weekday: "long",
@@ -51,6 +53,23 @@ function Dashboard() {
 
   return (
     <ClientLayout title={`¡Hola, ${firstName || "Cliente"}!`} subtitle={today}>
+      {emailUnverified && (
+        <div className="mb-6 flex items-center justify-between rounded-2xl border border-amber-500/30 bg-amber-500/10 px-5 py-4 text-sm">
+          <div className="flex items-center gap-3">
+            <Mail className="h-5 w-5 text-amber-400" />
+            <div>
+              <span className="font-semibold text-amber-400">Recuerda verificar tu correo</span>
+              <span className="ml-2 text-muted-foreground">
+                Ve a Mi cuenta para completar el paso.
+              </span>
+            </div>
+          </div>
+          <Link to="/app/cuenta" className="btn-primary shrink-0 rounded-lg px-4 py-1.5 text-xs">
+            Verificar
+          </Link>
+        </div>
+      )}
+
       {/* Publish CTA */}
       <Link
         to="/app/publish"

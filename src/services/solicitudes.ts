@@ -120,7 +120,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabase
       .from("solicitudes")
       .select(
-        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, deleted_at, created_at, propuestas(count, id, accepted_at)",
+        "id, category, brand, model, year, storage, condition, description, expected_amount_pen, expected_term_days, district, status, deleted_at, created_at",
       )
       .eq("client_id", user.id)
       .order("created_at", { ascending: false })
@@ -128,9 +128,9 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
 
     if (error) throw sanitizeError(error, "Error al cargar tus solicitudes.");
 
-    type PropuestaRow = { id: string; accepted_at: string } | null;
     const solicitudIds = (data ?? []).map((r) => r.id);
     let acceptedMap: Record<string, string> = {};
+    const countMap: Record<string, number> = {};
 
     if (solicitudIds.length > 0) {
       const { data: acceptedRows } = await supabase
@@ -145,6 +145,15 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
           r.id,
         ]),
       );
+
+      const { data: countRows } = await supabase
+        .from("propuestas")
+        .select("solicitud_id")
+        .in("solicitud_id", solicitudIds);
+
+      for (const r of countRows ?? []) {
+        countMap[r.solicitud_id] = (countMap[r.solicitud_id] ?? 0) + 1;
+      }
     }
 
     type SolicitudRow = {
@@ -162,7 +171,6 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       status: SolicitudStatus;
       created_at: string;
       deleted_at: string | null;
-      propuestas: { count: number }[] | null;
     };
     return (data ?? []).map((row: SolicitudRow) => ({
       id: row.id,
@@ -179,7 +187,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       status: row.status,
       deleted_at: row.deleted_at,
       created_at: row.created_at,
-      propuestas_count: row.propuestas?.[0]?.count ?? 0,
+      propuestas_count: countMap[row.id] ?? 0,
       accepted_propuesta_id: row.status === "accepted" ? (acceptedMap[row.id] ?? null) : null,
     }));
   },
