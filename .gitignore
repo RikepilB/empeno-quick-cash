@@ -60,6 +60,9 @@ docs/*
 # Build artifacts
 .next
 
+# Local database snapshots (may contain PII — never commit)
+.backups/
+
 # Screenshots and temp images
 *.png
 *.jpg
