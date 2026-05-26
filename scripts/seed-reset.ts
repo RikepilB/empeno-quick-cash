@@ -1,6 +1,8 @@
 #!/usr/bin/env bun
-// Truncates all user-data tables. Preserves schema, plans, commission_config.
-// SAFE TO RUN: never deletes auth.users rows — those are removed separately via auth.admin.
+// scripts/seed-reset.ts
+// DESTRUCTIVE: truncates all user-data tables, purges solicitud-photos bucket,
+// and deletes auth.users rows except those flagged app_metadata.seed_protected = true.
+// Intended for non-production runs only.
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.SUPABASE_URL;
@@ -12,6 +14,7 @@ if (!url || !serviceRoleKey) {
 
 const admin = createClient(url, serviceRoleKey, { auth: { persistSession: false } });
 
+// FK-ordered: leaf tables first, root tables last
 const TABLES_IN_FK_ORDER = [
   "commissions",
   "featured_offers",
@@ -38,6 +41,21 @@ const DELETE_FILTERS: Record<string, { column: string; value: string | number }>
 const DEFAULT_FILTER = { column: "id", value: "00000000-0000-0000-0000-000000000000" };
 
 async function main() {
+  const projectRef = url.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+  const confirm = process.env.SEED_RESET_CONFIRM;
+  if (!projectRef) {
+    console.error("Could not parse Supabase project ref from SUPABASE_URL — refusing to run.");
+    process.exit(1);
+  }
+  if (confirm !== projectRef) {
+    console.error(
+      `Refusing to wipe project '${projectRef}'.\n` +
+        `Set SEED_RESET_CONFIRM=${projectRef} to confirm.`,
+    );
+    process.exit(1);
+  }
+  console.log(`✓ confirmed target project ref: ${projectRef}`);
+
   for (const table of TABLES_IN_FK_ORDER) {
     const { column, value } = DELETE_FILTERS[table] ?? DEFAULT_FILTER;
     const { error } = await admin.from(table).delete().neq(column, value);
