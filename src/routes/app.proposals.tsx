@@ -44,10 +44,8 @@ function Proposals() {
   });
 
   const queryClient = useQueryClient();
-  useSupabaseRealtime(
-    "propuestas",
-    id ? `solicitud_id=eq.${id}` : undefined,
-    () => queryClient.invalidateQueries({ queryKey: ["propuestas", id] }),
+  useSupabaseRealtime("propuestas", id ? `solicitud_id=eq.${id}` : undefined, () =>
+    queryClient.invalidateQueries({ queryKey: ["propuestas", id] }),
   );
 
   const sorted = useMemo(() => {
