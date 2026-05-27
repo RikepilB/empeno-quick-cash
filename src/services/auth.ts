@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSupabaseServer } from "@/lib/db/server";
+import { getSupabaseAdmin } from "@/lib/db/admin";
 import { sanitizeError, log } from "@/lib/logger";
 
 export type AuthRole = "client" | "business";
@@ -298,3 +299,30 @@ export const verifyEmailOtp = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+export const deleteAccount = createServerFn({ method: "POST" }).handler(
+  async (): Promise<{ ok: true }> => {
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("No autenticado");
+
+    const { error: rpcErr } = await supabase.rpc("delete_my_account");
+    if (rpcErr) throw sanitizeError(rpcErr, "No se pudo eliminar tu cuenta.");
+
+    const admin = getSupabaseAdmin();
+    const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
+    if (delErr) {
+      log.error("auth.admin.deleteUser failed", {
+        user_id: user.id,
+        error: delErr.message,
+      });
+      throw sanitizeError(delErr, "No se pudo eliminar tu cuenta.");
+    }
+
+    await supabase.auth.signOut();
+    log.info("account_deleted", { user_id: user.id });
+    return { ok: true };
+  },
+);
