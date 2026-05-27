@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ClientLayout } from "@/ui/ClientLayout";
 import { useState, useEffect } from "react";
 import {
@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   ChevronRight,
   AlertTriangle,
+  Trash2,
 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,6 +20,7 @@ import {
   changePassword,
   sendVerificationOtp,
   verifyEmailOtp,
+  deleteAccount,
 } from "@/services/auth";
 
 export const Route = createFileRoute("/app/cuenta")({ component: Cuenta });
@@ -71,6 +73,17 @@ function Cuenta() {
       setShowVerifyForm(false);
       setVerifyCode(["", "", "", "", "", ""]);
       setVerifySent(false);
+    },
+  });
+
+  const navigate = useNavigate();
+  const [confirmDeleteText, setConfirmDeleteText] = useState("");
+  const [showDeletePanel, setShowDeletePanel] = useState(false);
+
+  const deleteMut = useMutation({
+    mutationFn: () => deleteAccount(),
+    onSuccess: async () => {
+      await navigate({ to: "/" });
     },
   });
 
@@ -395,6 +408,72 @@ function Cuenta() {
                   </span>
                 </div>
               </div>
+            </section>
+            <section className="rounded-2xl border border-red-500/30 bg-red-500/5 p-6">
+              <div className="mb-4 flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-red-400" />
+                <h2 className="font-display text-lg font-bold uppercase text-red-400">
+                  Zona peligrosa
+                </h2>
+              </div>
+
+              {!showDeletePanel ? (
+                <button
+                  type="button"
+                  onClick={() => setShowDeletePanel(true)}
+                  className="btn-ghost border border-red-500/40 text-red-400 hover:bg-red-500/10"
+                >
+                  Eliminar mi cuenta
+                </button>
+              ) : (
+                <div className="space-y-3 text-sm">
+                  <p>
+                    Esta acción es <strong>permanente</strong>. Se eliminarán tus solicitudes,
+                    propuestas, operaciones y datos de perfil. Tus operaciones aún pendientes de
+                    retiro deben completarse antes.
+                  </p>
+                  <p>
+                    Para confirmar, escribe{" "}
+                    <code className="rounded bg-surface-2 px-1.5">ELIMINAR</code>:
+                  </p>
+                  <input
+                    value={confirmDeleteText}
+                    onChange={(e) => setConfirmDeleteText(e.target.value)}
+                    className="input-field"
+                    placeholder="ELIMINAR"
+                  />
+                  {deleteMut.isError && (
+                    <div className="rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">
+                      {deleteMut.error.message}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => deleteMut.mutate()}
+                      disabled={confirmDeleteText !== "ELIMINAR" || deleteMut.isPending}
+                      className="btn-primary bg-red-500 hover:bg-red-600 disabled:opacity-60"
+                    >
+                      {deleteMut.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                      {deleteMut.isPending ? "Eliminando..." : "Eliminar definitivamente"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowDeletePanel(false);
+                        setConfirmDeleteText("");
+                      }}
+                      className="btn-ghost"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
             </section>
           </>
         )}
