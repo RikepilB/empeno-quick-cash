@@ -453,7 +453,7 @@ export const SOLICITUDES: SeedSolicitud[] = [
     expected_amount_pen: 7200,
     expected_term_days: 60,
     district: "Miraflores",
-    status: "active",
+    status: "accepted",
   },
   {
     client_email: "cliente2@empenalo.test",
