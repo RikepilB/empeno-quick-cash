@@ -135,10 +135,29 @@ export const loginWithPassword = createServerFn({ method: "POST" })
       email: data.email,
       password: data.password,
     });
-    if (error) throw new Error("Correo o contraseña incorrectos.");
+    if (error) {
+      log.warn("login_failed", {
+        email_hash: hashEmail(data.email),
+        code: error.code,
+        status: error.status,
+      });
+      if (error.code === "email_not_confirmed") {
+        throw new Error("Tu correo aún no está verificado. Revisa tu bandeja de entrada.");
+      }
+      if (error.status === 429) {
+        throw new Error("Demasiados intentos. Espera un minuto e intenta de nuevo.");
+      }
+      throw new Error("Correo o contraseña incorrectos.");
+    }
     if (!result.user) throw new Error("No pudimos iniciar tu sesión. Intenta de nuevo.");
     return { userId: result.user.id };
   });
+
+function hashEmail(s: string): string {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return h.toString(16);
+}
 
 const registerClientSchema = z.object({
   email: z.string().email(),
