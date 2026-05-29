@@ -1,6 +1,6 @@
 import { Link, useRouter, useRouterState } from "@tanstack/react-router";
 import type { ReactNode } from "react";
-import { LayoutDashboard, Inbox, Send, Bell, CreditCard, LogOut, User } from "lucide-react";
+import { LayoutDashboard, Inbox, Send, Bell, LogOut, User } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getSupabaseBrowser } from "@/lib/db/browser";
 import { getBusinessContext } from "@/services/business";
@@ -40,12 +40,6 @@ export function BusinessLayout({
     await router.navigate({ to: "/negocio/login" });
   }
 
-  const sub = context.data?.subscription;
-  const planName = sub?.plan.name ?? "Sin plan";
-  const limit = sub?.plan.monthly_propuestas ?? null;
-  const used = sub?.propuestas_used_this_period ?? 0;
-  const pct = limit === null ? 0 : Math.min(100, (used / Math.max(1, limit)) * 100);
-
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="flex min-h-screen">
@@ -57,8 +51,8 @@ export function BusinessLayout({
           >
             <Logo size={32} className="rounded-lg" />
             <LogoText />
-            <span className="ml-auto rounded-md bg-surface-2 px-1.5 py-0.5 text-[10px] uppercase text-muted-foreground">
-              B2B
+            <span className="ml-auto rounded-md bg-primary/20 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-primary">
+              Beta
             </span>
           </Link>
 
@@ -85,30 +79,16 @@ export function BusinessLayout({
 
           <div className="m-3 rounded-xl border border-border bg-surface p-4">
             {context.data?.business?.verified_at ? (
-              <>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <CreditCard className="h-3.5 w-3.5" /> Plan {planName}
-                </div>
-                <div className="mt-2 flex items-end justify-between">
-                  <span className="font-display text-2xl font-bold">
-                    {limit === null ? `${used}` : `${used}/${limit}`}
-                  </span>
-                  <span className="text-[10px] uppercase text-muted-foreground">
-                    {limit === null ? "ofertas (ilimitadas)" : "propuestas"}
-                  </span>
-                </div>
-                {limit !== null && (
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-                  </div>
-                )}
+              <div className="text-center text-xs">
+                <p className="font-semibold text-primary">Beta — Acceso completo</p>
+                <p className="mt-1 text-muted-foreground">Ofertas ilimitadas</p>
                 <Link
                   to="/negocio/perfil"
-                  className="mt-3 block text-center text-xs text-primary hover:underline"
+                  className="mt-3 block text-xs text-primary hover:underline"
                 >
                   Ver cuenta
                 </Link>
-              </>
+              </div>
             ) : (
               <div className="text-center text-xs text-muted-foreground">
                 <p className="font-semibold">Pendiente de verificación</p>

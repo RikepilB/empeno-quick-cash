@@ -94,7 +94,6 @@ function SolicitudDetalle() {
   }
 
   const s = solicitud.data;
-  const remaining = context.data?.subscription?.propuestas_remaining;
 
   return (
     <BusinessLayout
@@ -186,15 +185,6 @@ function SolicitudDetalle() {
               <p className="mt-1 text-xs text-muted-foreground">
                 El cliente recibirá la oferta de inmediato.
               </p>
-              {remaining !== null && remaining !== undefined && (
-                <div className="mt-4 rounded-lg bg-background p-3 text-xs">
-                  Te quedan{" "}
-                  <span className="font-display text-base font-bold text-primary">
-                    {Math.max(0, remaining - 1)}
-                  </span>{" "}
-                  propuestas este mes.
-                </div>
-              )}
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <Link to="/negocio/propuestas" className="btn-ghost text-xs">
                   Ver mis propuestas

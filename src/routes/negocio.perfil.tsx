@@ -1,49 +1,29 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BusinessLayout } from "@/ui/BusinessLayout";
-import { Check, Loader2, ReceiptText, ShieldCheck, Sparkles, AlertTriangle } from "lucide-react";
+import { Loader2, ReceiptText, ShieldCheck, Sparkles, AlertTriangle } from "lucide-react";
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getBusinessContext } from "@/services/business";
-import { listPlans, listMyInvoices, startCheckout, getBillingMode } from "@/services/billing";
+import { listMyInvoices, getBillingMode } from "@/services/billing";
 import { formatPEN } from "@/lib/categories";
-import { openCheckout, getCulqiPublicKey } from "@/lib/payments/checkout";
+import { getCulqiPublicKey } from "@/lib/payments/checkout";
 
 export const Route = createFileRoute("/negocio/perfil")({ component: Perfil });
 
 function Perfil() {
   const qc = useQueryClient();
   const context = useQuery({ queryKey: ["businessContext"], queryFn: () => getBusinessContext() });
-  const plans = useQuery({ queryKey: ["plans"], queryFn: () => listPlans() });
   const invoices = useQuery({ queryKey: ["invoices"], queryFn: () => listMyInvoices() });
   const billingMode = useQuery({ queryKey: ["billingMode"], queryFn: () => getBillingMode() });
 
-  const [pendingPlan, setPendingPlan] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
-
-  const checkout = useMutation({
-    mutationFn: (args: { plan_id: string; token_id?: string }) => startCheckout({ data: args }),
-    onSuccess: async (res) => {
-      setMsg(
-        res.mode === "demo"
-          ? `Plan ${res.plan_id} activado en modo demo. Cuando agregues CULQI_SECRET_KEY se cobrará por Culqi.`
-          : `Plan ${res.plan_id} activado correctamente.`,
-      );
-      await qc.invalidateQueries({ queryKey: ["businessContext"] });
-      await qc.invalidateQueries({ queryKey: ["invoices"] });
-      setPendingPlan(null);
-    },
-    onError: (err) => {
-      setMsg(err instanceof Error ? err.message : "Error al cambiar de plan");
-      setPendingPlan(null);
-    },
-  });
 
   const sub = context.data?.subscription;
   const business = context.data?.business;
 
   if (context.isLoading) {
     return (
-      <BusinessLayout title="Cuenta" subtitle="Configuración, planes y facturación">
+      <BusinessLayout title="Cuenta" subtitle="Configuración y facturación">
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
@@ -51,35 +31,11 @@ function Perfil() {
     );
   }
 
-  const currentPlanId = sub?.plan.id ?? null;
   const isDemo = billingMode.data?.mode === "demo";
   const missingPublicKey = !isDemo && !getCulqiPublicKey();
 
-  async function handlePlanClick(plan: { id: string; price_pen: number }) {
-    setMsg(null);
-    setPendingPlan(plan.id);
-    try {
-      if (isDemo) {
-        checkout.mutate({ plan_id: plan.id });
-        return;
-      }
-      const tok = await openCheckout({
-        amount_pen: plan.price_pen,
-        plan_id: plan.id,
-      });
-      if (!tok) {
-        setPendingPlan(null);
-        return;
-      }
-      checkout.mutate({ plan_id: plan.id, token_id: tok.token_id });
-    } catch (err) {
-      setMsg(err instanceof Error ? err.message : "Error al abrir Culqi");
-      setPendingPlan(null);
-    }
-  }
-
   return (
-    <BusinessLayout title="Cuenta" subtitle="Configuración, planes y facturación">
+    <BusinessLayout title="Cuenta" subtitle="Configuración y facturación">
       {!business?.verified_at && (
         <div className="mb-4 flex items-start gap-3 rounded-xl border border-status-pending/30 bg-status-pending/10 p-4 text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0 text-status-pending" />
@@ -153,142 +109,22 @@ function Perfil() {
 
         {business?.verified_at ? (
           <>
-            {/* Current plan */}
-            <div className="rounded-2xl border border-primary/40 bg-primary/5 p-6 lg:col-span-1">
-              <div className="text-xs uppercase text-muted-foreground">Plan activo</div>
-              {context.isLoading ? (
-                <div className="mt-2 flex items-center text-sm text-muted-foreground">
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
-                </div>
-              ) : !sub ? (
-                <div className="mt-2 text-sm text-muted-foreground">Sin suscripción activa.</div>
-              ) : (
-                <>
-                  <div className="mt-1 flex items-center gap-2">
-                    <span className="font-display text-3xl font-extrabold">{sub.plan.name}</span>
-                    <span className="badge-dot badge-accepted">{sub.status}</span>
-                  </div>
-                  <div className="mt-4 flex items-end justify-between">
-                    <span className="font-display text-2xl font-bold">
-                      {sub.plan.monthly_propuestas === null
-                        ? `${sub.propuestas_used_this_period}`
-                        : `${sub.propuestas_used_this_period}/${sub.plan.monthly_propuestas}`}
-                    </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      {sub.plan.monthly_propuestas === null ? "ilimitadas" : "propuestas usadas"}
-                    </span>
-                  </div>
-                  {sub.plan.monthly_propuestas !== null && (
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
-                      <div
-                        className="h-full rounded-full bg-primary"
-                        style={{
-                          width: `${Math.min(
-                            100,
-                            (sub.propuestas_used_this_period /
-                              Math.max(1, sub.plan.monthly_propuestas)) *
-                              100,
-                          )}%`,
-                        }}
-                      />
-                    </div>
-                  )}
-                  {sub.current_period_end && (
-                    <div className="mt-4 text-xs text-muted-foreground">
-                      Próxima renovación:{" "}
-                      <span className="font-semibold text-foreground">
-                        {new Date(sub.current_period_end).toLocaleDateString("es-PE", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </span>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* Plan picker */}
-            <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
+            {/* Beta badge */}
+            <div className="rounded-2xl border border-primary/40 bg-primary/5 p-6 lg:col-span-3">
               <div className="flex items-center justify-between">
-                <h3 className="font-display text-xl font-bold uppercase">Cambiar plan</h3>
-                <Link
-                  to="/negocio/plan"
-                  className="text-xs text-muted-foreground hover:text-foreground"
-                >
-                  Ver comparativa →
-                </Link>
-              </div>
-
-              <div className="mt-5 grid gap-4 md:grid-cols-3">
-                {plans.isLoading ? (
-                  <div className="col-span-3 flex items-center justify-center py-10 text-sm text-muted-foreground">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando planes...
+                <div>
+                  <div className="text-xs uppercase text-muted-foreground">Fase beta</div>
+                  <div className="mt-1 font-display text-2xl font-bold text-primary">
+                    Acceso completo
                   </div>
-                ) : (
-                  (plans.data ?? []).map((p) => {
-                    const isCurrent = currentPlanId === p.id;
-                    const submitting = pendingPlan === p.id && checkout.isPending;
-                    return (
-                      <div
-                        key={p.id}
-                        className={`relative flex flex-col rounded-xl border p-5 ${
-                          isCurrent ? "border-primary bg-primary/5" : "border-border bg-background"
-                        }`}
-                      >
-                        {isCurrent && (
-                          <span className="absolute -top-2 left-4 rounded-full bg-primary px-2 py-0.5 text-[10px] uppercase text-primary-foreground">
-                            Tu plan
-                          </span>
-                        )}
-                        <div className="font-display text-lg font-bold uppercase">{p.name}</div>
-                        <div className="mt-2 flex items-end gap-1">
-                          <span className="font-display text-3xl font-extrabold">
-                            {formatPEN(p.price_pen)}
-                          </span>
-                          <span className="pb-1 text-xs text-muted-foreground">/mes</span>
-                        </div>
-                        <div className="mt-1 text-xs text-muted-foreground">
-                          {p.monthly_propuestas === null
-                            ? "Propuestas ilimitadas"
-                            : `${p.monthly_propuestas} propuestas/mes`}
-                        </div>
-                        <ul className="mt-4 flex-1 space-y-1.5 text-xs">
-                          {p.features.map((f) => (
-                            <li key={f} className="flex items-start gap-1.5">
-                              <Check className="mt-0.5 h-3 w-3 text-primary" />
-                              <span>{f}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <button
-                          disabled={isCurrent || submitting || missingPublicKey}
-                          onClick={() => {
-                            handlePlanClick({ id: p.id, price_pen: p.price_pen });
-                          }}
-                          className={`mt-5 rounded-lg px-3 py-2 text-xs font-semibold disabled:opacity-60 ${
-                            isCurrent
-                              ? "border border-border bg-surface text-muted-foreground"
-                              : "bg-primary text-primary-foreground hover:bg-primary/90"
-                          }`}
-                        >
-                          {submitting ? (
-                            <span className="inline-flex items-center gap-1">
-                              <Loader2 className="h-3 w-3 animate-spin" /> Procesando...
-                            </span>
-                          ) : isCurrent ? (
-                            "Plan actual"
-                          ) : isDemo ? (
-                            "Cambiar (demo)"
-                          ) : (
-                            "Pagar y cambiar"
-                          )}
-                        </button>
-                      </div>
-                    );
-                  })
-                )}
+                  <div className="mt-1 text-sm text-muted-foreground">
+                    Durante la beta, todas las funcionalidades están disponibles sin límites. Los
+                    planes y precios se comunicarán cuando lancemos oficialmente.
+                  </div>
+                </div>
+                <div className="rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
+                  Ofertas ilimitadas
+                </div>
               </div>
             </div>
 
@@ -308,7 +144,7 @@ function Perfil() {
                   </div>
                 ) : (invoices.data ?? []).length === 0 ? (
                   <div className="py-10 text-center text-sm text-muted-foreground">
-                    Aún no tienes facturas. Cambia de plan para generar la primera.
+                    Sin facturas aún.
                   </div>
                 ) : (
                   <table className="w-full text-sm">
