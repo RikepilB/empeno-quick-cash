@@ -22,7 +22,7 @@ function Detail() {
 
   const propuesta = useQuery({
     queryKey: ["propuesta-detail", propuesta_id],
-    fn: () => getPropuestaForClient({ data: { propuesta_id } }),
+    queryFn: () => getPropuestaForClient({ data: { propuesta_id } }),
   });
 
   const accept = useMutation({

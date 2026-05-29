@@ -1,76 +1,119 @@
+#!/usr/bin/env bun
+// scripts/seed-reset.ts
+// DESTRUCTIVE: truncates all user-data tables, purges solicitud-photos bucket,
+// and deletes auth.users rows except those flagged app_metadata.seed_protected = true.
+// Intended for non-production runs only.
 import { createClient } from "@supabase/supabase-js";
-import { config } from "dotenv";
-import { resolve } from "path";
-
-config({ path: resolve(process.cwd(), ".dev.vars") });
 
 const url = process.env.SUPABASE_URL;
-const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!url || !serviceKey) {
-  console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .dev.vars");
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!url || !serviceRoleKey) {
+  console.error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY required");
   process.exit(1);
 }
 
-// Belt + suspenders: refuse to reset against URLs that don't look like dev/test.
-const ALLOWED_HOST_PATTERNS = [/raoprigiowskqnylapqs/, /localhost/, /127\.0\.0\.1/];
-const safe = ALLOWED_HOST_PATTERNS.some((re) => re.test(url));
-if (!safe && process.env.SEED_ALLOW_DESTRUCTIVE !== "1") {
-  console.error(
-    `Refusing to reset against ${url} — not in allowlist. Set SEED_ALLOW_DESTRUCTIVE=1 to override.`,
-  );
-  process.exit(1);
-}
+const admin = createClient(url, serviceRoleKey, { auth: { persistSession: false } });
 
-const supabase = createClient(url, serviceKey, {
-  auth: { autoRefreshToken: false, persistSession: false },
-});
+// FK-ordered: leaf tables first, root tables last
+const TABLES_IN_FK_ORDER = [
+  "commissions",
+  "featured_offers",
+  "payments",
+  "invoices",
+  "operations",
+  "propuestas",
+  "solicitud_photos",
+  "solicitudes",
+  "subscriptions",
+  "audit_logs",
+  "business_members",
+  "businesses",
+  "profiles",
+];
+
+// Per-table delete filter: tables without a uuid `id` column need a different anchor.
+// - business_members: composite PK (business_id, user_id), no `id` column
+// - audit_logs: id is bigserial, not uuid
+const DELETE_FILTERS: Record<string, { column: string; value: string | number }> = {
+  business_members: { column: "business_id", value: "00000000-0000-0000-0000-000000000000" },
+  audit_logs: { column: "id", value: 0 },
+};
+const DEFAULT_FILTER = { column: "id", value: "00000000-0000-0000-0000-000000000000" };
 
 async function main() {
-  console.log("\n♻️  EMPEÑALO — Seed Reset\n");
-  console.log(`Target: ${url}`);
-
-  const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
-  const targets = (list?.users ?? []).filter(
-    (u) =>
-      u.email?.startsWith("demo.") ||
-      u.email === "cliente.test@empenalo.local" ||
-      u.email === "negocio.test@empenalo.local",
-  );
-
-  if (targets.length === 0) {
-    console.log("  Nothing to clean");
-    return;
+  const projectRef = url.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1];
+  const confirm = process.env.SEED_RESET_CONFIRM;
+  if (!projectRef) {
+    console.error("Could not parse Supabase project ref from SUPABASE_URL — refusing to run.");
+    process.exit(1);
   }
-
-  // Clear ON DELETE RESTRICT money rows before cascading user delete.
-  const { data: bizRows } = await supabase
-    .from("businesses")
-    .select("id")
-    .in(
-      "owner_id",
-      targets.map((u) => u.id),
+  if (confirm !== projectRef) {
+    console.error(
+      `Refusing to wipe project '${projectRef}'.\n` +
+        `Set SEED_RESET_CONFIRM=${projectRef} to confirm.`,
     );
-  const bizIds = (bizRows ?? []).map((b) => b.id);
+    process.exit(1);
+  }
+  console.log(`✓ confirmed target project ref: ${projectRef}`);
 
-  if (bizIds.length > 0) {
-    await supabase.from("commissions").delete().in("business_id", bizIds);
-    await supabase.from("featured_offers").delete().in("business_id", bizIds);
-    await supabase.from("payments").delete().in("business_id", bizIds);
+  for (const table of TABLES_IN_FK_ORDER) {
+    const { column, value } = DELETE_FILTERS[table] ?? DEFAULT_FILTER;
+    const { error } = await admin.from(table).delete().neq(column, value);
+    if (error) {
+      console.error(`Failed truncate ${table}: ${error.message}`);
+      process.exit(1);
+    }
+    console.log(`✓ truncated ${table}`);
   }
 
-  let deleted = 0;
-  for (const u of targets) {
-    const { error } = await supabase.auth.admin.deleteUser(u.id);
-    if (error) console.log(`  ! delete ${u.email}: ${error.message}`);
-    else deleted++;
-  }
+  // Storage: photos are organized as {solicitud-id}/{photo-id}.jpg — list returns folders
+  // at root, so recurse one level to remove files inside each folder. Paginate in case there
+  // are more than 1000 folders or files.
+  let removedCount = 0;
+  let offset = 0;
 
-  console.log(`\n  Deleted ${deleted}/${targets.length} demo/test users`);
-  console.log("\n✅ Reset complete. Run `bun run scripts/seed.ts` to reseed.\n");
+  while (true) {
+    const { data: folders } = await admin.storage
+      .from("solicitud-photos")
+      .list("", { limit: 500, offset });
+    if (!folders || folders.length === 0) break;
+    for (const folder of folders) {
+      let fileOffset = 0;
+
+      while (true) {
+        const { data: files } = await admin.storage
+          .from("solicitud-photos")
+          .list(folder.name, { limit: 500, offset: fileOffset });
+        if (!files || files.length === 0) break;
+        const paths = files.map((f) => `${folder.name}/${f.name}`);
+        const { error } = await admin.storage.from("solicitud-photos").remove(paths);
+        if (error) console.error(`storage remove warning (${folder.name}): ${error.message}`);
+        else removedCount += paths.length;
+        fileOffset += 500;
+      }
+    }
+    offset += 500;
+  }
+  console.log(`✓ removed ${removedCount} storage objects`);
+
+  // Delete all auth users (cliente + negocio). Preserve admin/seed accounts marked with
+  // app_metadata.seed_protected = true. Paginate in case there are more than 1000 users.
+  let page = 1;
+
+  while (true) {
+    const { data: list } = await admin.auth.admin.listUsers({ perPage: 500, page });
+    if (!list?.users || list.users.length === 0) break;
+    for (const u of list.users) {
+      if (u.app_metadata?.seed_protected === true) continue;
+      const { error } = await admin.auth.admin.deleteUser(u.id);
+      if (error) console.error(`auth delete ${u.id} warning: ${error.message}`);
+    }
+    page++;
+  }
+  console.log(`✓ purged auth.users (preserved seed_protected accounts)`);
 }
 
 main().catch((err) => {
-  console.error("reset failed:", err);
+  console.error(err);
   process.exit(1);
 });

@@ -10,11 +10,12 @@ import {
   ArrowRight,
   Mail,
 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { listMySolicitudes, type SolicitudListItem } from "@/services/solicitudes";
 import { listMyClientOperations } from "@/services/operations";
 import { getCurrentUser } from "@/services/auth";
 import { categoryMeta, buildTitle } from "@/lib/categories";
+import { useSupabaseRealtime } from "@/lib/realtime";
 
 export const Route = createFileRoute("/app/dashboard")({ component: Dashboard });
 
@@ -37,7 +38,17 @@ function Dashboard() {
     queryFn: () => listMyClientOperations(),
   });
 
-  const items = solicitudes.data ?? [];
+  const queryClient = useQueryClient();
+  const userId = user.data?.user.id;
+
+  useSupabaseRealtime("solicitudes", userId ? `client_id=eq.${userId}` : undefined, () => {
+    queryClient.invalidateQueries({ queryKey: ["mySolicitudes"] });
+  });
+  useSupabaseRealtime("operations", undefined, () => {
+    queryClient.invalidateQueries({ queryKey: ["myClientOperations"] });
+  });
+
+  const items = (solicitudes.data ?? []).filter((s) => s.status !== "borrado");
   const activeCount = items.filter((s) => s.status === "active" || s.status === "accepted").length;
   const totalOps = operations.data?.length ?? 0;
   const firstName = user.data?.profile.full_name?.split(" ")[0] ?? "";

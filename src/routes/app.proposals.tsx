@@ -3,10 +3,11 @@ import { ClientLayout } from "@/ui/ClientLayout";
 import { MapPin, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSolicitud } from "@/services/solicitudes";
 import { listPropuestasForSolicitud, type PropuestaForClient } from "@/services/propuestas";
 import { categoryMeta, buildTitle, formatPEN } from "@/lib/categories";
+import { useSupabaseRealtime } from "@/lib/realtime";
 
 const searchSchema = z.object({ id: z.string().uuid().optional() });
 
@@ -41,6 +42,11 @@ function Proposals() {
         : Promise.resolve([] as PropuestaForClient[]),
     enabled: !!id,
   });
+
+  const queryClient = useQueryClient();
+  useSupabaseRealtime("propuestas", id ? `solicitud_id=eq.${id}` : undefined, () =>
+    queryClient.invalidateQueries({ queryKey: ["propuestas", id] }),
+  );
 
   const sorted = useMemo(() => {
     const list = propuestas.data ?? [];

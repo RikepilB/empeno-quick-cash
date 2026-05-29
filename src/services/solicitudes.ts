@@ -172,7 +172,7 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       created_at: string;
       deleted_at: string | null;
     };
-    return (data ?? []).map((row: SolicitudRow) => ({
+    const result = (data ?? []).map((row: SolicitudRow) => ({
       id: row.id,
       category: row.category,
       brand: row.brand,
@@ -190,6 +190,17 @@ export const listMySolicitudes = createServerFn({ method: "GET" }).handler(
       propuestas_count: countMap[row.id] ?? 0,
       accepted_propuesta_id: row.status === "accepted" ? (acceptedMap[row.id] ?? null) : null,
     }));
+
+    log.info("listMySolicitudes", {
+      user_id: user.id,
+      count: result.length,
+      by_status: result.reduce<Record<string, number>>((acc, r) => {
+        acc[r.status] = (acc[r.status] ?? 0) + 1;
+        return acc;
+      }, {}),
+    });
+
+    return result;
   },
 );
 

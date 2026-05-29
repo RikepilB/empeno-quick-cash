@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { getSupabaseServer } from "@/lib/db/server";
+import { getSupabaseAdmin } from "@/lib/db/admin";
 import { sanitizeError, log } from "@/lib/logger";
 
 export type AuthRole = "client" | "business";
@@ -135,10 +136,29 @@ export const loginWithPassword = createServerFn({ method: "POST" })
       email: data.email,
       password: data.password,
     });
-    if (error) throw new Error("Correo o contraseña incorrectos.");
+    if (error) {
+      log.warn("login_failed", {
+        email_hash: hashEmail(data.email),
+        code: error.code,
+        status: error.status,
+      });
+      if (error.code === "email_not_confirmed") {
+        throw new Error("Tu correo aún no está verificado. Revisa tu bandeja de entrada.");
+      }
+      if (error.status === 429) {
+        throw new Error("Demasiados intentos. Espera un minuto e intenta de nuevo.");
+      }
+      throw new Error("Correo o contraseña incorrectos.");
+    }
     if (!result.user) throw new Error("No pudimos iniciar tu sesión. Intenta de nuevo.");
     return { userId: result.user.id };
   });
+
+function hashEmail(s: string): string {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return h.toString(16);
+}
 
 const registerClientSchema = z.object({
   email: z.string().email(),
@@ -279,3 +299,30 @@ export const verifyEmailOtp = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+export const deleteAccount = createServerFn({ method: "POST" }).handler(
+  async (): Promise<{ ok: true }> => {
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("No autenticado");
+
+    const { error: rpcErr } = await supabase.rpc("delete_my_account");
+    if (rpcErr) throw sanitizeError(rpcErr, "No se pudo eliminar tu cuenta.");
+
+    const admin = getSupabaseAdmin();
+    const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
+    if (delErr) {
+      log.error("auth.admin.deleteUser failed", {
+        user_id: user.id,
+        error: delErr.message,
+      });
+      throw sanitizeError(delErr, "No se pudo eliminar tu cuenta.");
+    }
+
+    await supabase.auth.signOut();
+    log.info("account_deleted", { user_id: user.id });
+    return { ok: true };
+  },
+);

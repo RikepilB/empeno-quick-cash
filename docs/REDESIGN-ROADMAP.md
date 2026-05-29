@@ -42,6 +42,7 @@ Migrations applied through `0005_storage_gc.sql`:
   - Phone-frame removal on auth screens — `8364ada`.
   - Business proposal flow perf — `19b5395`.
   - Password recovery repair — `5d8228b`.
+  - `feat/prototype-2-closure` — wipe + seeder + cliente bug-fix pack + account deletion. See `docs/superpowers/plans/2026-05-26-prototype-2-closure.md`.
 
 ### Docs created this session
 
@@ -157,6 +158,14 @@ Verification:
 - ≥3 featured propuestas + ≥3 commission rows.
 
 Estimated effort: **1–2 sessions**.
+
+---
+
+### Phase 3.5 — Prototype 2 closure [shipped]
+
+**Goal**: ship the closure pack documented in `docs/superpowers/plans/2026-05-26-prototype-2-closure.md`. Wipe DB + reseed; fix `app.proposal-detail` `fn:` bug; add realtime sync; filter `borrado` rows; improve login error mapping; add account deletion. Closes the explicit user-reported bugs before Track A–E can land.
+
+Status: shipped on `develop` via commit range `2efd8d7 → 2b89c6a` (DB wipe + seeder driver, Sony A7 IV demo-data fix, `fn:` → `queryFn:` bug fix on proposal detail, `useSupabaseRealtime` hook + dashboard + proposals wiring, `borrado` filter + `listMySolicitudes` instrumentation, login error mapping + structured `login_failed` log, `delete_my_account` RPC migration `0011_account_deletion.sql` + `deleteAccount` server fn + `/app/cuenta` danger zone with typed "ELIMINAR" confirm).
 
 ---
 
