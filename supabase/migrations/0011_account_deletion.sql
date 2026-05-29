@@ -29,6 +29,17 @@ BEGIN
     RAISE EXCEPTION 'Tienes una operación pendiente de retiro. Complétala antes de eliminar tu cuenta.';
   END IF;
 
+  SELECT id INTO v_business FROM businesses WHERE owner_id = v_user;
+  IF v_business IS NOT NULL AND EXISTS (
+    SELECT 1
+    FROM operations o
+    JOIN propuestas p ON p.id = o.propuesta_id
+    WHERE p.business_id = v_business
+      AND o.status = 'pending_pickup'
+  ) THEN
+    RAISE EXCEPTION 'Tu negocio tiene operaciones pendientes de retiro. Complétalas antes de eliminar tu cuenta.';
+  END IF;
+
   DELETE FROM solicitud_photos
     WHERE solicitud_id IN (SELECT id FROM solicitudes WHERE client_id = v_user);
 

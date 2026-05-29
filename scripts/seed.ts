@@ -226,6 +226,9 @@ async function seedSolicitudes() {
       row.brand as string | null,
       row.model as string | null,
     );
+    if (solicitudIdByKey.has(key)) {
+      throw new Error(`Duplicate solicitud composite key detected: ${key}`);
+    }
     solicitudIdByKey.set(key, row.id as string);
   }
 
@@ -272,6 +275,9 @@ async function seedPropuestas() {
       src.brand,
       src.model,
     );
+    if (propuestaIdByKey.has(key)) {
+      throw new Error(`Duplicate propuesta composite key detected: ${key}`);
+    }
     propuestaIdByKey.set(key, data[i].id as string);
   }
 

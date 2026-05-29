@@ -242,7 +242,7 @@ export const PROPUESTAS: SeedPropuesta[] = [
   {
     client_email: "cliente6@empenalo.test",
     business_email: "negocio1@empenalo.test",
-    category: "videojuego",
+    category: "otro",
     brand: "Sony",
     model: "PlayStation 5 Slim",
     monto_pen: 1100,
@@ -253,7 +253,7 @@ export const PROPUESTAS: SeedPropuesta[] = [
   {
     client_email: "cliente6@empenalo.test",
     business_email: "negocio5@empenalo.test",
-    category: "videojuego",
+    category: "otro",
     brand: "Sony",
     model: "PlayStation 5 Slim",
     monto_pen: 1300,
@@ -266,7 +266,7 @@ export const PROPUESTAS: SeedPropuesta[] = [
   {
     client_email: "cliente1@empenalo.test",
     business_email: "negocio1@empenalo.test",
-    category: "bicicleta",
+    category: "otro",
     brand: "Specialized",
     model: "Stumpjumper Comp Alloy",
     monto_pen: 3000,
@@ -279,7 +279,7 @@ export const PROPUESTAS: SeedPropuesta[] = [
   {
     client_email: "cliente6@empenalo.test",
     business_email: "negocio1@empenalo.test",
-    category: "camara",
+    category: "otro",
     brand: "Sony",
     model: "Alpha A7 IV",
     monto_pen: 4500,
@@ -290,7 +290,7 @@ export const PROPUESTAS: SeedPropuesta[] = [
   {
     client_email: "cliente6@empenalo.test",
     business_email: "negocio5@empenalo.test",
-    category: "camara",
+    category: "otro",
     brand: "Sony",
     model: "Alpha A7 IV",
     monto_pen: 4200,

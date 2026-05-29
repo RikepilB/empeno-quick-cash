@@ -15,19 +15,7 @@ export const LIMA_DISTRICTS = [
   "Cercado de Lima",
 ] as const;
 
-export const CATEGORIES = [
-  "celular",
-  "laptop",
-  "joya",
-  "reloj",
-  "electrodomestico",
-  "videojuego",
-  "instrumento",
-  "bicicleta",
-  "herramienta",
-  "camara",
-  "otro",
-] as const;
+export const CATEGORIES = ["celular", "laptop", "joya", "reloj", "vehiculo", "otro"] as const;
 
 export const PLAN_SLUGS = ["basico", "intermedio", "avanzado"] as const;
 

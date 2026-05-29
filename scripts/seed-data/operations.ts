@@ -29,7 +29,7 @@ export const OPERATIONS: SeedOperation[] = [
   {
     client_email: "cliente6@empenalo.test",
     business_email: "negocio1@empenalo.test",
-    category: "camara",
+    category: "otro",
     redemption_code: "EMP-H8R4Q",
     status: "disputed",
     accepted_at: "2026-05-22T11:15:00Z",

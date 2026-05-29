@@ -12,7 +12,7 @@ export type SeedSolicitud = {
   expected_amount_pen: number;
   expected_term_days: number;
   district: string;
-  status: "active" | "accepted" | "closed" | "expired" | "borrado";
+  status: "active" | "accepted" | "closed" | "expired";
 };
 
 export const SOLICITUDES: SeedSolicitud[] = [
@@ -262,10 +262,10 @@ export const SOLICITUDES: SeedSolicitud[] = [
     status: "expired",
   },
 
-  // ── electrodomestico (3) ─────────────────────────────────────────────────
+  // ── electrodomestico → otro (3) ───────────────────────────────────────────
   {
     client_email: "cliente5@empenalo.test",
-    category: "electrodomestico",
+    category: "otro",
     brand: "LG",
     model: "Refrigeradora No Frost 410 L",
     year: 2022,
@@ -279,7 +279,7 @@ export const SOLICITUDES: SeedSolicitud[] = [
   },
   {
     client_email: "cliente7@empenalo.test",
-    category: "electrodomestico",
+    category: "otro",
     brand: "Samsung",
     model: 'Smart TV 55" QLED',
     year: 2023,
@@ -293,7 +293,7 @@ export const SOLICITUDES: SeedSolicitud[] = [
   },
   {
     client_email: "cliente3@empenalo.test",
-    category: "electrodomestico",
+    category: "otro",
     brand: "Bosch",
     model: "Lavadora 9 kg",
     year: 2021,
@@ -306,10 +306,10 @@ export const SOLICITUDES: SeedSolicitud[] = [
     status: "closed",
   },
 
-  // ── videojuego (3) ───────────────────────────────────────────────────────
+  // ── videojuego → otro (3) ─────────────────────────────────────────────────
   {
     client_email: "cliente6@empenalo.test",
-    category: "videojuego",
+    category: "otro",
     brand: "Sony",
     model: "PlayStation 5 Slim",
     year: 2024,
@@ -323,7 +323,7 @@ export const SOLICITUDES: SeedSolicitud[] = [
   },
   {
     client_email: "cliente8@empenalo.test",
-    category: "videojuego",
+    category: "otro",
     brand: "Microsoft",
     model: "Xbox Series X",
     year: 2023,
@@ -337,7 +337,7 @@ export const SOLICITUDES: SeedSolicitud[] = [
   },
   {
     client_email: "cliente2@empenalo.test",
-    category: "videojuego",
+    category: "otro",
     brand: "Nintendo",
     model: "Switch OLED",
     year: 2022,
@@ -350,10 +350,10 @@ export const SOLICITUDES: SeedSolicitud[] = [
     status: "active",
   },
 
-  // ── instrumento (2) ──────────────────────────────────────────────────────
+  // ── instrumento → otro (2) ────────────────────────────────────────────────
   {
     client_email: "cliente7@empenalo.test",
-    category: "instrumento",
+    category: "otro",
     brand: "Fender",
     model: "Stratocaster American Pro II",
     year: 2022,
@@ -367,7 +367,7 @@ export const SOLICITUDES: SeedSolicitud[] = [
   },
   {
     client_email: "cliente4@empenalo.test",
-    category: "instrumento",
+    category: "otro",
     brand: "Yamaha",
     model: "Piano digital P-125",
     year: 2021,
@@ -380,10 +380,10 @@ export const SOLICITUDES: SeedSolicitud[] = [
     status: "active",
   },
 
-  // ── bicicleta (2) ────────────────────────────────────────────────────────
+  // ── bicicleta → otro (2) ──────────────────────────────────────────────────
   {
     client_email: "cliente1@empenalo.test",
-    category: "bicicleta",
+    category: "otro",
     brand: "Specialized",
     model: "Stumpjumper Comp Alloy",
     year: 2023,
@@ -397,7 +397,7 @@ export const SOLICITUDES: SeedSolicitud[] = [
   },
   {
     client_email: "cliente5@empenalo.test",
-    category: "bicicleta",
+    category: "otro",
     brand: "Trek",
     model: "Domane SL 5",
     year: 2022,
@@ -410,10 +410,10 @@ export const SOLICITUDES: SeedSolicitud[] = [
     status: "active",
   },
 
-  // ── herramienta (2) ──────────────────────────────────────────────────────
+  // ── herramienta → otro (2) ────────────────────────────────────────────────
   {
     client_email: "cliente8@empenalo.test",
-    category: "herramienta",
+    category: "otro",
     brand: "DeWalt",
     model: "Kit combo 20V MAX (10 piezas)",
     year: 2023,
@@ -427,7 +427,7 @@ export const SOLICITUDES: SeedSolicitud[] = [
   },
   {
     client_email: "cliente3@empenalo.test",
-    category: "herramienta",
+    category: "otro",
     brand: "Bosch",
     model: "Rotomartillo profesional GBH 2-26",
     year: 2022,
@@ -440,10 +440,10 @@ export const SOLICITUDES: SeedSolicitud[] = [
     status: "active",
   },
 
-  // ── camara (2) ───────────────────────────────────────────────────────────
+  // ── camara → otro (2) ─────────────────────────────────────────────────────
   {
     client_email: "cliente6@empenalo.test",
-    category: "camara",
+    category: "otro",
     brand: "Sony",
     model: "Alpha A7 IV",
     year: 2023,
@@ -457,7 +457,7 @@ export const SOLICITUDES: SeedSolicitud[] = [
   },
   {
     client_email: "cliente2@empenalo.test",
-    category: "camara",
+    category: "otro",
     brand: "Canon",
     model: "EOS R6 Mark II",
     year: 2023,

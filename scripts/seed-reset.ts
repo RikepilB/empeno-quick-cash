@@ -67,28 +67,48 @@ async function main() {
   }
 
   // Storage: photos are organized as {solicitud-id}/{photo-id}.jpg — list returns folders
-  // at root, so recurse one level to remove files inside each folder.
-  const { data: folders } = await admin.storage.from("solicitud-photos").list("", { limit: 1000 });
+  // at root, so recurse one level to remove files inside each folder. Paginate in case there
+  // are more than 1000 folders or files.
   let removedCount = 0;
-  for (const folder of folders ?? []) {
-    const { data: files } = await admin.storage
+  let offset = 0;
+
+  while (true) {
+    const { data: folders } = await admin.storage
       .from("solicitud-photos")
-      .list(folder.name, { limit: 1000 });
-    if (!files || files.length === 0) continue;
-    const paths = files.map((f) => `${folder.name}/${f.name}`);
-    const { error } = await admin.storage.from("solicitud-photos").remove(paths);
-    if (error) console.error(`storage remove warning (${folder.name}): ${error.message}`);
-    else removedCount += paths.length;
+      .list("", { limit: 500, offset });
+    if (!folders || folders.length === 0) break;
+    for (const folder of folders) {
+      let fileOffset = 0;
+
+      while (true) {
+        const { data: files } = await admin.storage
+          .from("solicitud-photos")
+          .list(folder.name, { limit: 500, offset: fileOffset });
+        if (!files || files.length === 0) break;
+        const paths = files.map((f) => `${folder.name}/${f.name}`);
+        const { error } = await admin.storage.from("solicitud-photos").remove(paths);
+        if (error) console.error(`storage remove warning (${folder.name}): ${error.message}`);
+        else removedCount += paths.length;
+        fileOffset += 500;
+      }
+    }
+    offset += 500;
   }
   console.log(`✓ removed ${removedCount} storage objects`);
 
   // Delete all auth users (cliente + negocio). Preserve admin/seed accounts marked with
-  // app_metadata.seed_protected = true.
-  const { data: list } = await admin.auth.admin.listUsers({ perPage: 1000 });
-  for (const u of list?.users ?? []) {
-    if (u.app_metadata?.seed_protected === true) continue;
-    const { error } = await admin.auth.admin.deleteUser(u.id);
-    if (error) console.error(`auth delete ${u.id} warning: ${error.message}`);
+  // app_metadata.seed_protected = true. Paginate in case there are more than 1000 users.
+  let page = 1;
+
+  while (true) {
+    const { data: list } = await admin.auth.admin.listUsers({ perPage: 500, page });
+    if (!list?.users || list.users.length === 0) break;
+    for (const u of list.users) {
+      if (u.app_metadata?.seed_protected === true) continue;
+      const { error } = await admin.auth.admin.deleteUser(u.id);
+      if (error) console.error(`auth delete ${u.id} warning: ${error.message}`);
+    }
+    page++;
   }
   console.log(`✓ purged auth.users (preserved seed_protected accounts)`);
 }
