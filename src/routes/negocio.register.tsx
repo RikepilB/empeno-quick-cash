@@ -112,7 +112,7 @@ function BusinessRegister() {
               Panel de negocio
             </span>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-              Empiezas con el plan Básico gratis. Sin costo inicial. Actualiza cuando quieras.
+              Acceso completo durante la beta. Sin costo. Sin límites.
             </p>
           </div>
         </aside>
@@ -153,7 +153,7 @@ function BusinessRegister() {
               <div className="rounded-2xl border border-border bg-surface p-6 md:p-8">
                 <h1 className="font-display text-2xl font-bold">Registrar negocio</h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Plan Básico gratis. Sin costo inicial. Actualiza cuando quieras.
+                  Beta — Acceso completo. Sin costo. Sin límites.
                 </p>
 
                 <form onSubmit={onSubmit} className="mt-6 space-y-5">

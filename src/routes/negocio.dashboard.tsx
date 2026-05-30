@@ -1,14 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BusinessLayout } from "@/ui/BusinessLayout";
-import {
-  TrendingUp,
-  Send,
-  CheckCircle2,
-  Inbox,
-  AlertTriangle,
-  ArrowRight,
-  Loader2,
-} from "lucide-react";
+import { TrendingUp, Send, CheckCircle2, Inbox, ArrowRight, Loader2 } from "lucide-react";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { listActiveSolicitudes } from "@/services/solicitudes";
@@ -45,9 +37,6 @@ function BizDashboard() {
 
   const newest = useMemo(() => (available.data ?? []).slice(0, 5), [available.data]);
 
-  const limit = sub?.plan.monthly_propuestas;
-  const remaining = sub?.propuestas_remaining;
-
   const today = new Date().toLocaleDateString("es-PE", {
     weekday: "long",
     day: "numeric",
@@ -71,14 +60,8 @@ function BizDashboard() {
         <Metric
           icon={Send}
           label="Propuestas enviadas"
-          value={
-            limit !== null && limit !== undefined
-              ? `${sub?.propuestas_used_this_period ?? 0}/${limit}`
-              : (sub?.propuestas_used_this_period ?? 0).toString()
-          }
-          delta={
-            remaining !== null && remaining !== undefined ? `${remaining} restantes` : "Ilimitadas"
-          }
+          value={(sub?.propuestas_used_this_period ?? 0).toString()}
+          delta="Ilimitadas"
         />
         <Metric
           icon={CheckCircle2}
@@ -93,32 +76,6 @@ function BizDashboard() {
           delta="aceptadas / enviadas"
         />
       </div>
-
-      {limit !== null &&
-        limit !== undefined &&
-        remaining !== null &&
-        remaining !== undefined &&
-        remaining <= 5 &&
-        business?.verified_at && (
-          <div className="mt-4 flex items-start gap-3 rounded-xl border border-status-pending/30 bg-status-pending/10 p-4 text-sm">
-            <AlertTriangle className="h-4 w-4 shrink-0 text-status-pending" />
-            <div>
-              <span className="font-semibold text-status-pending">
-                Te quedan {remaining} propuestas
-              </span>
-              <span className="text-muted-foreground">
-                {" "}
-                este mes. Considera el plan Avanzado para ofertas ilimitadas.
-              </span>
-            </div>
-            <Link
-              to="/negocio/perfil"
-              className="ml-auto text-xs font-semibold text-primary hover:underline"
-            >
-              Mejorar plan →
-            </Link>
-          </div>
-        )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <section className="lg:col-span-2">
