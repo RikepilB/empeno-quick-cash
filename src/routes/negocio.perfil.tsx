@@ -1,29 +1,23 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { BusinessLayout } from "@/ui/BusinessLayout";
-import { Loader2, ReceiptText, ShieldCheck, Sparkles, AlertTriangle } from "lucide-react";
-import { useState } from "react";
+import { Loader2, Building2, KeyRound, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getBusinessContext } from "@/services/business";
-import { listMyInvoices, getBillingMode } from "@/services/billing";
-import { formatPEN } from "@/lib/categories";
-import { getCulqiPublicKey } from "@/lib/payments/checkout";
+import { getBusinessProfile, updateBusiness, type BusinessProfile } from "@/services/business";
+import { changePassword } from "@/services/auth";
 
-export const Route = createFileRoute("/negocio/perfil")({ component: Perfil });
+export const Route = createFileRoute("/negocio/perfil")({ component: Cuenta });
 
-function Perfil() {
+function Cuenta() {
   const qc = useQueryClient();
-  const context = useQuery({ queryKey: ["businessContext"], queryFn: () => getBusinessContext() });
-  const invoices = useQuery({ queryKey: ["invoices"], queryFn: () => listMyInvoices() });
-  const billingMode = useQuery({ queryKey: ["billingMode"], queryFn: () => getBillingMode() });
+  const profile = useQuery({
+    queryKey: ["businessProfile"],
+    queryFn: () => getBusinessProfile(),
+  });
 
-  const [msg, setMsg] = useState<string | null>(null);
-
-  const sub = context.data?.subscription;
-  const business = context.data?.business;
-
-  if (context.isLoading) {
+  if (profile.isLoading) {
     return (
-      <BusinessLayout title="Cuenta" subtitle="Configuración y facturación">
+      <BusinessLayout title="Cuenta" subtitle="Datos de tu negocio">
         <div className="flex items-center justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
@@ -31,201 +25,291 @@ function Perfil() {
     );
   }
 
-  const isDemo = billingMode.data?.mode === "demo";
-  const missingPublicKey = !isDemo && !getCulqiPublicKey();
+  const data = profile.data;
+
+  if (!data) {
+    return (
+      <BusinessLayout title="Cuenta" subtitle="Datos de tu negocio">
+        <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted-foreground">
+          No encontramos tu negocio. Vuelve a iniciar sesión.
+        </div>
+      </BusinessLayout>
+    );
+  }
 
   return (
-    <BusinessLayout title="Cuenta" subtitle="Configuración y facturación">
-      {!business?.verified_at && (
-        <div className="mb-4 flex items-start gap-3 rounded-xl border border-status-pending/30 bg-status-pending/10 p-4 text-sm">
-          <AlertTriangle className="h-4 w-4 shrink-0 text-status-pending" />
-          <div>
-            <span className="font-semibold text-status-pending">
-              Negocio pendiente de verificación.
-            </span>
-            <span className="text-muted-foreground">
-              {" "}
-              Completa el proceso para acceder a planes y facturación.
-            </span>
-          </div>
-        </div>
-      )}
-
-      {msg && (
-        <div className="mb-4 flex items-start gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4 text-sm">
-          <Sparkles className="h-4 w-4 shrink-0 text-primary" />
-          <div className="flex-1">{msg}</div>
-          <button
-            onClick={() => setMsg(null)}
-            className="text-xs text-muted-foreground hover:text-foreground"
-          >
-            cerrar
-          </button>
-        </div>
-      )}
-
-      {isDemo && (
-        <div className="mb-4 flex items-start gap-3 rounded-xl border border-status-pending/30 bg-status-pending/10 p-4 text-sm">
-          <ShieldCheck className="h-4 w-4 shrink-0 text-status-pending" />
-          <div>
-            <div className="font-semibold text-status-pending">Modo demo de facturación</div>
-            <div className="text-muted-foreground">
-              Aún no se ha configurado <code>CULQI_SECRET_KEY</code>. Los cambios de plan se aplican
-              al instante sin cobrar. Cuando agregues la clave, las suscripciones pasarán por Culqi
-              automáticamente.
-            </div>
-          </div>
-        </div>
-      )}
-
-      {missingPublicKey && (
-        <div className="mb-4 flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/10 p-4 text-sm">
-          <ShieldCheck className="h-4 w-4 shrink-0 text-destructive" />
-          <div>
-            <div className="font-semibold text-destructive">Falta clave pública de Culqi</div>
-            <div className="text-muted-foreground">
-              El servidor está en modo live pero <code>VITE_CULQI_PUBLIC_KEY</code> no está
-              configurada en el cliente. No se puede cobrar hasta que se agregue.
-            </div>
-          </div>
-        </div>
-      )}
-
+    <BusinessLayout title="Cuenta" subtitle="Datos de tu negocio">
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Business identity */}
-        <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-3">
-          <h3 className="font-display text-xl font-bold uppercase">Datos del negocio</h3>
-          <div className="mt-3 text-sm">
-            {business?.name ?? "—"} · {business?.district ?? "Sin distrito"}
-          </div>
-          <div className="mt-1 text-xs text-muted-foreground">
-            {business?.verified_at ? (
-              <span className="text-status-accepted">Verificado</span>
-            ) : (
-              <span className="text-status-pending">Pendiente de verificación</span>
-            )}
-          </div>
+        <BusinessDetailsCard
+          data={data}
+          onSaved={() => qc.invalidateQueries({ queryKey: ["businessProfile"] })}
+        />
+        <div className="space-y-6">
+          <VerificationCard status={data.verification_status} />
+          <PasswordCard />
         </div>
-
-        {business?.verified_at ? (
-          <>
-            {/* Beta badge */}
-            <div className="rounded-2xl border border-primary/40 bg-primary/5 p-6 lg:col-span-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-xs uppercase text-muted-foreground">Fase beta</div>
-                  <div className="mt-1 font-display text-2xl font-bold text-primary">
-                    Acceso completo
-                  </div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    Durante la beta, todas las funcionalidades están disponibles sin límites. Los
-                    planes y precios se comunicarán cuando lancemos oficialmente.
-                  </div>
-                </div>
-                <div className="rounded-full border border-primary/30 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-                  Ofertas ilimitadas
-                </div>
-              </div>
-            </div>
-
-            {/* Invoices */}
-            <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-3">
-              <div className="flex items-center justify-between">
-                <h3 className="font-display text-xl font-bold uppercase">Historial de facturas</h3>
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-                  <ReceiptText className="h-3.5 w-3.5" />
-                  {(invoices.data ?? []).length} facturas
-                </span>
-              </div>
-              <div className="mt-4 overflow-hidden rounded-xl border border-border">
-                {invoices.isLoading ? (
-                  <div className="flex items-center justify-center py-10 text-sm text-muted-foreground">
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Cargando...
-                  </div>
-                ) : (invoices.data ?? []).length === 0 ? (
-                  <div className="py-10 text-center text-sm text-muted-foreground">
-                    Sin facturas aún.
-                  </div>
-                ) : (
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-background text-left text-[11px] uppercase text-muted-foreground">
-                        <th className="px-4 py-3">Fecha</th>
-                        <th className="px-4 py-3">Plan</th>
-                        <th className="px-4 py-3">Monto</th>
-                        <th className="px-4 py-3">Estado</th>
-                        <th className="px-4 py-3">Periodo</th>
-                        <th className="px-4 py-3">Charge</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {(invoices.data ?? []).map((inv) => (
-                        <tr key={inv.id} className="border-b border-border last:border-0">
-                          <td className="px-4 py-3 text-muted-foreground">
-                            {new Date(inv.created_at).toLocaleDateString("es-PE", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                            })}
-                          </td>
-                          <td className="px-4 py-3 font-semibold uppercase">
-                            {inv.plan_id ?? "—"}
-                          </td>
-                          <td className="px-4 py-3 font-display font-bold">
-                            {formatPEN(inv.amount_pen)}
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className={`badge-dot ${invStatusBadge(inv.status)}`}>
-                              {invStatusLabel(inv.status)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-xs text-muted-foreground">
-                            {inv.period_start && inv.period_end
-                              ? `${new Date(inv.period_start).toLocaleDateString("es-PE", { day: "numeric", month: "short" })} – ${new Date(inv.period_end).toLocaleDateString("es-PE", { day: "numeric", month: "short" })}`
-                              : "—"}
-                          </td>
-                          <td className="px-4 py-3 text-[11px] font-mono text-muted-foreground">
-                            {inv.culqi_charge_id ?? "—"}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </div>
-          </>
-        ) : (
-          <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
-            <div className="text-center text-sm text-muted-foreground py-8">
-              <p className="font-semibold">Planes y facturación no disponibles</p>
-              <p className="mt-1">Completa la verificación de tu negocio para acceder.</p>
-              <Link
-                to="/negocio/plan"
-                className="mt-3 inline-block text-xs text-primary hover:underline"
-              >
-                Ver planes disponibles →
-              </Link>
-            </div>
-          </div>
-        )}
       </div>
     </BusinessLayout>
   );
 }
 
-function invStatusBadge(s: string): string {
-  if (s === "paid") return "badge-accepted";
-  if (s === "demo") return "badge-new";
-  if (s === "failed" || s === "refunded") return "badge-reported";
-  return "badge-pending";
+function BusinessDetailsCard({ data, onSaved }: { data: BusinessProfile; onSaved: () => void }) {
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setMsg(null);
+    setError(null);
+
+    const form = new FormData(e.currentTarget);
+    const name = String(form.get("name") ?? "").trim();
+    const ruc = String(form.get("ruc") ?? "").trim();
+    const phone = String(form.get("phone") ?? "").trim();
+    const district = String(form.get("district") ?? "").trim();
+    const address = String(form.get("address") ?? "").trim();
+
+    if (!name) {
+      setError("El nombre del negocio es obligatorio.");
+      return;
+    }
+    if (ruc && !/^\d{11}$/u.test(ruc)) {
+      setError("El RUC debe tener 11 dígitos.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await updateBusiness({
+        data: {
+          name,
+          ruc: ruc || null,
+          phone: phone || null,
+          district: district || null,
+          address: address || null,
+        },
+      });
+      setMsg("Cambios guardados.");
+      onSaved();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo actualizar tu cuenta.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2"
+    >
+      <div className="flex items-center gap-2">
+        <Building2 className="h-5 w-5 text-primary" />
+        <h3 className="font-display text-xl font-bold uppercase">Datos del negocio</h3>
+      </div>
+
+      <div className="mt-5 grid gap-4 sm:grid-cols-2">
+        <Field label="Nombre del negocio" className="sm:col-span-2">
+          <input name="name" defaultValue={data.name ?? ""} required className="input-field" />
+        </Field>
+
+        <Field label="RUC">
+          <input
+            name="ruc"
+            defaultValue={data.ruc ?? ""}
+            inputMode="numeric"
+            maxLength={11}
+            placeholder="11 dígitos"
+            className="input-field"
+          />
+        </Field>
+
+        <Field label="Teléfono">
+          <input
+            name="phone"
+            defaultValue={data.phone ?? ""}
+            placeholder="+51 ..."
+            className="input-field"
+          />
+        </Field>
+
+        <Field label="Distrito">
+          <input
+            name="district"
+            defaultValue={data.district ?? ""}
+            placeholder="Ej. Miraflores"
+            className="input-field"
+          />
+        </Field>
+
+        <Field label="Dirección">
+          <input
+            name="address"
+            defaultValue={data.address ?? ""}
+            placeholder="Av. / Jr. ..."
+            className="input-field"
+          />
+        </Field>
+
+        <Field label="Correo (no editable)" className="sm:col-span-2">
+          <input value={data.email ?? "—"} disabled className="input-field opacity-60" readOnly />
+        </Field>
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>
+      )}
+      {msg && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg bg-status-accepted/10 px-3 py-2 text-xs text-status-accepted">
+          <CheckCircle2 className="h-3.5 w-3.5" /> {msg}
+        </div>
+      )}
+
+      <button type="submit" disabled={saving} className="btn-primary mt-5 disabled:opacity-60">
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+        {saving ? "Guardando..." : "Guardar cambios"}
+      </button>
+    </form>
+  );
 }
 
-function invStatusLabel(s: string): string {
-  if (s === "paid") return "Pagada";
-  if (s === "demo") return "Demo";
-  if (s === "failed") return "Fallida";
-  if (s === "refunded") return "Reembolsada";
-  if (s === "pending") return "Pendiente";
-  return s;
+function VerificationCard({ status }: { status: BusinessProfile["verification_status"] }) {
+  const map = {
+    verified: {
+      label: "Verificado",
+      cls: "text-status-accepted",
+      desc: "Tu negocio está verificado.",
+    },
+    pending: {
+      label: "Pendiente",
+      cls: "text-status-pending",
+      desc: "Verificación en revisión. Completa tus datos para acelerarla.",
+    },
+    rejected: {
+      label: "Rechazado",
+      cls: "text-destructive",
+      desc: "No pudimos verificar tu negocio. Revisa tus datos.",
+    },
+  } as const;
+  const v = map[status];
+
+  return (
+    <div className="rounded-2xl border border-border bg-surface p-6">
+      <div className="flex items-center gap-2">
+        <ShieldCheck className="h-5 w-5 text-primary" />
+        <h3 className="font-display text-lg font-bold uppercase">Verificación</h3>
+      </div>
+      <div className={`mt-3 text-sm font-semibold ${v.cls}`}>{v.label}</div>
+      <p className="mt-1 text-xs text-muted-foreground">{v.desc}</p>
+    </div>
+  );
+}
+
+function PasswordCard() {
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setMsg(null);
+    setError(null);
+
+    const formEl = e.currentTarget;
+    const form = new FormData(formEl);
+    const currentPassword = String(form.get("currentPassword") ?? "");
+    const newPassword = String(form.get("newPassword") ?? "");
+    const confirm = String(form.get("confirm") ?? "");
+
+    if (newPassword.length < 8) {
+      setError("La nueva contraseña debe tener al menos 8 caracteres.");
+      return;
+    }
+    if (newPassword !== confirm) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await changePassword({ data: { currentPassword, newPassword } });
+      setMsg("Contraseña actualizada.");
+      formEl.reset();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo cambiar la contraseña.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <form onSubmit={onSubmit} className="rounded-2xl border border-border bg-surface p-6">
+      <div className="flex items-center gap-2">
+        <KeyRound className="h-5 w-5 text-primary" />
+        <h3 className="font-display text-lg font-bold uppercase">Cambiar contraseña</h3>
+      </div>
+
+      <div className="mt-4 space-y-4">
+        <Field label="Contraseña actual">
+          <input
+            name="currentPassword"
+            type="password"
+            required
+            autoComplete="current-password"
+            className="input-field"
+          />
+        </Field>
+        <Field label="Nueva contraseña">
+          <input
+            name="newPassword"
+            type="password"
+            required
+            autoComplete="new-password"
+            className="input-field"
+          />
+        </Field>
+        <Field label="Confirmar nueva contraseña">
+          <input
+            name="confirm"
+            type="password"
+            required
+            autoComplete="new-password"
+            className="input-field"
+          />
+        </Field>
+      </div>
+
+      {error && (
+        <div className="mt-4 rounded-lg bg-red-500/10 px-3 py-2 text-xs text-red-400">{error}</div>
+      )}
+      {msg && (
+        <div className="mt-4 flex items-center gap-2 rounded-lg bg-status-accepted/10 px-3 py-2 text-xs text-status-accepted">
+          <CheckCircle2 className="h-3.5 w-3.5" /> {msg}
+        </div>
+      )}
+
+      <button type="submit" disabled={saving} className="btn-primary mt-5 disabled:opacity-60">
+        {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+        {saving ? "Guardando..." : "Cambiar contraseña"}
+      </button>
+    </form>
+  );
+}
+
+function Field({
+  label,
+  className,
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={className}>
+      <label className="mb-1.5 block text-sm font-medium">{label}</label>
+      {children}
+    </div>
+  );
 }

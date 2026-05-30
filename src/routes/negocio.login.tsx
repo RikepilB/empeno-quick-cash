@@ -1,7 +1,7 @@
-import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, useRouter, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Building2, Loader2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import { safeRedirect } from "@/lib/safe-redirect";
 import { loginWithPassword, getCurrentUser, signOut } from "@/services/auth";
@@ -19,6 +19,8 @@ export const Route = createFileRoute("/negocio/login")({
 
 function BusinessLogin() {
   const navigate = useNavigate();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   const search = useSearch({ from: "/negocio/login" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,22 +42,17 @@ function BusinessLogin() {
 
       await loginWithPassword({ data: { email, password } });
 
-      let profile = null;
-      for (let attempt = 0; attempt < 2; attempt++) {
-        if (attempt > 0) await new Promise((r) => setTimeout(r, 500));
-        const user = await getCurrentUser();
-        if (user) {
-          profile = user.profile;
-          break;
-        }
-      }
+      await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      await router.invalidate();
+      const user = await getCurrentUser();
 
-      if (!profile) {
+      if (!user?.profile) {
         await signOut();
         throw new Error("Tu cuenta aún se está creando. Espera unos segundos e intenta de nuevo.");
       }
-      if (profile.role !== "business") {
+      if (user.profile.role !== "business") {
         await signOut();
+        await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
         throw new Error(
           "Esta cuenta no pertenece a este portal. Usa el portal de clientes para iniciar sesión.",
         );
@@ -124,24 +121,46 @@ function BusinessLogin() {
               </div>
 
               <div className="rounded-2xl border border-border bg-surface p-6 md:p-8">
-                <h1 className="font-display text-2xl font-bold">Iniciar sesión</h1>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+                  Portal Casa de empeño
+                </span>
+                <h1 className="mt-3 font-display text-2xl font-bold">
+                  Inicia sesión — Casa de empeño
+                </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Accede al panel de gestión de tu casa de empeño.
+                  Accede al panel de gestión de tu negocio.
                 </p>
 
-                {currentUser.data?.profile && currentUser.data.profile.role === "client" && (
+                {currentUser.data?.profile && (
                   <div className="mt-4 rounded-lg border border-status-pending/30 bg-status-pending/10 px-4 py-3 text-sm">
                     <p className="font-semibold text-status-pending">
-                      Ya iniciaste sesión como cliente.
+                      Hay una sesión activa
+                      {currentUser.data.profile.full_name
+                        ? ` (${currentUser.data.profile.full_name})`
+                        : ""}
+                      .
                     </p>
-                    <div className="mt-2 flex gap-2">
-                      <Link to="/app/dashboard" className="text-xs text-primary hover:underline">
-                        Ir a tu panel B2C →
-                      </Link>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Ciérrala antes de entrar con otra cuenta.
+                    </p>
+                    <div className="mt-2 flex gap-3">
+                      {currentUser.data.profile.role === "business" ? (
+                        <Link
+                          to="/negocio/dashboard"
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Ir al panel de negocio →
+                        </Link>
+                      ) : (
+                        <Link to="/app/dashboard" className="text-xs text-primary hover:underline">
+                          Ir a mi panel →
+                        </Link>
+                      )}
                       <button
                         type="button"
                         onClick={async () => {
                           await signOut();
+                          await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
                           currentUser.refetch();
                         }}
                         className="text-xs text-muted-foreground hover:text-foreground"
