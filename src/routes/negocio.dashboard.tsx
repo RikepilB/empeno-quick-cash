@@ -27,7 +27,6 @@ function BizDashboard() {
     staleTime: 30_000,
   });
 
-  const sub = context.data?.subscription;
   const business = context.data?.business;
   const sent = myPropuestas.data?.length ?? 0;
   const accepted = myPropuestas.data?.filter((p) => p.status === "accepted").length ?? 0;
@@ -60,8 +59,8 @@ function BizDashboard() {
         <Metric
           icon={Send}
           label="Propuestas enviadas"
-          value={(sub?.propuestas_used_this_period ?? 0).toString()}
-          delta="Ilimitadas"
+          value={myPropuestas.isLoading ? "…" : sent.toString()}
+          delta={`${pending.length} pendientes`}
         />
         <Metric
           icon={CheckCircle2}
