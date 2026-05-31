@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { getSupabaseServer } from "@/lib/db/server";
-import { sanitizeError } from "@/lib/logger";
+import { sanitizeError, log } from "@/lib/logger";
+import { rateLimitByUser } from "@/lib/rate-limit";
 
 export type BusinessContext = {
   business: {
@@ -89,3 +91,77 @@ export const getBusinessContext = createServerFn({ method: "GET" }).handler(
     return { business, subscription: subOut };
   },
 );
+
+export type BusinessProfile = {
+  id: string;
+  name: string;
+  trade_name: string | null;
+  ruc: string | null;
+  phone: string | null;
+  district: string | null;
+  address: string | null;
+  city: string | null;
+  email: string | null;
+  verification_status: "pending" | "verified" | "rejected";
+};
+
+export const getBusinessProfile = createServerFn({ method: "GET" }).handler(
+  async (): Promise<BusinessProfile | null> => {
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from("businesses")
+      .select(
+        "id, name, trade_name, ruc, phone, district, address, city, email, verification_status",
+      )
+      .eq("owner_id", user.id)
+      .maybeSingle<BusinessProfile>();
+
+    if (error) throw sanitizeError(error, "No se pudo cargar tu cuenta.");
+    return data ?? null;
+  },
+);
+
+const updateBusinessSchema = z.object({
+  name: z.string().min(1).max(120).optional(),
+  phone: z.string().max(20).optional().nullable(),
+  district: z.string().max(80).optional().nullable(),
+  address: z.string().max(200).optional().nullable(),
+  ruc: z
+    .string()
+    .regex(/^\d{11}$/u, "El RUC debe tener 11 dígitos.")
+    .optional()
+    .nullable(),
+});
+
+export const updateBusiness = createServerFn({ method: "POST" })
+  .inputValidator(updateBusinessSchema)
+  .handler(async ({ data }): Promise<{ ok: true }> => {
+    const supabase = getSupabaseServer();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("No autenticado");
+
+    const rl = await rateLimitByUser("business:update", user.id, 20, 3600);
+    if (!rl.allowed) throw new Error("Demasiados cambios. Intenta en una hora.");
+
+    const updates: Record<string, string | null> = {};
+    if (data.name !== undefined) updates.name = data.name;
+    if (data.phone !== undefined) updates.phone = data.phone;
+    if (data.district !== undefined) updates.district = data.district;
+    if (data.address !== undefined) updates.address = data.address;
+    if (data.ruc !== undefined) updates.ruc = data.ruc;
+
+    if (Object.keys(updates).length === 0) return { ok: true };
+
+    const { error } = await supabase.from("businesses").update(updates).eq("owner_id", user.id);
+    if (error) throw sanitizeError(error, "No se pudo actualizar tu cuenta.");
+
+    log.info("business_updated", { user_id: user.id, fields: Object.keys(updates) });
+    return { ok: true };
+  });
